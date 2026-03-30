@@ -1,6 +1,50 @@
 [gd_scene format=3 uid="uid://ylhh3mcm4cy3"]
 
 [ext_resource type="Texture2D" uid="uid://bvvcw8of1gbqk" path="res://asset/Accueil.png" id="1_3er1b"]
+[ext_resource type="Script" uid="uid://cvakgplve8ur8" path="res://scene/main_menu.gd" id="1_hxu56"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2fwvj"]
+bg_color = Color(0.03054955, 0.6981783, 0.5910823, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0iwki"]
+bg_color = Color(0.5276359, 0.6413808, 0.46049148, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sepwh"]
+bg_color = Color(0.81572247, 0.51818657, 0.32998076, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_14wem"]
+bg_color = Color(0.67679256, 0.5251296, 0.8064746, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2atga"]
+bg_color = Color(0.6585424, 0.5882799, 0.50170547, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_by01r"]
+bg_color = Color(0.92879355, 0, 0.16984853, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 20
 
 [node name="MainMenu" type="Control" unique_id=1768534178]
 layout_mode = 3
@@ -9,14 +53,83 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_hxu56")
 
-[node name="Background" type="TextureRect" parent="." unique_id=1908219919]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="Background" type="TextureRect" parent="." unique_id=1981166995]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("1_3er1b")
+expand_mode = 1
+metadata/_edit_use_anchors_ = true
 
-[node name="CenterContainer" type="CenterContainer" parent="." unique_id=240410866]
+[node name="BtnStart" type="Button" parent="." unique_id=33680438]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 461.00003
+offset_top = 340.0
+offset_right = 599.0
+offset_bottom = 371.0
+scale = Vector2(1.6646167, 1.4525009)
+theme_override_styles/normal = SubResource("StyleBoxFlat_2fwvj")
+text = "Lance une partie"
+
+[node name="BtnLoad" type="Button" parent="." unique_id=1973124815]
+layout_mode = 0
+offset_left = 461.0
+offset_top = 391.0
+offset_right = 615.0
+offset_bottom = 422.0
+scale = Vector2(1.4967524, 1.052704)
+theme_override_styles/normal = SubResource("StyleBoxFlat_0iwki")
+text = "Charger une partie"
+
+[node name="BtnModif" type="Button" parent="." unique_id=1749792772]
+layout_mode = 0
+offset_left = 461.00003
+offset_top = 429.0
+offset_right = 569.0
+offset_bottom = 460.0
+scale = Vector2(2.1349247, 1.4782565)
+theme_override_styles/normal = SubResource("StyleBoxFlat_sepwh")
+text = "Modificateur"
+
+[node name="BtnTutoriel" type="Button" parent="." unique_id=1574433870]
+layout_mode = 0
+offset_left = 461.0
+offset_top = 479.00003
+offset_right = 530.0
+offset_bottom = 510.00003
+scale = Vector2(3.3337622, 1.1196691)
+theme_override_styles/normal = SubResource("StyleBoxFlat_14wem")
+text = "Tutoriel"
+
+[node name="BtnSettings" type="MenuButton" parent="." unique_id=1206069246]
+layout_mode = 0
+offset_left = 461.00003
+offset_top = 518.0
+offset_right = 541.0
+offset_bottom = 549.0
+scale = Vector2(2.8738759, 1.0714277)
+theme_override_styles/normal = SubResource("StyleBoxFlat_2atga")
+text = "Settiongs"
+
+[node name="BtnSuccées" type="MenuButton" parent="." unique_id=253236271]
+layout_mode = 0
+offset_left = 461.00003
+offset_top = 556.0
+offset_right = 469.00003
+offset_bottom = 564.0
+scale = Vector2(28.753536, 4.2064433)
+
+[node name="BtnQuit" type="Button" parent="." unique_id=1356033094]
+layout_mode = 0
+offset_left = 460.00003
+offset_top = 594.0
+offset_right = 525.0
+offset_bottom = 625.0
+scale = Vector2(3.5613348, 1.1082071)
+theme_override_styles/normal = SubResource("StyleBoxFlat_by01r")
+text = "Quitter"
