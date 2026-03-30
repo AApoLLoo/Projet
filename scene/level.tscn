@@ -1,7 +1,7 @@
 [gd_scene format=4 uid="uid://b4bnjoqf12g83"]
 
 [ext_resource type="Texture2D" uid="uid://31twxhbxjm57" path="res://asset/IndustrialTile_14.png" id="1_bllo7"]
-[ext_resource type="Script" uid="uid://d2gs4e03solck" path="res://map/floor.gd" id="2_0vq05"]
+[ext_resource type="Script" uid="uid://d2gs4e03solck" path="res://scene/floor.gd" id="2_0vq05"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vqrxs"]
 texture = ExtResource("1_bllo7")
