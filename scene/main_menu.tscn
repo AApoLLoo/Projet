@@ -1,22 +1,129 @@
 [gd_scene format=3 uid="uid://ylhh3mcm4cy3"]
 
-[ext_resource type="Texture2D" uid="uid://bvvcw8of1gbqk" path="res://asset/Accueil.png" id="1_3er1b"]
+[ext_resource type="Script" uid="uid://bhw80blb4onvx" path="res://scene/main_menu.gd" id="2_wkc40"]
 
-[node name="MainMenu" type="Control" unique_id=1768534178]
+[node name="MainMenu" type="Control" unique_id=461237088]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("2_wkc40")
 
-[node name="Background" type="TextureRect" parent="." unique_id=1908219919]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-texture = ExtResource("1_3er1b")
+[node name="Overlay" type="ColorRect" parent="." unique_id=1021546741]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.04)
 
-[node name="CenterContainer" type="CenterContainer" parent="." unique_id=240410866]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="MenuButtons" type="VBoxContainer" parent="." unique_id=251925214]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -142.0
+offset_top = -142.0
+offset_right = 188.0
+offset_bottom = 298.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="StartButton" type="Button" parent="MenuButtons" unique_id=1084796760]
+custom_minimum_size = Vector2(330, 56)
+layout_mode = 2
+text = "[START NEW GAME]"
+
+[node name="LoadButton" type="Button" parent="MenuButtons" unique_id=1941782341]
+custom_minimum_size = Vector2(330, 56)
+layout_mode = 2
+text = "LOAD RECENT SESSION"
+
+[node name="LabButton" type="Button" parent="MenuButtons" unique_id=1446686155]
+custom_minimum_size = Vector2(330, 56)
+layout_mode = 2
+text = "MODIFIER LAB"
+
+[node name="TutorialButton" type="Button" parent="MenuButtons" unique_id=216766424]
+custom_minimum_size = Vector2(330, 56)
+layout_mode = 2
+text = "TUTORIAL"
+
+[node name="SettingsButton" type="Button" parent="MenuButtons" unique_id=1522601819]
+custom_minimum_size = Vector2(330, 56)
+layout_mode = 2
+text = "SETTINGS"
+
+[node name="AchievementsButton" type="Button" parent="MenuButtons" unique_id=124663486]
+custom_minimum_size = Vector2(330, 56)
+layout_mode = 2
+text = "ACHIEVEMENTS"
+
+[node name="QuitButton" type="Button" parent="MenuButtons" unique_id=39767664]
+custom_minimum_size = Vector2(330, 56)
+layout_mode = 2
+text = "QUIT"
+
+[node name="BottomLeftPanel" type="PanelContainer" parent="." unique_id=587624548]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -118.0
+offset_right = 416.0
+offset_bottom = -32.0
+grow_vertical = 0
+
+[node name="BottomLeftMargin" type="MarginContainer" parent="BottomLeftPanel" unique_id=461979880]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 10
+
+[node name="BottomLeftLabel" type="Label" parent="BottomLeftPanel/BottomLeftMargin" unique_id=1846832211]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "CURRENT ACTIVE UNIVERSE RULE:
+Default Physics (1.0g)"
+autowrap_mode = 2
+
+[node name="BottomRightPanel" type="PanelContainer" parent="." unique_id=735000768]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -352.0
+offset_top = -170.0
+offset_right = -24.0
+offset_bottom = -26.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="BottomRightMargin" type="MarginContainer" parent="BottomRightPanel" unique_id=1820492936]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="BottomRightLabel" type="Label" parent="BottomRightPanel/BottomRightMargin" unique_id=175793846]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "STUDENT GROUP AEFLE
+Antoine, Antoine, Ethan, Louis, Enzo
+TEAMS COLLABORATION SPACE 
+v0.8.1 (Prototype)"
+horizontal_alignment = 2
+
+[node name="MessageDialog" type="AcceptDialog" parent="." unique_id=2133714974]
+title = "Information"

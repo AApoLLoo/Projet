@@ -11,9 +11,14 @@ config_version=5
 [application]
 
 config/name="Projet Segpa Challange"
-run/main_scene="uid://b4bnjoqf12g83"
+run/main_scene="uid://ylhh3mcm4cy3"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+SaveSystem="*res://script/SaveSystem.gd"
+SettingsManager="*res://script/SettingsManager.gd"
 
 [physics]
 
