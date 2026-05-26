@@ -28,6 +28,9 @@ func _ready() -> void:
 	if _preview_mode:
 		_disable_preview_interactions()
 		return
+		var hud = get_node_or_null("PointLight2D/HUD")
+		if hud:
+			hud.visible = false
 
 	_build_pause_ui()
 	TimeManager.is_time_running = true
