@@ -134,17 +134,28 @@ text = "0 �"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BuildMenuContainer" type="MarginContainer" parent="." unique_id=2133594692]
+[node name="BuildMenuContainer" type="VBoxContainer" parent="." unique_id=1150902757]
+unique_name_in_owner = true
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -40.0
-offset_right = 40.0
+offset_left = 36.0
+offset_top = -47.0
+offset_right = 145.0
+offset_bottom = -3.0
 grow_vertical = 0
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_bottom = 10
+
+[node name="BtnBuildBelt" type="Button" parent="BuildMenuContainer" unique_id=559379114]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Tapis"
+
+[node name="BtnBuildTurbine" type="Button" parent="BuildMenuContainer" unique_id=1270201037]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Turbine"
 
 [node name="BtnBuildFactory" type="Button" parent="BuildMenuContainer" unique_id=1572101387]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Construction"
+text = "Usine"

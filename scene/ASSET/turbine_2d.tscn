@@ -1,5 +1,66 @@
 [gd_scene format=3 uid="uid://c2gxv2swfb4mu"]
 
+[ext_resource type="Texture2D" uid="uid://cl1akoi1t5mdv" path="res://asset/Turbine Animation 0006.png" id="1_8a1ny"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1b01t"]
+atlas = ExtResource("1_8a1ny")
+region = Rect2(0, 0, 149, 108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7d53e"]
+atlas = ExtResource("1_8a1ny")
+region = Rect2(149, 0, 149, 108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vlkjo"]
+atlas = ExtResource("1_8a1ny")
+region = Rect2(298, 0, 149, 108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2cjve"]
+atlas = ExtResource("1_8a1ny")
+region = Rect2(447, 0, 149, 108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_46nj5"]
+atlas = ExtResource("1_8a1ny")
+region = Rect2(596, 0, 149, 108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_inlhx"]
+atlas = ExtResource("1_8a1ny")
+region = Rect2(745, 0, 149, 108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_chkey"]
+atlas = ExtResource("1_8a1ny")
+region = Rect2(894, 0, 149, 108)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ixlcy"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1b01t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7d53e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vlkjo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2cjve")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_46nj5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_inlhx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_chkey")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
 [node name="Turbine2D" type="Node2D" unique_id=263519013]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1900461012]
+sprite_frames = SubResource("SpriteFrames_ixlcy")
+autoplay = "default"

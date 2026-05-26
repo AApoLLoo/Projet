@@ -15,10 +15,17 @@ func _ready() -> void:
 	preview_sprite.z_index = 10 # Assure que le fantôme reste visible par-dessus le sol
 	add_child(preview_sprite)
 
-func start_building(scene: PackedScene, cost: float, texture: Texture2D) -> void:
+# --- MODIFICATION ICI : Ajout de frames_count ---
+func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1) -> void:
 	factory_scene = scene
 	factory_cost = cost
 	preview_sprite.texture = texture
+	
+	# --- NOUVEAU : Découpe l'image animée ---
+	preview_sprite.hframes = frames_count
+	preview_sprite.frame = 0 # Affiche seulement la première image
+	# ----------------------------------------
+	
 	preview_sprite.visible = true
 	is_building = true
 
@@ -38,6 +45,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Clic gauche pour placer l'usine
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_try_place_building()
+		print("JE POSE LE BATIMENT !")
 		get_viewport().set_input_as_handled()
 
 func _process(_delta: float) -> void:

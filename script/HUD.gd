@@ -8,23 +8,37 @@ extends CanvasLayer
 @onready var btn_x1: Button = %BtnX1
 @onready var btn_x2: Button = %BtnX2
 @onready var btn_x4: Button = %BtnX4
-@onready var btn_build_factory: Button = %BtnBuildFactory 
 
-# Dictionnaire regroupant les données des différents bâtiments à construire
+# --- NOUVEAUX BOUTONS DE CONSTRUCTION ---
+@onready var btn_toggle_build_menu: Button = %BtnBuildFactory # Le bouton "Construction" principal
+@onready var build_menu_container: VBoxContainer = %BuildMenuContainer # Le conteneur (menu déroulant)
+
+@onready var btn_build_factory: Button = %BtnBuildFactory 
+@onready var btn_build_belt: Button = %BtnBuildBelt       
+@onready var btn_build_turbine: Button = %BtnBuildTurbine 
+
+# --- DICTIONNAIRE MIS À JOUR ---
+# --- DICTIONNAIRE MIS À JOUR ---
 var buildings_data = {
 	"factory": {
 		"scene": preload("res://scene/factory.tscn"),
 		"texture": preload("res://asset/IndustrialTile_14.png"),
-		"cost": 200.0 # Prix modifiable ici
+		"cost": 200.0,
+		"frames": 1 # C'est une image simple
+	},
+	"belt": {
+		"scene": preload("res://scene/ASSET/belt/beltmid.tscn"),
+		"texture": preload("res://asset/belt-mid.png"),
+		"cost": 50.0,
+		"frames": 4# Il y a 4 images collées
+	},
+	"turbine": {
+		"scene": preload("res://scene/turbine_2d.tscn"),
+		"texture": preload("res://asset/Turbine Animation base.png"),
+		"cost": 500.0,
+		"frames": 6# Il y a 4 images collées
 	}
-	# Vous pourrez ajouter d'autres bâtiments ici :
-	# "conveyor": {
-	# 	"scene": preload("res://scene/conveyor.tscn"),
-	# 	"texture": preload("res://asset/conveyor_texture.png"),
-	# 	"cost": 150.0
-	# }
 }
-
 @onready var minimap_camera: Camera2D = %MinimapCamera
 
 func _ready() -> void:
@@ -50,13 +64,31 @@ func _ready() -> void:
 	var minute: int = int((TimeManager.current_time - hour) * 60)
 	_update_time_display(hour, minute)
 
-	# Bouton Construction 
+	# --- GESTION DU MENU DE CONSTRUCTION ---
+	# 1. Cliquer sur "Construction" affiche ou masque le conteneur
+	
+
+	# 2. Les sous-boutons lancent la construction
 	btn_build_factory.pressed.connect(func():
-		var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
-		if building_manager:
-			var data = buildings_data["factory"]
-			building_manager.start_building(data["scene"], data["cost"], data["texture"])
+		print("Clic sur USINE !")
+		_start_building_process("factory")
 	)
+	
+	btn_build_belt.pressed.connect(func():
+		print("Clic sur TAPIS !")
+		_start_building_process("belt")
+	)
+	
+	btn_build_turbine.pressed.connect(func():
+		print("Clic sur TURBINE !")
+		_start_building_process("turbine")
+	)
+# --- NOUVELLE FONCTION ---
+func _start_building_process(building_type: String) -> void:
+	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
+	if building_manager:
+		var data = buildings_data[building_type]
+		building_manager.start_building(data["scene"], data["cost"], data["texture"])
 
 func _process(_delta: float) -> void:
 	# Synchroniser la caméra de la minimap avec la caméra principale

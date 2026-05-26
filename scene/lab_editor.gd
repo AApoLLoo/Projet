@@ -1,4 +1,12 @@
 extends Control
+# 1. On déclare le conteneur et le bouton principal
+@onready var btn_toggle_build_menu: Button = %BtnToggleBuildMenu # Votre bouton "Construction" principal
+@onready var build_menu_container: VBoxContainer = %BuildMenuContainer # Le conteneur qui cache les structures
+
+# Les sous-boutons présents dans le conteneur
+@onready var btn_build_factory: Button = %BtnBuildFactory 
+@onready var btn_build_belt: Button = %BtnBuildBelt       
+@onready var btn_build_turbine: Button = %BtnBuildTurbine
 
 @onready var _gravity_slider: HSlider = $CenterContainer/PanelContainer/MarginContainer/Content/GravitySlider
 @onready var _gravity_value: Label = $CenterContainer/PanelContainer/MarginContainer/Content/GravityValue
@@ -13,55 +21,62 @@ extends Control
 @onready var _message_dialog: AcceptDialog = $MessageDialog
 
 var _active_settings: Dictionary = {}
+@onready var day_label: Label = %DayLabel
+
 
 func _ready() -> void:
-    _active_settings = SettingsManager.get_settings()
-    _update_ui_from_settings()
+	_active_settings = SettingsManager.get_settings()
+	_update_ui_from_settings()
 
-    _gravity_slider.value_changed.connect(_on_gravity_changed)
-    _temp_slider.value_changed.connect(_on_temp_changed)
-    _friction_slider.value_changed.connect(_on_friction_changed)
+	_gravity_slider.value_changed.connect(_on_gravity_changed)
+	_temp_slider.value_changed.connect(_on_temp_changed)
+	_friction_slider.value_changed.connect(_on_friction_changed)
 
-    _apply_button.pressed.connect(_on_apply_pressed)
-    _reset_button.pressed.connect(_on_reset_pressed)
-    _back_button.pressed.connect(_on_back_pressed)
+	_apply_button.pressed.connect(_on_apply_pressed)
+	_reset_button.pressed.connect(_on_reset_pressed)
+	_back_button.pressed.connect(_on_back_pressed)
+# 2. Cliquer sur "Construction" affiche ou masque le conteneur
+	btn_toggle_build_menu.pressed.connect(func():
+		build_menu_container.visible = not build_menu_container.visible
+	)
 
+	
 func _update_ui_from_settings() -> void:
-    _gravity_slider.value = SettingsManager._to_float(_active_settings.get("physics_gravity", 9.8), 9.8)
-    _temp_slider.value = SettingsManager._to_float(_active_settings.get("physics_temperature", 20.0), 20.0)
-    _friction_slider.value = SettingsManager._to_float(_active_settings.get("physics_friction", 1.0), 1.0)
-    
-    _on_gravity_changed(_gravity_slider.value)
-    _on_temp_changed(_temp_slider.value)
-    _on_friction_changed(_friction_slider.value)
+	_gravity_slider.value = SettingsManager._to_float(_active_settings.get("physics_gravity", 9.8), 9.8)
+	_temp_slider.value = SettingsManager._to_float(_active_settings.get("physics_temperature", 20.0), 20.0)
+	_friction_slider.value = SettingsManager._to_float(_active_settings.get("physics_friction", 1.0), 1.0)
+	
+	_on_gravity_changed(_gravity_slider.value)
+	_on_temp_changed(_temp_slider.value)
+	_on_friction_changed(_friction_slider.value)
 
 func _on_gravity_changed(val: float) -> void:
-    _gravity_value.text = String.num(val, 1) + " m/s²"
+	_gravity_value.text = String.num(val, 1) + " m/s²"
 
 func _on_temp_changed(val: float) -> void:
-    _temp_value.text = String.num(val, 1) + " °C"
+	_temp_value.text = String.num(val, 1) + " °C"
 
 func _on_friction_changed(val: float) -> void:
-    _friction_value.text = String.num(val, 1)
+	_friction_value.text = String.num(val, 1)
 
 func _on_apply_pressed() -> void:
-    _active_settings["physics_gravity"] = _gravity_slider.value
-    _active_settings["physics_temperature"] = _temp_slider.value
-    _active_settings["physics_friction"] = _friction_slider.value
-    
-    SettingsManager.update_settings(_active_settings)
-    _show_message("Parametres appliques avec succes.")
+	_active_settings["physics_gravity"] = _gravity_slider.value
+	_active_settings["physics_temperature"] = _temp_slider.value
+	_active_settings["physics_friction"] = _friction_slider.value
+	
+	SettingsManager.update_settings(_active_settings)
+	_show_message("Parametres appliques avec succes.")
 
 func _on_reset_pressed() -> void:
-    SettingsManager.reset_to_defaults()
-    _active_settings = SettingsManager.get_settings()
-    _update_ui_from_settings()
+	SettingsManager.reset_to_defaults()
+	_active_settings = SettingsManager.get_settings()
+	_update_ui_from_settings()
 
 func _on_back_pressed() -> void:
-    var error: Error = get_tree().change_scene_to_file(SettingsManager.get_return_scene_path())
-    if error != OK:
-        push_error("Erreur retour: " + str(error))
+	var error: Error = get_tree().change_scene_to_file(SettingsManager.get_return_scene_path())
+	if error != OK:
+		push_error("Erreur retour: " + str(error))
 
 func _show_message(text: String) -> void:
-    _message_dialog.dialog_text = text
-    _message_dialog.popup_centered()
+	_message_dialog.dialog_text = text
+	_message_dialog.popup_centered()
