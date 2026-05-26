@@ -118,6 +118,14 @@ func _set_gameplay_enabled(enabled: bool) -> void:
 		_floor.set_process(enabled)
 
 func _build_pause_ui() -> void:
+	_apply_start_state()
+	if _preview_mode:
+		_disable_preview_interactions()
+		var hud = get_node_or_null("PointLight2D/HUD")
+		if hud:
+			hud.visible = false
+		return
+
 	_pause_layer = CanvasLayer.new()
 	_pause_layer.name = "PauseUI"
 	add_child(_pause_layer)

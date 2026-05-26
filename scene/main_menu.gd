@@ -150,8 +150,9 @@ func _setup_map_preview() -> void:
 	_preview_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_preview_container.layout_mode = 1
 	_preview_container.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_preview_container.anchor_right = 1.0
-	_preview_container.anchor_bottom = 1.0
+	if _preview_container != null:
+		_preview_container.anchor_right = 1.0
+		_preview_container.anchor_bottom = 1.0
 	_preview_container.stretch = true
 	_preview_container.stretch_shrink = 1
 	add_child(_preview_container)
