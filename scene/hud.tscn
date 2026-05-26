@@ -67,6 +67,11 @@ unique_name_in_owner = true
 layout_mode = 2
 text = ">>>"
 
+[node name="BtnToggleBuildMenu" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1987654321]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Construction"
+
 [node name="MinimapContainer" type="MarginContainer" parent="." unique_id=987692439]
 anchors_preset = 3
 anchor_left = 1.0
@@ -144,6 +149,7 @@ offset_top = -47.0
 offset_right = 145.0
 offset_bottom = -3.0
 grow_vertical = 0
+visible = false
 
 [node name="BtnBuildBelt" type="Button" parent="BuildMenuContainer" unique_id=559379114]
 unique_name_in_owner = true

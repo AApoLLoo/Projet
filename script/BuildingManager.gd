@@ -15,6 +15,9 @@ func _ready() -> void:
 	preview_sprite.z_index = 10 # Assure que le fantôme reste visible par-dessus le sol
 	add_child(preview_sprite)
 
+	# S'assurer que le preview est centré par rapport à sa position
+	preview_sprite.centered = true
+
 # --- MODIFICATION ICI : Ajout de frames_count ---
 func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1) -> void:
 	factory_scene = scene
@@ -28,6 +31,10 @@ func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_
 	
 	preview_sprite.visible = true
 	is_building = true
+
+	# Reset scale / modulate au cas où
+	preview_sprite.scale = Vector2.ONE
+	preview_sprite.modulate = Color(1,1,1,0.6)
 
 func stop_building() -> void:
 	is_building = false
@@ -84,12 +91,23 @@ func _try_place_building() -> void:
 		
 		# Création de l'usine
 		var factory_instance: Node2D = factory_scene.instantiate()
-		factory_instance.global_position = preview_sprite.global_position
-		
+		# Ajoute en tant qu'enfant du nœud de bâtiments (si défini) avant de positionner
 		if buildings_node:
 			buildings_node.add_child(factory_instance)
 		else:
 			add_child(factory_instance)
+		# Positionner l'instance au centre de la case en coordonnées globales
+		factory_instance.global_position = preview_sprite.global_position
+		# Assurer une visibilité complète et ordre d'affichage
+		if factory_instance.has_method("set_z_index"):
+			factory_instance.z_index = preview_sprite.z_index - 1
+		# Forcer les sprites enfants à être centrés (évite les découpes causées par un pivot en haut-gauche)
+		for child in factory_instance.get_children():
+			if child is Sprite2D:
+				child.centered = true
+				child.region_enabled = false
+			elif child is AnimatedSprite2D:
+				child.centered = true
 			
 		# Optionnel : décommentez la ligne suivante pour quitter le mode construction après un seul placement
 		# stop_building()

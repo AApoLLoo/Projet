@@ -10,14 +10,13 @@ extends CanvasLayer
 @onready var btn_x4: Button = %BtnX4
 
 # --- NOUVEAUX BOUTONS DE CONSTRUCTION ---
-@onready var btn_toggle_build_menu: Button = %BtnBuildFactory # Le bouton "Construction" principal
+@onready var btn_toggle_build_menu: Button = %BtnToggleBuildMenu # Le bouton "Construction" principal
 @onready var build_menu_container: VBoxContainer = %BuildMenuContainer # Le conteneur (menu déroulant)
 
 @onready var btn_build_factory: Button = %BtnBuildFactory 
 @onready var btn_build_belt: Button = %BtnBuildBelt       
 @onready var btn_build_turbine: Button = %BtnBuildTurbine 
 
-# --- DICTIONNAIRE MIS À JOUR ---
 # --- DICTIONNAIRE MIS À JOUR ---
 var buildings_data = {
 	"factory": {
@@ -66,7 +65,9 @@ func _ready() -> void:
 
 	# --- GESTION DU MENU DE CONSTRUCTION ---
 	# 1. Cliquer sur "Construction" affiche ou masque le conteneur
-	
+	btn_toggle_build_menu.pressed.connect(func():
+		build_menu_container.visible = not build_menu_container.visible
+	)
 
 	# 2. Les sous-boutons lancent la construction
 	btn_build_factory.pressed.connect(func():
@@ -88,7 +89,10 @@ func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	if building_manager:
 		var data = buildings_data[building_type]
-		building_manager.start_building(data["scene"], data["cost"], data["texture"])
+		building_manager.start_building(data["scene"], data["cost"], data["texture"], data.get("frames", 1))
+		# Fermer le menu de construction après la sélection
+		if build_menu_container:
+			build_menu_container.visible = false
 
 func _process(_delta: float) -> void:
 	# Synchroniser la caméra de la minimap avec la caméra principale
