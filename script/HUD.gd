@@ -8,7 +8,10 @@ extends CanvasLayer
 @onready var btn_x1: Button = %BtnX1
 @onready var btn_x2: Button = %BtnX2
 @onready var btn_x4: Button = %BtnX4
+@onready var btn_build_factory: Button = %BtnBuildFactory 
 
+var factory_scene = preload("res://scene/factory.tscn")
+var factory_texture = preload("res://asset/IndustrialTile_14.png")
 @onready var minimap_camera: Camera2D = %MinimapCamera
 
 func _ready() -> void:
@@ -33,6 +36,13 @@ func _ready() -> void:
 	var hour: int = int(TimeManager.current_time)
 	var minute: int = int((TimeManager.current_time - hour) * 60)
 	_update_time_display(hour, minute)
+
+	# Bouton Construction 
+	btn_build_factory.pressed.connect(func():
+		var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
+		if building_manager:
+			building_manager.start_building(factory_scene, 1000.0, factory_texture)
+	)
 
 func _process(_delta: float) -> void:
 	# Synchroniser la caméra de la minimap avec la caméra principale
