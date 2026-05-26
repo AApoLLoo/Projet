@@ -29,4 +29,3 @@ GameManager="*res://script/GameManager.gd"
 [rendering]
 
 rendering_device/driver.windows="d3d12"
-
