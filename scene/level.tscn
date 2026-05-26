@@ -1,12 +1,12 @@
-[gd_scene format=3 uid="uid://b4bnjoqf12g83"]
+[gd_scene format=3 uid="uid://d06nouei2i3yl"]
 
-[ext_resource type="Script" uid="uid://k84hls15n7gq" path="res://scene/camera_controller.gd" id="3_0bn3b"]
+[ext_resource type="Script" path="res://scene/camera_controller.gd" id="3_0bn3b"]
 [ext_resource type="Script" uid="uid://dokhhfob5h6be" path="res://scene/level.gd" id="4_q3wyj"]
-[ext_resource type="Script" uid="uid://bx6id27enx61e" path="res://script/DayNightCycle.gd" id="5_ukt71"]
-[ext_resource type="Texture2D" uid="uid://31twxhbxjm57" path="res://asset/IndustrialTile_14.png" id="6_bddx0"]
-[ext_resource type="Script" uid="uid://dicss5mejclyn" path="res://script/AutoLight.gd" id="6_ismto"]
+[ext_resource type="Script" path="res://script/DayNightCycle.gd" id="5_ukt71"]
+[ext_resource type="Script" path="res://script/AutoLight.gd" id="6_ismto"]
+[ext_resource type="Script" uid="uid://d2gs4e03solck" path="res://scene/floor.gd" id="7_aw33w"]
 [ext_resource type="PackedScene" path="res://scene/hud.tscn" id="7_bddx0"]
-[ext_resource type="Script" uid="uid://d2gs4e03solck" path="res://scene/floor.gd" id="7_u2b8d"]
+[ext_resource type="Texture2D" uid="uid://bptn8q5sk28r5" path="res://asset/Tuiles_stan.png" id="7_u2b8d"]
 
 [sub_resource type="Gradient" id="Gradient_bddx0"]
 offsets = PackedFloat32Array(0, 0.5106383, 1)
@@ -19,15 +19,92 @@ colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
 gradient = SubResource("Gradient_u2b8d")
 fill_from = Vector2(0, 1)
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bddx0"]
-texture = ExtResource("6_bddx0")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ktmlt"]
+texture = ExtResource("7_u2b8d")
 0:0/0 = 0
 1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
 0:1/0 = 0
 1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+6:1/0 = 0
+7:1/0 = 0
+8:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+4:2/0 = 0
+5:2/0 = 0
+6:2/0 = 0
+7:2/0 = 0
+8:2/0 = 0
+0:3/0 = 0
+1:3/0 = 0
+2:3/0 = 0
+3:3/0 = 0
+4:3/0 = 0
+5:3/0 = 0
+6:3/0 = 0
+7:3/0 = 0
+8:3/0 = 0
+0:4/0 = 0
+1:4/0 = 0
+2:4/0 = 0
+3:4/0 = 0
+4:4/0 = 0
+5:4/0 = 0
+6:4/0 = 0
+7:4/0 = 0
+8:4/0 = 0
+0:5/0 = 0
+1:5/0 = 0
+2:5/0 = 0
+3:5/0 = 0
+4:5/0 = 0
+5:5/0 = 0
+6:5/0 = 0
+7:5/0 = 0
+8:5/0 = 0
+0:6/0 = 0
+1:6/0 = 0
+2:6/0 = 0
+3:6/0 = 0
+4:6/0 = 0
+5:6/0 = 0
+6:6/0 = 0
+7:6/0 = 0
+8:6/0 = 0
+0:7/0 = 0
+1:7/0 = 0
+2:7/0 = 0
+3:7/0 = 0
+4:7/0 = 0
+5:7/0 = 0
+6:7/0 = 0
+7:7/0 = 0
+8:7/0 = 0
+0:8/0 = 0
+1:8/0 = 0
+2:8/0 = 0
+3:8/0 = 0
+4:8/0 = 0
+5:8/0 = 0
+6:8/0 = 0
+7:8/0 = 0
+8:8/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_u2b8d"]
-sources/1 = SubResource("TileSetAtlasSource_bddx0")
+sources/1 = SubResource("TileSetAtlasSource_ktmlt")
 
 [node name="Level" type="Node2D" unique_id=1328862578]
 script = ExtResource("4_q3wyj")
@@ -38,6 +115,7 @@ script = ExtResource("3_0bn3b")
 floor_path = NodePath("")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1676232311]
+visible = false
 script = ExtResource("5_ukt71")
 day_night_gradient = SubResource("Gradient_bddx0")
 
@@ -51,4 +129,4 @@ script = ExtResource("6_ismto")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1173680372]
 tile_set = SubResource("TileSet_u2b8d")
-script = ExtResource("7_u2b8d")
+script = ExtResource("7_aw33w")
