@@ -1,31 +1,53 @@
 [gd_scene format=3 uid="uid://b4bnjoqf12g83"]
 
-[ext_resource type="Texture2D" uid="uid://31twxhbxjm57" path="res://asset/IndustrialTile_14.png" id="1_bllo7"]
-[ext_resource type="Script" uid="uid://d2gs4e03solck" path="res://scene/floor.gd" id="2_0vq05"]
-[ext_resource type="Script" path="res://scene/camera_controller.gd" id="3_0bn3b"]
-[ext_resource type="Script" path="res://scene/level.gd" id="4_q3wyj"]
+[ext_resource type="Script" uid="uid://k84hls15n7gq" path="res://scene/camera_controller.gd" id="3_0bn3b"]
+[ext_resource type="Script" uid="uid://dokhhfob5h6be" path="res://scene/level.gd" id="4_q3wyj"]
+[ext_resource type="Script" uid="uid://bx6id27enx61e" path="res://script/DayNightCycle.gd" id="5_ukt71"]
+[ext_resource type="Texture2D" uid="uid://31twxhbxjm57" path="res://asset/IndustrialTile_14.png" id="6_bddx0"]
+[ext_resource type="Script" uid="uid://dicss5mejclyn" path="res://script/AutoLight.gd" id="6_ismto"]
+[ext_resource type="PackedScene" path="res://scene/hud.tscn" id="7_bddx0"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vqrxs"]
-texture = ExtResource("1_bllo7")
-texture_region_size = Vector2i(32, 32)
+[sub_resource type="Gradient" id="Gradient_bddx0"]
+offsets = PackedFloat32Array(0, 0.5106383, 1)
+colors = PackedColorArray(0.14117648, 0, 0.5137255, 1, 0.97082883, 0.5449091, 0.08165432, 1, 0.14117648, 0, 0.5137255, 1)
+
+[sub_resource type="Gradient" id="Gradient_u2b8d"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_aw33w"]
+gradient = SubResource("Gradient_u2b8d")
+fill_from = Vector2(0, 1)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_u2b8d"]
+texture = ExtResource("6_bddx0")
 0:0/0 = 0
 1:0/0 = 0
 0:1/0 = 0
 1:1/0 = 0
 
-[sub_resource type="TileSet" id="TileSet_ut75f"]
-tile_size = Vector2i(32, 32)
-sources/1 = SubResource("TileSetAtlasSource_vqrxs")
+[sub_resource type="TileSet" id="TileSet_aw33w"]
+sources/0 = SubResource("TileSetAtlasSource_u2b8d")
 
 [node name="Level" type="Node2D" unique_id=1328862578]
 script = ExtResource("4_q3wyj")
 
-[node name="Floor" type="TileMapLayer" parent="." unique_id=544265434]
-tile_set = SubResource("TileSet_ut75f")
-script = ExtResource("2_0vq05")
-grid_width = 1000
-grid_height = 1000
-
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1860478233]
 position = Vector2(576, 324)
 script = ExtResource("3_0bn3b")
+floor_path = NodePath("")
+
+[node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1676232311]
+script = ExtResource("5_ukt71")
+day_night_gradient = SubResource("Gradient_bddx0")
+
+[node name="PointLight2D" type="PointLight2D" parent="." unique_id=1264541095]
+position = Vector2(579.75, 328.25)
+scale = Vector2(17.914063, 10.1171875)
+texture = SubResource("GradientTexture2D_aw33w")
+script = ExtResource("6_ismto")
+
+[node name="HUD" parent="PointLight2D" unique_id=667082562 instance=ExtResource("7_bddx0")]
+
+[node name="TileMap" type="TileMap" parent="." unique_id=1216546062]
+tile_set = SubResource("TileSet_aw33w")
+format = 2

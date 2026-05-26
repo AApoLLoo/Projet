@@ -19,6 +19,8 @@ config/icon="res://icon.svg"
 
 SaveSystem="*res://script/SaveSystem.gd"
 SettingsManager="*res://script/SettingsManager.gd"
+TimeManager="*res://script/TimeManager.gd"
+GameManager="*res://script/GameManager.gd"
 
 [physics]
 
@@ -27,3 +29,4 @@ SettingsManager="*res://script/SettingsManager.gd"
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+

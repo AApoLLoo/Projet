@@ -290,9 +290,10 @@ func _spawn_preview_level_scene() -> void:
 
 	var level_scene: PackedScene = level_scene_resource
 	var level_instance: Node = level_scene.instantiate()
-	if level_instance.has_method("set_preview_mode"):
+	if level_instance and level_instance.has_method("set_preview_mode"):
 		level_instance.call("set_preview_mode", true)
-	_preview_viewport.add_child(level_instance)
+	if level_instance:
+		_preview_viewport.add_child(level_instance)
 
 func _format_saved_time(saved_at_unix: int) -> String:
 	if saved_at_unix <= 0:

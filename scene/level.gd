@@ -30,6 +30,7 @@ func _ready() -> void:
 		return
 
 	_build_pause_ui()
+	TimeManager.is_time_running = true
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _preview_mode:
@@ -56,25 +57,39 @@ func _exit_tree() -> void:
 	if _preview_mode:
 		return
 
+	TimeManager.is_time_running = false
 	_save_current_state()
 
 func _apply_start_state() -> void:
 	var start_state: Dictionary = SaveSystem.get_menu_preview_state() if _preview_mode else SaveSystem.get_level_start_state()
 	var floor_script: Object = _floor
-	if floor_script.has_method("apply_saved_state"):
+	if floor_script and floor_script.has_method("apply_saved_state"):
 		floor_script.call("apply_saved_state", start_state)
 
 	var camera_script: Object = _camera
-	if camera_script.has_method("refresh_limits"):
+	if camera_script and camera_script.has_method("refresh_limits"):
 		camera_script.call("refresh_limits")
 
 	var camera_x: float = _to_float(start_state.get("camera_x"), 576.0)
 	var camera_y: float = _to_float(start_state.get("camera_y"), 324.0)
 	var camera_position: Vector2 = Vector2(camera_x, camera_y)
-	if camera_script.has_method("set_camera_world_position"):
+	if camera_script and camera_script.has_method("set_camera_world_position"):
 		camera_script.call("set_camera_world_position", camera_position)
 	else:
 		_camera.global_position = camera_position
+		
+	TimeManager.current_day = start_state.get("game_day", 1)
+	TimeManager.current_time = start_state.get("game_time", 8.0)
+	
+	if GameManager:
+		GameManager.credits = start_state.get("credits", 12500.0)
+		GameManager.resources_updated.emit()
+	
+	# Forcer la mise à jour de l'UI
+	var hour: int = int(TimeManager.current_time)
+	var minute: int = int((TimeManager.current_time - hour) * 60)
+	TimeManager.time_changed.emit(hour, minute)
+	TimeManager.day_changed.emit(TimeManager.current_day)
 
 func _disable_preview_interactions() -> void:
 	set_process_unhandled_input(false)
@@ -200,6 +215,7 @@ func _build_pause_ui() -> void:
 
 func _open_pause_menu() -> void:
 	_is_paused = true
+	TimeManager.is_time_running = false
 	_set_gameplay_enabled(false)
 	if _pause_backdrop != null:
 		_pause_backdrop.visible = true
@@ -208,6 +224,7 @@ func _open_pause_menu() -> void:
 
 func _resume_game() -> void:
 	_is_paused = false
+	TimeManager.is_time_running = true
 	_set_gameplay_enabled(true)
 	if _pause_panel != null:
 		_pause_panel.visible = false
@@ -369,15 +386,15 @@ func _save_current_state() -> void:
 func _collect_floor_state() -> Dictionary:
 	var floor_state: Dictionary = {}
 	var floor_script: Object = _floor
-	if floor_script.has_method("get_generation_state"):
+	if floor_script and floor_script.has_method("get_generation_state"):
 		var state_result: Variant = floor_script.call("get_generation_state")
 		floor_state = _to_dictionary(state_result)
 	return floor_state
 
 func _collect_camera_position() -> Vector2:
-	var camera_position: Vector2 = _camera.global_position
+	var camera_position: Vector2 = _camera.global_position if _camera else Vector2.ZERO
 	var camera_script: Object = _camera
-	if camera_script.has_method("get_camera_world_position"):
+	if camera_script and camera_script.has_method("get_camera_world_position"):
 		var position_result: Variant = camera_script.call("get_camera_world_position")
 		camera_position = _to_vector2(position_result, camera_position)
 	return camera_position

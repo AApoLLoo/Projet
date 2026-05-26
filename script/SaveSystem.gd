@@ -137,6 +137,10 @@ func save_level_state_to_slot(slot_id: String, camera_position: Vector2, floor_s
 	state["chunk_size"] = _to_int(floor_state.get("chunk_size"), DEFAULT_CHUNK_SIZE)
 	state["active_chunk_radius"] = _to_int(floor_state.get("active_chunk_radius"), DEFAULT_ACTIVE_CHUNK_RADIUS)
 	state["saved_at_unix"] = int(Time.get_unix_time_from_system())
+	state["game_day"] = TimeManager.current_day
+	state["game_time"] = TimeManager.current_time
+	if GameManager:
+		state["credits"] = GameManager.credits
 	state["save_name"] = final_name
 	save_slot_state(normalized_slot_id, state)
 	return normalized_slot_id
@@ -216,6 +220,9 @@ func get_default_state() -> Dictionary:
 	state["camera_y"] = DEFAULT_CAMERA_Y
 	state["saved_at_unix"] = 0
 	state["save_name"] = ""
+	state["game_day"] = 1
+	state["game_time"] = 8.0
+	state["credits"] = GameManager.credits if GameManager else 12500.0
 	return state
 
 func _sanitize_state(raw_state: Dictionary) -> Dictionary:
@@ -228,6 +235,9 @@ func _sanitize_state(raw_state: Dictionary) -> Dictionary:
 	state["camera_x"] = _to_float(raw_state.get("camera_x"), DEFAULT_CAMERA_X)
 	state["camera_y"] = _to_float(raw_state.get("camera_y"), DEFAULT_CAMERA_Y)
 	state["saved_at_unix"] = max(0, _to_int(raw_state.get("saved_at_unix"), 0))
+	state["game_day"] = max(1, _to_int(raw_state.get("game_day"), 1))
+	state["game_time"] = _to_float(raw_state.get("game_time"), 8.0)
+	state["credits"] = _to_float(raw_state.get("credits"), 12500.0)
 	var raw_name: String = _variant_to_string(raw_state.get("save_name"), _default_save_name())
 	state["save_name"] = _sanitize_save_name(raw_name, _default_save_name())
 	return state
