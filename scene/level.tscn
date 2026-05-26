@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://b4bnjoqf12g83"]
 
-[ext_resource type="Script" uid="uid://dg3krn5y8658m" path="res://script/BuildingManager.gd" id="2_u2b8d"]
-[ext_resource type="Script" uid="uid://k84hls15n7gq" path="res://scene/camera_controller.gd" id="3_0bn3b"]
+[ext_resource type="Script" path="res://script/BuildingManager.gd" id="2_u2b8d"]
+[ext_resource type="Script" path="res://scene/camera_controller.gd" id="3_0bn3b"]
 [ext_resource type="Script" uid="uid://dokhhfob5h6be" path="res://scene/level.gd" id="4_q3wyj"]
-[ext_resource type="Script" uid="uid://bx6id27enx61e" path="res://script/DayNightCycle.gd" id="5_ukt71"]
-[ext_resource type="Script" uid="uid://dicss5mejclyn" path="res://script/AutoLight.gd" id="6_ismto"]
+[ext_resource type="Script" path="res://script/DayNightCycle.gd" id="5_ukt71"]
+[ext_resource type="Script" path="res://script/AutoLight.gd" id="6_ismto"]
 [ext_resource type="Script" uid="uid://d2gs4e03solck" path="res://scene/floor.gd" id="7_aw33w"]
-[ext_resource type="PackedScene" path="res://scene/hud.tscn" id="7_bddx0"]
+[ext_resource type="PackedScene" uid="uid://dmkm5f1c4lgyp" path="res://scene/hud.tscn" id="7_bddx0"]
 [ext_resource type="Texture2D" uid="uid://bptn8q5sk28r5" path="res://asset/Tuiles_stan.png" id="7_u2b8d"]
 
 [sub_resource type="Gradient" id="Gradient_bddx0"]

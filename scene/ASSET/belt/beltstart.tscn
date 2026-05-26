@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://che3ckrwbas7l"]
+
+[ext_resource type="Texture2D" uid="uid://kfrcovb5t6gi" path="res://asset/belt-start.png" id="1_64je7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_83yk1"]
+atlas = ExtResource("1_64je7")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p0pyl"]
+atlas = ExtResource("1_64je7")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xuyjl"]
+atlas = ExtResource("1_64je7")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dxten"]
+atlas = ExtResource("1_64je7")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rrj5h"]
+animations = [{
+"frames": [{
+"duration": 0.5,
+"texture": SubResource("AtlasTexture_83yk1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p0pyl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xuyjl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dxten")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Beltstart" type="Node2D" unique_id=1006008569]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1894799795]
+sprite_frames = SubResource("SpriteFrames_rrj5h")
+autoplay = "default"
+frame_progress = 0.3072645

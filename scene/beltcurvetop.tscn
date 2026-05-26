@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://csxi4y85behxc"]
+
+[ext_resource type="Texture2D" uid="uid://cyjcncgjijm2l" path="res://asset/Curve_0001.png" id="1_cb071"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cpbmy"]
+atlas = ExtResource("1_cb071")
+region = Rect2(172, 0, 172, 171)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cnkhd"]
+atlas = ExtResource("1_cb071")
+region = Rect2(0, 0, 172, 171)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fn0ef"]
+atlas = ExtResource("1_cb071")
+region = Rect2(344, 0, 172, 171)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tq3c4"]
+atlas = ExtResource("1_cb071")
+region = Rect2(516, 0, 172, 171)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ka00q"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cpbmy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cnkhd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fn0ef")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tq3c4")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Beltcurvetop" type="Node2D" unique_id=1733774233]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1749146392]
+position = Vector2(-5.7499914, 23.624996)
+scale = Vector2(1.5552325, 1.3961986)
+sprite_frames = SubResource("SpriteFrames_ka00q")
+autoplay = "default"
+frame_progress = 0.27337947
