@@ -5,5 +5,5 @@
 [node name="Factory" type="Node2D" unique_id=935672183]
 z_index = 5
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1945434516]
+[node name="Tuile" type="Sprite2D" parent="." unique_id=1945434516]
 texture = ExtResource("1_52rbu")

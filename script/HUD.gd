@@ -10,8 +10,21 @@ extends CanvasLayer
 @onready var btn_x4: Button = %BtnX4
 @onready var btn_build_factory: Button = %BtnBuildFactory 
 
-var factory_scene = preload("res://scene/factory.tscn")
-var factory_texture = preload("res://asset/IndustrialTile_14.png")
+# Dictionnaire regroupant les données des différents bâtiments à construire
+var buildings_data = {
+	"factory": {
+		"scene": preload("res://scene/factory.tscn"),
+		"texture": preload("res://asset/IndustrialTile_14.png"),
+		"cost": 200.0 # Prix modifiable ici
+	}
+	# Vous pourrez ajouter d'autres bâtiments ici :
+	# "conveyor": {
+	# 	"scene": preload("res://scene/conveyor.tscn"),
+	# 	"texture": preload("res://asset/conveyor_texture.png"),
+	# 	"cost": 150.0
+	# }
+}
+
 @onready var minimap_camera: Camera2D = %MinimapCamera
 
 func _ready() -> void:
@@ -41,7 +54,8 @@ func _ready() -> void:
 	btn_build_factory.pressed.connect(func():
 		var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 		if building_manager:
-			building_manager.start_building(factory_scene, 1000.0, factory_texture)
+			var data = buildings_data["factory"]
+			building_manager.start_building(data["scene"], data["cost"], data["texture"])
 	)
 
 func _process(_delta: float) -> void:
