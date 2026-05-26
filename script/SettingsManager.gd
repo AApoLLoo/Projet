@@ -82,6 +82,9 @@ func _default_settings() -> Dictionary:
 	defaults["master_volume"] = 80.0
 	defaults["music_volume"] = 80.0
 	defaults["sfx_volume"] = 80.0
+	defaults["physics_gravity"] = 9.8
+	defaults["physics_temperature"] = 20.0
+	defaults["physics_friction"] = 1.0
 	return defaults
 
 func _sanitize_settings(raw: Dictionary) -> Dictionary:
@@ -95,6 +98,9 @@ func _sanitize_settings(raw: Dictionary) -> Dictionary:
 	sanitized["master_volume"] = clampf(_to_float(raw.get("master_volume"), _to_float(defaults["master_volume"], 80.0)), 0.0, 100.0)
 	sanitized["music_volume"] = clampf(_to_float(raw.get("music_volume"), _to_float(defaults["music_volume"], 80.0)), 0.0, 100.0)
 	sanitized["sfx_volume"] = clampf(_to_float(raw.get("sfx_volume"), _to_float(defaults["sfx_volume"], 80.0)), 0.0, 100.0)
+	sanitized["physics_gravity"] = clampf(_to_float(raw.get("physics_gravity"), defaults["physics_gravity"]), 0.1, 30.0)
+	sanitized["physics_temperature"] = clampf(_to_float(raw.get("physics_temperature"), defaults["physics_temperature"]), -50.0, 150.0)
+	sanitized["physics_friction"] = clampf(_to_float(raw.get("physics_friction"), defaults["physics_friction"]), 0.0, 5.0)
 	return sanitized
 
 func _apply_settings(settings_data: Dictionary) -> void:

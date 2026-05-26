@@ -4,6 +4,7 @@ const LEVEL_SCENE: String = "res://scene/level.tscn"
 const SETTINGS_SCENE: String = "res://scene/settings.tscn"
 const ACHIEVEMENTS_SCENE: String = "res://scene/achivements.tscn"
 
+@onready var _bottom_left_label: Label = $BottomLeftPanel/BottomLeftMargin/BottomLeftLabel
 @onready var _start_button: Button = $MenuButtons/StartButton
 @onready var _load_button: Button = $MenuButtons/LoadButton
 @onready var _lab_button: Button = $MenuButtons/LabButton
@@ -22,6 +23,7 @@ var _load_slot_list: ItemList
 var _load_slot_ids: Array[String] = []
 
 func _ready() -> void:
+	_update_physics_panel()
 	_setup_map_preview()
 	_setup_load_dialog()
 	resized.connect(_on_menu_resized)
@@ -37,6 +39,14 @@ func _style_buttons() -> void:
 	_apply_button_style(_settings_button, Color(0.94, 0.95, 0.96), Color(0.08, 0.11, 0.17))
 	_apply_button_style(_achievements_button, Color(0.94, 0.95, 0.96), Color(0.08, 0.11, 0.17))
 	_apply_button_style(_quit_button, Color(0.94, 0.95, 0.96), Color(0.08, 0.11, 0.17))
+
+func _update_physics_panel() -> void:
+	if _bottom_left_label:
+		var settings: Dictionary = SettingsManager.get_settings()
+		var g: float = SettingsManager._to_float(settings.get("physics_gravity", 9.8), 9.8)
+		var t: float = SettingsManager._to_float(settings.get("physics_temperature", 20.0), 20.0)
+		var f: float = SettingsManager._to_float(settings.get("physics_friction", 1.0), 1.0)
+		_bottom_left_label.text = "CURRENT ACTIVE UNIVERSE RULE:\nPhysique Modifiee :\nGravite: %.1f m/s²\nTemp: %.1f °C\nFrottement: %.1f" % [g, t, f]
 
 func _style_info_panels() -> void:
 	_left_panel.add_theme_stylebox_override("panel", _make_panel_style())
@@ -107,7 +117,10 @@ func _on_load_pressed() -> void:
 	_open_load_dialog()
 
 func _on_lab_pressed() -> void:
-	_show_message("Le mode Modifier Lab arrive bientot.")
+	SettingsManager.set_return_target("res://scene/main_menu.tscn")
+	var error: Error = get_tree().change_scene_to_file("res://scene/lab_editor.tscn")
+	if error != OK:
+		_show_message("Impossible d'ouvrir le Lab: " + str(error))
 
 func _on_tutorial_pressed() -> void:
 	_show_message("Le tutoriel interactif arrive bientot.")
