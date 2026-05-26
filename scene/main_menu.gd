@@ -306,6 +306,19 @@ func _spawn_preview_level_scene() -> void:
 	var level_instance: Node = level_scene.instantiate()
 	if level_instance and level_instance.has_method("set_preview_mode"):
 		level_instance.call("set_preview_mode", true)
+
+	# Ensure HUD is hidden in the preview instance so it doesn't appear behind the menu
+	if level_instance:
+		var hud_node: Node = null
+		if level_instance.has_node("PointLight2D/HUD"):
+			hud_node = level_instance.get_node("PointLight2D/HUD")
+		else:
+			hud_node = level_instance.find_node("HUD", true, false)
+		if hud_node != null:
+			if hud_node.has_method("hide"):
+				hud_node.hide()
+			elif hud_node is CanvasLayer or hud_node is Control:
+				hud_node.visible = false
 	if level_instance:
 		_preview_viewport.add_child(level_instance)
 
