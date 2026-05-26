@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://31twxhbxjm57" path="res://asset/IndustrialTile_14.png" id="6_bddx0"]
 [ext_resource type="Script" uid="uid://dicss5mejclyn" path="res://script/AutoLight.gd" id="6_ismto"]
 [ext_resource type="PackedScene" path="res://scene/hud.tscn" id="7_bddx0"]
+[ext_resource type="Script" uid="uid://d2gs4e03solck" path="res://scene/floor.gd" id="7_u2b8d"]
 
 [sub_resource type="Gradient" id="Gradient_bddx0"]
 offsets = PackedFloat32Array(0, 0.5106383, 1)
@@ -18,15 +19,15 @@ colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
 gradient = SubResource("Gradient_u2b8d")
 fill_from = Vector2(0, 1)
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_u2b8d"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bddx0"]
 texture = ExtResource("6_bddx0")
 0:0/0 = 0
 1:0/0 = 0
 0:1/0 = 0
 1:1/0 = 0
 
-[sub_resource type="TileSet" id="TileSet_aw33w"]
-sources/0 = SubResource("TileSetAtlasSource_u2b8d")
+[sub_resource type="TileSet" id="TileSet_u2b8d"]
+sources/1 = SubResource("TileSetAtlasSource_bddx0")
 
 [node name="Level" type="Node2D" unique_id=1328862578]
 script = ExtResource("4_q3wyj")
@@ -48,6 +49,6 @@ script = ExtResource("6_ismto")
 
 [node name="HUD" parent="PointLight2D" unique_id=667082562 instance=ExtResource("7_bddx0")]
 
-[node name="TileMap" type="TileMap" parent="." unique_id=1216546062]
-tile_set = SubResource("TileSet_aw33w")
-format = 2
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1173680372]
+tile_set = SubResource("TileSet_u2b8d")
+script = ExtResource("7_u2b8d")
