@@ -3,7 +3,8 @@ extends Node2D
 const MAIN_MENU_SCENE: String = "res://scene/main_menu.tscn"
 const SETTINGS_SCENE: String = "res://scene/settings.tscn"
 
-@onready var _floor: TileMapLayer = $Floor
+@export var floor_path: NodePath = NodePath("Floor")
+@onready var _floor: TileMapLayer = get_node_or_null(floor_path) as TileMapLayer
 @onready var _camera: Camera2D = $Camera2D
 
 var _preview_mode: bool = false
@@ -24,6 +25,15 @@ func set_preview_mode(enabled: bool) -> void:
 	_preview_mode = enabled
 
 func _ready() -> void:
+	if _floor == null:
+		var err_msg: String = "Floor node not found at path: %s" % floor_path
+		push_error(err_msg)
+		var dlg: AcceptDialog = AcceptDialog.new()
+		dlg.title = "Erreur"
+		dlg.dialog_text = err_msg
+		get_tree().get_root().add_child(dlg)
+		dlg.popup_centered()
+
 	_apply_start_state()
 	if _preview_mode:
 		_disable_preview_interactions()
