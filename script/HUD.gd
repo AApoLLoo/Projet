@@ -58,7 +58,7 @@ var buildings_data = {
 	
 	# --- VIRAGES / COURBES (Curves 1 à 4 basées sur vos assets) ---
 	"curve_top": {
-		"scene": preload("res://scene/beltcurvetop.tscn"), # Votre scène existante !
+		"scene": preload("res://scene/ASSET/beltcurvetop.tscn"), # Votre scène existante !
 		"texture": preload("res://asset/Curve_0001.png"),   # Texture correspondante
 		"cost": 60.0,
 		"frames": 4 # Mettez le nombre de frames d'animation si elles sont animées
@@ -83,6 +83,9 @@ var buildings_data = {
 	}
 }
 @onready var minimap_camera: Camera2D = %MinimapCamera
+
+const ENTITY_PANEL_SCENE := preload("res://scene/entity_panel.tscn")
+var _entity_panel: PanelContainer = null
 
 func _ready() -> void:
 	# On s'assure que le menu est caché au démarrage
@@ -131,6 +134,10 @@ func _ready() -> void:
 	if GameManager:
 		GameManager.resources_updated.connect(_on_resources_updated)
 		_update_money_display()
+
+	# --- PANNEAU ENTITÉ ---
+	_entity_panel = ENTITY_PANEL_SCENE.instantiate()
+	add_child(_entity_panel)
 	
 	# Boutons de contrôle du temps
 	btn_pause.pressed.connect(func(): TimeManager.time_speed = 0.0)
@@ -166,6 +173,65 @@ func _ready() -> void:
 		print("Clic sur TURBINE !")
 		_start_building_process("turbine")
 	)
+
+	# --- BOUTON D'ANNULATION DU DERNIER BATIMENT (créé dynamiquement) ---
+	var undo_button: Button = Button.new()
+	undo_button.name = "BtnUndoBuild"
+	undo_button.text = "Annuler dernier bâtiment (50%)"
+	undo_button.visible = false
+	# Positionnement simple : en bas du menu de construction si présent, sinon en haut à gauche
+	if build_menu_container:
+		build_menu_container.add_child(undo_button)
+	else:
+		add_child(undo_button)
+
+	# Connexion du clic
+	undo_button.pressed.connect(_on_undo_build_pressed)
+
+	# Connexion au BuildingManager pour synchroniser la visibilité
+	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
+	if building_manager:
+		# Si le BuildingManager offre un signal, on l'écoute
+		if building_manager.has_signal("last_build_state_changed"):
+			building_manager.last_build_state_changed.connect(func(available):
+				undo_button.visible = available
+			)
+		# Set initial visibility si nécessaire
+		undo_button.visible = building_manager.has_method("has_last_build") and building_manager.has_last_build()
+
+		# Connecter la sélection d'entité
+		if building_manager.has_signal("entity_selected"):
+			building_manager.entity_selected.connect(_on_entity_selected)
+
+		# --- BOUTON MODE DESTRUCTION (toggle) ---
+		var destroy_button: Button = Button.new()
+		destroy_button.name = "BtnDestroyMode"
+		destroy_button.text = "Mode destruction"
+		destroy_button.toggle_mode = true
+		destroy_button.set_pressed(false)
+		if build_menu_container:
+			build_menu_container.add_child(destroy_button)
+		else:
+			add_child(destroy_button)
+
+		# Quand l'utilisateur bascule le bouton, on demande au BuildingManager de démarrer/arrêter
+		destroy_button.toggled.connect(func(pressed):
+			var bm = get_tree().current_scene.find_child("BuildingManager", true, false)
+			if bm:
+				if pressed and bm.has_method("start_destroying"):
+					bm.start_destroying()
+				elif not pressed and bm.has_method("stop_destroying"):
+					bm.stop_destroying()
+		)
+
+		# Synchroniser l'état du bouton avec le BuildingManager
+		if building_manager and building_manager.has_signal("destroy_mode_changed"):
+			building_manager.destroy_mode_changed.connect(func(enabled):
+				destroy_button.set_pressed(enabled)
+			)
+		if building_manager:
+			destroy_button.set_pressed(building_manager.is_destroying)
+
 # --- NOUVELLE FONCTION ---
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
@@ -175,6 +241,17 @@ func _start_building_process(building_type: String) -> void:
 		# Fermer le menu de construction après la sélection
 		if build_menu_container:
 			build_menu_container.visible = false
+		# Masquer le panneau entité quand on entre en mode construction
+		if _entity_panel:
+			_entity_panel.hide()
+
+func _on_entity_selected(entity) -> void:
+	if _entity_panel == null:
+		return
+	if entity == null:
+		_entity_panel.hide()
+	else:
+		_entity_panel.setup(entity)
 
 func _process(_delta: float) -> void:
 	# Synchroniser la caméra de la minimap avec la caméra principale
@@ -226,3 +303,11 @@ func _on_menu_belt_pressed() -> void:
 		menu_belt.hide()
 	else:
 		menu_belt.show()
+
+
+func _on_undo_build_pressed() -> void:
+	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
+	if building_manager and building_manager.has_method("undo_last_build"):
+		building_manager.undo_last_build()
+	else:
+		print("Annulation impossible : BuildingManager introuvable ou méthode manquante")

@@ -1,24 +1,23 @@
 extends TileMapLayer
 
-@export var cell_size: int = 32
-@export var grid_width: int = 2000  # Nombre de cases en largeur
-@export var grid_height: int = 2000 # Nombre de cases en hauteur
-@export var chunk_size: int = 64 # Taille d'un chunk en nombre de cases
-@export var active_chunk_radius: int = 2 # Chunks chargés autour de la caméra
+## Nombre de cases par côté d'un chunk.
+@export var chunk_size: int = 16
+## Chemin vers la Camera2D de la scène.
 @export var camera_path: NodePath = ^"../Camera2D"
+## Chunks supplémentaires chargés autour du viewport (marge de sécurité).
+@export var chunk_margin: int = 1
 
-const SOURCE_ID := 1
+const SOURCE_ID    := 1
 const ATLAS_COORDS := Vector2i(0, 0)
 
-var _loaded_chunks: Dictionary = {}
-var _current_center_chunk: Vector2i = Vector2i(999999, 999999)
-var _camera: Camera2D
+var _loaded_chunks : Dictionary = {}
+var _center_chunk  : Vector2i   = Vector2i(999999, 999999)
+var _camera        : Camera2D
 
 func _ready() -> void:
 	_camera = get_node_or_null(camera_path) as Camera2D
 	if _camera == null:
 		_camera = get_viewport().get_camera_2d()
-
 	_refresh_chunks()
 
 func _process(_delta: float) -> void:
@@ -29,88 +28,98 @@ func _process(_delta: float) -> void:
 		if _camera == null:
 			return
 
-	var center_chunk := _world_to_chunk(_camera.global_position)
-	if center_chunk == _current_center_chunk:
-		return
-
-	_current_center_chunk = center_chunk
-	_refresh_chunks()
+	# Rafraîchir uniquement quand le chunk central change
+	var cell := local_to_map(to_local(_camera.global_position))
+	var new_center := Vector2i(
+		floori(float(cell.x) / float(chunk_size)),
+		floori(float(cell.y) / float(chunk_size))
+	)
+	if new_center != _center_chunk:
+		_center_chunk = new_center
+		_refresh_chunks()
 
 func _refresh_chunks() -> void:
 	if _camera == null:
 		return
 
-	var center_chunk := _world_to_chunk(_camera.global_position)
-	_current_center_chunk = center_chunk
+	var target := _visible_chunks()
 
-	var target_chunks: Dictionary = {}
-	for chunk_x in range(center_chunk.x - active_chunk_radius, center_chunk.x + active_chunk_radius + 1):
-		for chunk_y in range(center_chunk.y - active_chunk_radius, center_chunk.y + active_chunk_radius + 1):
-			var chunk := Vector2i(chunk_x, chunk_y)
-			if _is_chunk_inside_map(chunk):
-				target_chunks[chunk] = true
-				if not _loaded_chunks.has(chunk):
-					_load_chunk(chunk)
+	for chunk in target:
+		if not _loaded_chunks.has(chunk):
+			_load_chunk(chunk)
 
 	for chunk in _loaded_chunks.keys():
-		if not target_chunks.has(chunk):
+		if not target.has(chunk):
 			_unload_chunk(chunk)
 
-	_loaded_chunks = target_chunks
+	_loaded_chunks = target
 
-func _world_to_chunk(world_position: Vector2) -> Vector2i:
-	var cell_x := int(floor(world_position.x / float(cell_size)))
-	var cell_y := int(floor(world_position.y / float(cell_size)))
-	return Vector2i(
-		int(floor(cell_x / float(chunk_size))),
-		int(floor(cell_y / float(chunk_size)))
-	)
+## Retourne l'ensemble des chunks qui couvrent le viewport + marge.
+func _visible_chunks() -> Dictionary:
+	var result   : Dictionary = {}
+	var vp       : Vector2   = get_viewport().get_visible_rect().size
+	var zoom     : Vector2   = _camera.zoom
+	var hw       : float     = vp.x * 0.5 / zoom.x
+	var hh       : float     = vp.y * 0.5 / zoom.y
+	var cam      : Vector2   = _camera.global_position
 
-func _is_chunk_inside_map(chunk: Vector2i) -> bool:
-	var start_x := chunk.x * chunk_size
-	var start_y := chunk.y * chunk_size
-	return start_x < grid_width and start_y < grid_height and (start_x + chunk_size) > 0 and (start_y + chunk_size) > 0
+	# Convertir les 4 coins du viewport en coordonnées de chunk
+	var corners : Array = [
+		cam + Vector2(-hw, -hh),
+		cam + Vector2( hw, -hh),
+		cam + Vector2(-hw,  hh),
+		cam + Vector2( hw,  hh),
+	]
+
+	var min_cx :=  999999; var max_cx := -999999
+	var min_cy :=  999999; var max_cy := -999999
+
+	for corner in corners:
+		var c  : Vector2i = local_to_map(to_local(corner))
+		var cx := floori(float(c.x) / float(chunk_size))
+		var cy := floori(float(c.y) / float(chunk_size))
+		if cx < min_cx: min_cx = cx
+		if cx > max_cx: max_cx = cx
+		if cy < min_cy: min_cy = cy
+		if cy > max_cy: max_cy = cy
+
+	for cx in range(min_cx - chunk_margin, max_cx + chunk_margin + 1):
+		for cy in range(min_cy - chunk_margin, max_cy + chunk_margin + 1):
+			result[Vector2i(cx, cy)] = true
+
+	return result
 
 func _load_chunk(chunk: Vector2i) -> void:
-	var start_x: int = int(max(0, chunk.x * chunk_size))
-	var start_y: int = int(max(0, chunk.y * chunk_size))
-	var end_x: int = int(min(grid_width, start_x + chunk_size))
-	var end_y: int = int(min(grid_height, start_y + chunk_size))
-
-	for x in range(start_x, end_x):
-		for y in range(start_y, end_y):
+	# Calcul des bornes du chunk (soutenir coordonnées négatives si carte infinie)
+	var sx := chunk.x * chunk_size
+	var sy := chunk.y * chunk_size
+	for x in range(sx, sx + chunk_size):
+		for y in range(sy, sy + chunk_size):
 			set_cell(Vector2i(x, y), SOURCE_ID, ATLAS_COORDS)
 
 func _unload_chunk(chunk: Vector2i) -> void:
-	var start_x: int = int(max(0, chunk.x * chunk_size))
-	var start_y: int = int(max(0, chunk.y * chunk_size))
-	var end_x: int = int(min(grid_width, start_x + chunk_size))
-	var end_y: int = int(min(grid_height, start_y + chunk_size))
-
-	for x in range(start_x, end_x):
-		for y in range(start_y, end_y):
+	var sx := chunk.x * chunk_size
+	var sy := chunk.y * chunk_size
+	for x in range(sx, sx + chunk_size):
+		for y in range(sy, sy + chunk_size):
 			erase_cell(Vector2i(x, y))
 
 func apply_saved_state(save_state: Dictionary) -> void:
-	grid_width = _to_int(save_state.get("grid_width"), grid_width)
-	grid_height = _to_int(save_state.get("grid_height"), grid_height)
-	cell_size = _to_int(save_state.get("cell_size"), cell_size)
 	chunk_size = _to_int(save_state.get("chunk_size"), chunk_size)
-	active_chunk_radius = _to_int(save_state.get("active_chunk_radius"), active_chunk_radius)
-
 	clear()
 	_loaded_chunks.clear()
-	_current_center_chunk = Vector2i(999999, 999999)
+	_center_chunk = Vector2i(999999, 999999)
 	_refresh_chunks()
 
 func get_generation_state() -> Dictionary:
-	var state: Dictionary = {}
-	state["grid_width"] = grid_width
-	state["grid_height"] = grid_height
-	state["cell_size"] = cell_size
-	state["chunk_size"] = chunk_size
-	state["active_chunk_radius"] = active_chunk_radius
-	return state
+	return {
+		"chunk_size"          : chunk_size,
+		"infinite_map"        : true,
+		"cell_size"           : 32,
+		"grid_width"          : 2000,
+		"grid_height"         : 2000,
+		"active_chunk_radius" : 2,
+	}
 
 func _to_int(value: Variant, fallback: int) -> int:
 	if value is int:

@@ -1,5 +1,6 @@
-[gd_scene format=3 uid="uid://b8y65t6767qkw"]
+[gd_scene load_steps=10 format=3 uid="uid://b8y65t6767qkw"]
 
+[ext_resource type="Script" path="res://script/TurbineEntity.gd" id="1_turbineentity"]
 [ext_resource type="Texture2D" uid="uid://cl1akoi1t5mdv" path="res://asset/Turbine Animation 0006.png" id="1_0cou2"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ktmlt"]
@@ -60,7 +61,8 @@ animations = [{
 }]
 
 [node name="Turbine2d" type="Node2D" unique_id=108063647]
+script = ExtResource("1_turbineentity")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1501720407]
 sprite_frames = SubResource("SpriteFrames_l10q4")
-autoplay = "default"
+autoplay = ""

@@ -9,6 +9,9 @@ const SETTINGS_SCENE: String = "res://scene/settings.tscn"
 
 var _preview_mode: bool = false
 var _is_paused: bool = false
+# Bloque la sauvegarde automatique dans _exit_tree() quand on a déjà sauvegardé
+# explicitement : à ce stade les entités ont quitté l'arbre et EntityManager est vide.
+var _skip_exit_save: bool = false
 
 var _pause_layer: CanvasLayer
 var _pause_backdrop: ColorRect
@@ -45,6 +48,23 @@ func _ready() -> void:
 	_build_pause_ui()
 	TimeManager.is_time_running = true
 
+func _input(event: InputEvent) -> void:
+	if _preview_mode:
+		return
+
+	if event.is_action_pressed("ui_cancel"):
+		if _save_dialog != null and _save_dialog.visible:
+			_save_dialog.hide()
+			get_viewport().set_input_as_handled()
+			return
+
+		if _is_paused:
+			_resume_game()
+		else:
+			_open_pause_menu()
+
+		get_viewport().set_input_as_handled()
+
 func _unhandled_input(event: InputEvent) -> void:
 	if _preview_mode:
 		return
@@ -71,10 +91,21 @@ func _exit_tree() -> void:
 		return
 
 	TimeManager.is_time_running = false
-	_save_current_state()
+	# Ne pas sauvegarder ici si on vient de sauvegarder explicitement :
+	# à ce stade les entités ont déjà quitté l'arbre et EntityManager est vide,
+	# ce qui écraserait la bonne sauvegarde avec un tableau vide.
+	if not _skip_exit_save:
+		_save_current_state()
 
 func _apply_start_state() -> void:
 	var start_state: Dictionary = SaveSystem.get_menu_preview_state() if _preview_mode else SaveSystem.get_level_start_state()
+	if EntityManager and EntityManager.has_method("clear_entities"):
+		EntityManager.clear_entities()
+
+	var building_manager: Node = find_child("BuildingManager", true, false)
+	if building_manager and building_manager.has_method("clear_runtime_state"):
+		building_manager.call("clear_runtime_state")
+
 	var floor_script: Object = _floor
 	if floor_script and floor_script.has_method("apply_saved_state"):
 		floor_script.call("apply_saved_state", start_state)
@@ -97,7 +128,17 @@ func _apply_start_state() -> void:
 	if GameManager:
 		GameManager.credits = start_state.get("credits", 12500.0)
 		GameManager.resources_updated.emit()
-	
+
+	# Restaurer les entités sauvegardées (bâtiments avec leur état)
+	var entities_data: Array = start_state.get("entities", [])
+	if not entities_data.is_empty():
+		if building_manager and building_manager.has_method("restore_entities"):
+			var restored_count: Variant = building_manager.call("restore_entities", entities_data)
+			if int(restored_count) != entities_data.size():
+				push_warning("Restauration partielle des batiments: %d/%d" % [int(restored_count), entities_data.size()])
+		else:
+			push_warning("BuildingManager introuvable pendant la restauration des batiments.")
+
 	# Forcer la mise à jour de l'UI
 	var hour: int = int(TimeManager.current_time)
 	var minute: int = int((TimeManager.current_time - hour) * 60)
@@ -118,7 +159,6 @@ func _set_gameplay_enabled(enabled: bool) -> void:
 		_floor.set_process(enabled)
 
 func _build_pause_ui() -> void:
-	_apply_start_state()
 	if _preview_mode:
 		_disable_preview_interactions()
 		var hud = get_node_or_null("PointLight2D/HUD")
@@ -403,6 +443,9 @@ func _save_current_state() -> void:
 	var floor_state: Dictionary = _collect_floor_state()
 	var camera_position: Vector2 = _collect_camera_position()
 	SaveSystem.save_level_state(camera_position, floor_state)
+	# Marquer que la sauvegarde est faite : _exit_tree() ne l'écrasera pas
+	# avec un EntityManager déjà vidé par la sortie des nœuds enfants.
+	_skip_exit_save = true
 
 func _collect_floor_state() -> Dictionary:
 	var floor_state: Dictionary = {}

@@ -1,0 +1,172 @@
+[gd_scene load_steps=2 format=3 uid="uid://entity_panel"]
+
+[ext_resource type="Script" path="res://script/EntityPanel.gd" id="1_entitypanel"]
+
+[node name="EntityPanel" type="PanelContainer"]
+script = ExtResource("1_entitypanel")
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -420.0
+offset_right = 330.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="EntityNameLabel" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Bâtiment"
+theme_override_font_sizes/font_size = 16
+
+[node name="CloseBtn" type="Button" parent="MarginContainer/VBoxContainer/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "✕"
+flat = true
+
+[node name="HSep1" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="RecipeLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Recette"
+theme_override_font_sizes/font_size = 13
+
+[node name="RecipeSelector" type="OptionButton" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RecipeDetailsBox" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="InputBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/RecipeDetailsBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="InputLabel" type="Label" parent="MarginContainer/VBoxContainer/RecipeDetailsBox/InputBox"]
+layout_mode = 2
+text = "Entrées"
+theme_override_font_sizes/font_size = 11
+
+[node name="InputList" type="ItemList" parent="MarginContainer/VBoxContainer/RecipeDetailsBox/InputBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 60)
+mouse_filter = 2
+select_mode = 0
+allow_reselect = false
+allow_rmb_select = false
+
+[node name="ArrowLabel" type="Label" parent="MarginContainer/VBoxContainer/RecipeDetailsBox"]
+layout_mode = 2
+text = "→"
+vertical_alignment = 1
+
+[node name="OutputBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/RecipeDetailsBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OutputLabel" type="Label" parent="MarginContainer/VBoxContainer/RecipeDetailsBox/OutputBox"]
+layout_mode = 2
+text = "Sorties"
+theme_override_font_sizes/font_size = 11
+
+[node name="OutputList" type="ItemList" parent="MarginContainer/VBoxContainer/RecipeDetailsBox/OutputBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 60)
+mouse_filter = 2
+select_mode = 0
+allow_reselect = false
+allow_rmb_select = false
+
+[node name="HSep2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="RateLabel_Title" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Taux de production"
+theme_override_font_sizes/font_size = 13
+
+[node name="RateBox" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RateSlider" type="HSlider" parent="MarginContainer/VBoxContainer/RateBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="RateLabel" type="Label" parent="MarginContainer/VBoxContainer/RateBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+text = "100%"
+horizontal_alignment = 2
+
+[node name="HSep3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="StatsBox" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="EnergyBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/StatsBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EnergyTitle" type="Label" parent="MarginContainer/VBoxContainer/StatsBox/EnergyBox"]
+layout_mode = 2
+text = "⚡ Énergie"
+theme_override_font_sizes/font_size = 11
+
+[node name="EnergyLabel" type="Label" parent="MarginContainer/VBoxContainer/StatsBox/EnergyBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 kW"
+
+[node name="Co2Box" type="VBoxContainer" parent="MarginContainer/VBoxContainer/StatsBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Co2Title" type="Label" parent="MarginContainer/VBoxContainer/StatsBox/Co2Box"]
+layout_mode = 2
+text = "☁ CO₂"
+theme_override_font_sizes/font_size = 11
+
+[node name="Co2Label" type="Label" parent="MarginContainer/VBoxContainer/StatsBox/Co2Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.0 g/min"
+
+[node name="HSep4" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ActiveToggle" type="CheckButton" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Actif"

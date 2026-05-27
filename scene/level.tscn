@@ -179,7 +179,6 @@ script = ExtResource("6_ismto")
 [node name="HUD" parent="PointLight2D" unique_id=667082562 instance=ExtResource("7_bddx0")]
 
 [node name="Floor" type="TileMapLayer" parent="." unique_id=1173680372]
-visible = false
 tile_set = SubResource("TileSet_u2b8d")
 script = ExtResource("7_aw33w")
 

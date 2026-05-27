@@ -141,6 +141,12 @@ func save_level_state_to_slot(slot_id: String, camera_position: Vector2, floor_s
 	state["game_time"] = TimeManager.current_time
 	if GameManager:
 		state["credits"] = GameManager.credits
+	# Sauvegarder toutes les entités actives
+	var entities_array: Array = []
+	for entity in EntityManager.entities.values():
+		if is_instance_valid(entity):
+			entities_array.append(entity.serialize())
+	state["entities"] = entities_array
 	state["save_name"] = final_name
 	save_slot_state(normalized_slot_id, state)
 	return normalized_slot_id
@@ -222,7 +228,8 @@ func get_default_state() -> Dictionary:
 	state["save_name"] = ""
 	state["game_day"] = 1
 	state["game_time"] = 8.0
-	state["credits"] = GameManager.credits if GameManager else 12500.0
+	state["credits"] = 12500.0
+	state["entities"] = []
 	return state
 
 func _sanitize_state(raw_state: Dictionary) -> Dictionary:
@@ -238,6 +245,9 @@ func _sanitize_state(raw_state: Dictionary) -> Dictionary:
 	state["game_day"] = max(1, _to_int(raw_state.get("game_day"), 1))
 	state["game_time"] = _to_float(raw_state.get("game_time"), 8.0)
 	state["credits"] = _to_float(raw_state.get("credits"), 12500.0)
+	# Préserver le tableau des entités tel quel (validé case par case à la restauration)
+	var raw_entities: Variant = raw_state.get("entities")
+	state["entities"] = raw_entities if raw_entities is Array else []
 	var raw_name: String = _variant_to_string(raw_state.get("save_name"), _default_save_name())
 	state["save_name"] = _sanitize_save_name(raw_name, _default_save_name())
 	return state

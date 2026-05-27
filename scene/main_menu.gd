@@ -110,7 +110,12 @@ func _make_panel_style() -> StyleBoxFlat:
 	return style
 
 func _on_start_pressed() -> void:
-	SaveSystem.request_new_game()
+	# Continuer la dernière sauvegarde si elle existe, sinon démarrer une nouvelle partie.
+	var existing_slots: Array[Dictionary] = SaveSystem.get_save_slots()
+	if existing_slots.is_empty():
+		SaveSystem.request_new_game()
+	else:
+		SaveSystem.request_load_game()  # Charge automatiquement le slot le plus récent
 	_change_scene(LEVEL_SCENE)
 
 func _on_load_pressed() -> void:
@@ -258,7 +263,7 @@ func _on_load_dialog_confirmed() -> void:
 
 	var selected_slot: String = _load_slot_ids[selected_index]
 	if SaveSystem.is_new_slot_id(selected_slot):
-		SaveSystem.request_load_game("")
+		SaveSystem.request_new_game()
 	else:
 		SaveSystem.request_load_game(selected_slot)
 	_change_scene(LEVEL_SCENE)

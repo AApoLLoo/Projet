@@ -16,7 +16,6 @@ func _process(delta: float) -> void:
 		
 	# Convertir le delta en heures in-game
 	current_time += (delta * time_multiplier * time_speed) / 3600.0
-	current_time += (delta * time_multiplier) / 3600.0
 	
 	# Gestion du changement de jour
 	if current_time >= 24.0:
