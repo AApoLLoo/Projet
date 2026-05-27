@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://d3hg0gffbxbn"]
+
+[ext_resource type="Texture2D" uid="uid://cavcjwdxrksis" path="res://asset/Curve_0004.png" id="1_n6eop"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ye32w"]
+atlas = ExtResource("1_n6eop")
+region = Rect2(0, 0, 172, 171)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ftxep"]
+atlas = ExtResource("1_n6eop")
+region = Rect2(172, 0, 172, 171)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jsx4j"]
+atlas = ExtResource("1_n6eop")
+region = Rect2(344, 0, 172, 171)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vgkxy"]
+atlas = ExtResource("1_n6eop")
+region = Rect2(516, 0, 172, 171)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3e41q"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ye32w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ftxep")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jsx4j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vgkxy")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="curveright" type="Node2D" unique_id=1712766572]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1659799696]
+position = Vector2(53.000008, 15.999998)
+scale = Vector2(1.4476744, 1.3538011)
+sprite_frames = SubResource("SpriteFrames_3e41q")
+autoplay = "default"
+frame_progress = 0.82305723

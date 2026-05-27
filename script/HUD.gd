@@ -17,33 +17,116 @@ extends CanvasLayer
 @onready var btn_build_belt: Button = %BtnBuildBelt       
 @onready var btn_build_turbine: Button = %BtnBuildTurbine 
 
+###BELT###
+@onready var menu_belt: HBoxContainer = $Menu_Belt
+@onready var curve_top: Button = $Menu_Belt/Curve_Top
+@onready var curve_down: Button = $Menu_Belt/Curve_Down
+@onready var curve_right: Button = $Menu_Belt/Curve_Right
+@onready var curve_left: Button = $Menu_Belt/Curve_left
+@onready var belt_droit: Button = $Menu_Belt/Belt_droit
+@onready var belt_left: Button = $Menu_Belt/Belt_left
+
 # --- DICTIONNAIRE MIS À JOUR ---
+# --- DICTIONNAIRE MIS À JOUR AVEC DIRECTIONS ET VIRAGES ---
 var buildings_data = {
 	"factory": {
 		"scene": preload("res://scene/factory.tscn"),
 		"texture": preload("res://asset/IndustrialTile_14.png"),
 		"cost": 200.0,
-		"frames": 1 # C'est une image simple
-	},
-	"belt": {
-		"scene": preload("res://scene/ASSET/belt/beltmid.tscn"),
-		"texture": preload("res://asset/belt-mid.png"),
-		"cost": 50.0,
-		"frames": 4# Il y a 4 images collées
+		"frames": 1
 	},
 	"turbine": {
 		"scene": preload("res://scene/turbine_2d.tscn"),
 		"texture": preload("res://asset/Turbine Animation base.png"),
 		"cost": 500.0,
-		"frames": 6# Il y a 4 images collées
+		"frames": 6
+	},
+	
+	# --- TAPIS DROITS (Exemples de directions si vous séparez les scènes) ---
+	"belt_right": {
+		"scene": preload("res://scene/ASSET/belt/beltmid.tscn"), # À adapter si vous créez une scène par direction
+		"texture": preload("res://asset/belt-midNO.png"),
+		"cost": 50.0,
+		"frames": 4
+	},
+	"belt_left": {
+		"scene": preload("res://scene/ASSET/belt/beltleft.tscn"), 
+		"texture": preload("res://asset/belt-mid.png"),
+		"cost": 50.0,
+		"frames": 4
+	},
+	
+	# --- VIRAGES / COURBES (Curves 1 à 4 basées sur vos assets) ---
+	"curve_top": {
+		"scene": preload("res://scene/beltcurvetop.tscn"), # Votre scène existante !
+		"texture": preload("res://asset/Curve_0001.png"),   # Texture correspondante
+		"cost": 60.0,
+		"frames": 4 # Mettez le nombre de frames d'animation si elles sont animées
+	},
+	"curve_down": {
+		"scene": preload("res://scene/ASSET/belt/curvedown.tscn"), # À créer sur le modèle de beltcurvetop
+		"texture": preload("res://asset/Curve_0002.png"),
+		"cost": 60.0,
+		"frames": 4
+	},
+	"curve_left": {
+		"scene": preload("res://scene/ASSET/belt/curveright.tscn"),
+		"texture": preload("res://asset/Curve_0003.png"),
+		"cost": 60.0,
+		"frames": 4
+	},
+	"curve_right": {
+		"scene": preload("res://scene/ASSET/belt/curveright.tscn"),
+		"texture": preload("res://asset/Curve_0004.png"),
+		"cost": 60.0,
+		"frames": 4
 	}
 }
 @onready var minimap_camera: Camera2D = %MinimapCamera
 
 func _ready() -> void:
+	# On s'assure que le menu est caché au démarrage
+	menu_belt.hide()
+	
 	# Connexion aux signaux du TimeManager
 	TimeManager.time_changed.connect(_on_time_changed)
 	TimeManager.day_changed.connect(_on_day_changed)
+	
+	# --- CORRECTION 1 : Indentation corrigée ici ---
+	
+	
+	# Exemple pour les tapis droits
+	belt_droit.pressed.connect(func():
+		print("Mode construction : Tapis Droit")
+		_start_building_process("belt_right")
+		menu_belt.hide()
+	)
+	belt_left.pressed.connect(func():
+		print("Mode construction : Tapis Droit")
+		_start_building_process("belt_left")
+		menu_belt.hide()
+	)
+	# Exemple pour vos courbes (Curves)
+	curve_top.pressed.connect(func():
+		print("Mode construction : Courbe Haut (Curve Top)")
+		_start_building_process("curve_top")
+		menu_belt.hide()
+	)
+	curve_down.pressed.connect(func():
+		print("Mode construction : Courbe Haut (Curve Top)")
+		_start_building_process("curve_down")
+		menu_belt.hide()
+	)
+	curve_right.pressed.connect(func():
+		print("Mode construction : Courbe Haut (Curve Top)")
+		_start_building_process("curve_right")
+		menu_belt.hide()
+	)
+	curve_left.pressed.connect(func():
+		print("Mode construction : Courbe Haut (Curve Top)")
+		_start_building_process("curve_left")
+		menu_belt.hide()
+	)
 	
 	if GameManager:
 		GameManager.resources_updated.connect(_on_resources_updated)
@@ -58,7 +141,7 @@ func _ready() -> void:
 	# Initialisation avec les valeurs actuelles au lancement
 	_update_day_display(TimeManager.current_day)
 	
-	# Calculer manuellement l'heure pour la toute première frame (avant le premier signal Emit)
+	# Calculer manuellement l'heure pour la toute première frame
 	var hour: int = int(TimeManager.current_time)
 	var minute: int = int((TimeManager.current_time - hour) * 60)
 	_update_time_display(hour, minute)
@@ -75,10 +158,9 @@ func _ready() -> void:
 		_start_building_process("factory")
 	)
 	
-	btn_build_belt.pressed.connect(func():
-		print("Clic sur TAPIS !")
-		_start_building_process("belt")
-	)
+	# --- CORRECTION 2 : Connexion directe et propre ---
+	btn_build_belt.pressed.connect(_on_menu_belt_pressed)
+	# --------------------------------------------------
 	
 	btn_build_turbine.pressed.connect(func():
 		print("Clic sur TURBINE !")
@@ -137,3 +219,10 @@ func _update_money_display() -> void:
 			result += "." + parts[1]
 			
 		money_label.text = result + " €"
+# --- NOUVELLE FONCTION POUR LE SOUS-MENU DES TAPIS ---
+func _on_menu_belt_pressed() -> void:
+	# Si le menu des tapis est visible, on le cache. Sinon, on l'affiche.
+	if menu_belt.visible:
+		menu_belt.hide()
+	else:
+		menu_belt.show()

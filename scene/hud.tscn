@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://dmkm5f1c4lgyp"]
+[gd_scene format=3 uid="uid://bnit1gqnd4kqp"]
 
 [ext_resource type="Script" uid="uid://5nx80apmymd" path="res://script/HUD.gd" id="1_hud"]
 
@@ -144,12 +144,11 @@ unique_name_in_owner = true
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 36.0
-offset_top = -47.0
-offset_right = 145.0
-offset_bottom = -3.0
+offset_left = 31.0
+offset_top = -147.0
+offset_right = 140.0
+offset_bottom = -10.0
 grow_vertical = 0
-visible = false
 
 [node name="BtnBuildBelt" type="Button" parent="BuildMenuContainer" unique_id=559379114]
 unique_name_in_owner = true
@@ -165,3 +164,33 @@ text = "Turbine"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Usine"
+
+[node name="Menu_Belt" type="HBoxContainer" parent="." unique_id=330465475]
+offset_left = 32.0
+offset_top = 453.0
+offset_right = 162.0
+offset_bottom = 493.0
+
+[node name="Curve_Top" type="Button" parent="Menu_Belt" unique_id=454416111]
+layout_mode = 2
+text = "⮍"
+
+[node name="Curve_Down" type="Button" parent="Menu_Belt" unique_id=279223697]
+layout_mode = 2
+text = "⮏"
+
+[node name="Curve_Right" type="Button" parent="Menu_Belt" unique_id=991484786]
+layout_mode = 2
+text = "⮎"
+
+[node name="Curve_left" type="Button" parent="Menu_Belt" unique_id=546413980]
+layout_mode = 2
+text = "⮌"
+
+[node name="Belt_droit" type="Button" parent="Menu_Belt" unique_id=1001744654]
+layout_mode = 2
+text = "🡭"
+
+[node name="Belt_left" type="Button" parent="Menu_Belt" unique_id=1980610375]
+layout_mode = 2
+text = "🡴"
