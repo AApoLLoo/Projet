@@ -40,11 +40,8 @@ animations = [{
 }]
 
 [node name="beltmid" type="Node2D" unique_id=2105109412]
-<<<<<<< Updated upstream
 y_sort_enabled = true
-=======
 script = ExtResource("1_tthp1")
->>>>>>> Stashed changes
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=489065791]
 y_sort_enabled = true
