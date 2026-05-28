@@ -46,6 +46,7 @@ func _ready() -> void:
 			hud.visible = false
 
 	_build_pause_ui()
+	_spawn_boxes()
 	TimeManager.is_time_running = true
 	if has_node("DeliveryManager"):
 		$DeliveryManager.start_delivery()
@@ -98,6 +99,7 @@ func _exit_tree() -> void:
 	# ce qui écraserait la bonne sauvegarde avec un tableau vide.
 	if not _skip_exit_save:
 		_save_current_state()
+
 
 func _apply_start_state() -> void:
 	var start_state: Dictionary = SaveSystem.get_menu_preview_state() if _preview_mode else SaveSystem.get_level_start_state()
@@ -506,3 +508,21 @@ func _to_vector2(value: Variant, fallback: Vector2) -> Vector2:
 		var vector_value: Vector2 = value
 		return vector_value
 	return fallback
+
+func _spawn_boxes() -> void:
+	if _preview_mode:
+		return
+	var box_scene: PackedScene = load("res://scene/box.tscn")
+	if box_scene == null:
+		push_error("Impossible de charger res://scene/box.tscn")
+		return
+	var spawn_positions: Array[Vector2i] = [
+		Vector2i(2, 2),
+		Vector2i(3, 2),
+		Vector2i(4, 2),
+	]
+	for cell in spawn_positions:
+		var box: Node2D = box_scene.instantiate()
+		add_child(box)
+		box.global_position = Vector2(cell.x * 32 + 16, cell.y * 32 + 16)
+		

@@ -87,7 +87,7 @@ func get_camera_world_position() -> Vector2:
 	return global_position
 
 func _is_pan_button(button_index: MouseButton) -> bool:
-	return button_index == MOUSE_BUTTON_LEFT or button_index == MOUSE_BUTTON_MIDDLE or button_index == MOUSE_BUTTON_RIGHT
+	return button_index == MOUSE_BUTTON_MIDDLE or button_index == MOUSE_BUTTON_RIGHT
 
 func _ensure_input_actions() -> void:
 	_ensure_action_with_keys(ACTION_LEFT, [KEY_LEFT, KEY_A])

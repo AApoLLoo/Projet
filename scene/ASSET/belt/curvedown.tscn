@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://d0ij2ecdqoe82"]
 
 [ext_resource type="Texture2D" uid="uid://chb0x1eoydhfw" path="res://asset/Curve_0002.png" id="1_hwkuf"]
+[ext_resource type="Script" uid="uid://rvys5wlny44c" path="res://script/BeltTrack.gd" id="1_y66ns"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gl7f0"]
 atlas = ExtResource("1_hwkuf")
@@ -39,6 +40,8 @@ animations = [{
 }]
 
 [node name="curvedown" type="Node2D" unique_id=736027828]
+script = ExtResource("1_y66ns")
+direction = Vector2(0, 1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1777190488]
 sprite_frames = SubResource("SpriteFrames_mffpd")

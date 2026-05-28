@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://che3ckrwbas7l"]
 
+[ext_resource type="Script" uid="uid://rvys5wlny44c" path="res://script/BeltTrack.gd" id="1_0uk5f"]
 [ext_resource type="Texture2D" uid="uid://kfrcovb5t6gi" path="res://asset/belt-start.png" id="1_64je7"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_83yk1"]
@@ -39,6 +40,7 @@ animations = [{
 }]
 
 [node name="Beltstart" type="Node2D" unique_id=1006008569]
+script = ExtResource("1_0uk5f")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1894799795]
 sprite_frames = SubResource("SpriteFrames_rrj5h")

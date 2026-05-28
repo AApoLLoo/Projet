@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://d3hg0gffbxbn"]
 
+[ext_resource type="Script" uid="uid://rvys5wlny44c" path="res://script/BeltTrack.gd" id="1_e0lgy"]
 [ext_resource type="Texture2D" uid="uid://cavcjwdxrksis" path="res://asset/Curve_0004.png" id="1_n6eop"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ye32w"]
@@ -39,6 +40,7 @@ animations = [{
 }]
 
 [node name="curveright" type="Node2D" unique_id=1712766572]
+script = ExtResource("1_e0lgy")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1659799696]
 position = Vector2(53.000008, 15.999998)

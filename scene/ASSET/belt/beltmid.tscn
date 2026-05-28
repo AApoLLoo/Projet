@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dkvb35fcl5twk"]
 
 [ext_resource type="Texture2D" uid="uid://c1ljikxrr35sv" path="res://asset/belt-midNO.png" id="1_igdmf"]
+[ext_resource type="Script" uid="uid://rvys5wlny44c" path="res://script/BeltTrack.gd" id="1_tthp1"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tthp1"]
 atlas = ExtResource("1_igdmf")
@@ -39,7 +40,11 @@ animations = [{
 }]
 
 [node name="beltmid" type="Node2D" unique_id=2105109412]
+<<<<<<< Updated upstream
 y_sort_enabled = true
+=======
+script = ExtResource("1_tthp1")
+>>>>>>> Stashed changes
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=489065791]
 y_sort_enabled = true
