@@ -174,7 +174,18 @@ func _ready() -> void:
 
 	# --- GESTION DU MENU DE CONSTRUCTION ---
 	# 1. Cliquer sur "Construction" affiche ou masque le conteneur
+<<<<<<< Updated upstream
 	btn_toggle_build_menu.pressed.connect(_toggle_build_menu)
+=======
+	btn_toggle_build_menu.pressed.connect(func():
+		build_menu_container.visible = not build_menu_container.visible
+		# Annule la construction en cours si on ferme le menu
+		if not build_menu_container.visible:
+			var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
+			if building_manager:
+				building_manager.stop_building()
+	)
+>>>>>>> Stashed changes
 
 	# 2. Les sous-boutons lancent la construction
 	btn_build_factory.pressed.connect(func():
@@ -266,6 +277,7 @@ func _start_building_process(building_type: String) -> void:
 	if building_manager:
 		var data = buildings_data[building_type]
 		building_manager.start_building(data["scene"], data["cost"], data["texture"], data.get("frames", 1))
+<<<<<<< Updated upstream
 		# Fermer le menu de construction après la sélection
 		if build_menu_container:
 			build_menu_container.visible = false
@@ -280,6 +292,9 @@ func _on_entity_selected(entity) -> void:
 		_entity_panel.hide()
 	else:
 		_entity_panel.setup(entity)
+=======
+		
+>>>>>>> Stashed changes
 
 func _process(_delta: float) -> void:
 	# Synchroniser la caméra de la minimap avec la caméra principale

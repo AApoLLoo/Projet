@@ -1,5 +1,6 @@
 extends Node2D
 
+<<<<<<< Updated upstream
 # Correspondance entity_type → scène pour la restauration des sauvegardes
 const _ENTITY_SCENES: Dictionary = {
 	"turbine": preload("res://scene/turbine_2d.tscn"),
@@ -12,11 +13,16 @@ const _ENTITY_SCENES: Dictionary = {
 
 @export var cell_size: int = 32 # Gardé au cas où, mais sera ignoré si floor_tilemap est assigné
 @export var buildings_node: Node2D # Nœud parent pour regrouper les usines placées
+=======
+@export var cell_size: int = 32
+@export var buildings_node: Node2D
+>>>>>>> Stashed changes
 
 var factory_scene: PackedScene
 var factory_cost: float = 0.0
 var is_building: bool = false
 var preview_sprite: Sprite2D
+<<<<<<< Updated upstream
 var occupied_cells: Dictionary = {} # maps Vector2i -> {"instance": Node2D, "cost": float}
 # Signal émis quand l'état du dernier bâtiment change (disponible / non)
 signal last_build_state_changed(available)
@@ -33,16 +39,19 @@ const _CLICK_THRESHOLD: float = 5.0
 
 # Informations sur le dernier bâtiment placé (cell_pos, instance, cost)
 var _last_built: Dictionary = {}
+=======
+var occupied_cells: Dictionary = {}
+var _current_belt_direction: Vector2 = Vector2.RIGHT  # ← déplacée ici, niveau classe
+>>>>>>> Stashed changes
 
 func _ready() -> void:
 	preview_sprite = Sprite2D.new()
 	preview_sprite.visible = false
-	preview_sprite.z_index = 10 # Assure que le fantôme reste visible par-dessus le sol
+	preview_sprite.z_index = 10
 	add_child(preview_sprite)
-
-	# S'assurer que le preview est centré par rapport à sa position
 	preview_sprite.centered = true
 
+<<<<<<< Updated upstream
 # --- NOUVELLES FONCTIONS ISOMÉTRIQUES ---
 func get_grid_pos(world_pos: Vector2) -> Vector2i:
 	if floor_tilemap:
@@ -59,6 +68,8 @@ func get_world_pos(cell_pos: Vector2i) -> Vector2:
 		return Vector2(cell_pos.x * cell_size + cell_size / 2.0, cell_pos.y * cell_size + cell_size / 2.0)
 # ----------------------------------------
 
+=======
+>>>>>>> Stashed changes
 func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1) -> void:
 	# Quitter le mode destruction si actif
 	if is_destroying:
@@ -67,15 +78,18 @@ func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_
 	factory_scene = scene
 	factory_cost = cost
 	preview_sprite.texture = texture
+<<<<<<< Updated upstream
 	
 	# Découpe l'image animée
 	preview_sprite.hframes = frames_count
 	preview_sprite.frame = 0 # Affiche seulement la première image
 	
+=======
+	preview_sprite.hframes = frames_count
+	preview_sprite.frame = 0
+>>>>>>> Stashed changes
 	preview_sprite.visible = true
 	is_building = true
-
-	# Reset scale / modulate au cas où
 	preview_sprite.scale = Vector2.ONE
 	preview_sprite.modulate = Color(1,1,1,0.6)
 
@@ -111,14 +125,12 @@ func _unhandled_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 			return
 
-	# Clic droit ou Echap pour annuler la construction
 	if event.is_action_pressed("ui_cancel") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed):
 		stop_building()
 		get_viewport().set_input_as_handled()
 		
-	# Clic gauche pour placer l'usine
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_try_place_building()
+		_try_place_building()  # ← plus rien ici, tout est dans _try_place_building
 		print("JE POSE LE BATIMENT !")
 		get_viewport().set_input_as_handled()
 
@@ -128,16 +140,25 @@ func _process(_delta: float) -> void:
 
 func _update_preview() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
+<<<<<<< Updated upstream
 	
 	# --- MODIFICATION ICI : Calcul de position isométrique ---
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
 	preview_sprite.global_position = get_world_pos(cell_pos)
 	# ---------------------------------------------------------
 	
+=======
+	var grid_x: int = int(floor(mouse_pos.x / cell_size))
+	var grid_y: int = int(floor(mouse_pos.y / cell_size))
+	var target_pos: Vector2 = Vector2(grid_x * cell_size + cell_size / 2.0, grid_y * cell_size + cell_size / 2.0)
+	preview_sprite.global_position = target_pos
+	# ← _current_belt_direction supprimée d'ici
+	var cell_pos: Vector2i = Vector2i(grid_x, grid_y)
+>>>>>>> Stashed changes
 	if _can_build(cell_pos):
-		preview_sprite.modulate = Color(0, 1, 0, 0.6) # Vert semi-transparent si plaçable
+		preview_sprite.modulate = Color(0, 1, 0, 0.6)
 	else:
-		preview_sprite.modulate = Color(1, 0, 0, 0.6) # Rouge sinon
+		preview_sprite.modulate = Color(1, 0, 0, 0.6)
 
 func _try_place_building() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
@@ -147,16 +168,20 @@ func _try_place_building() -> void:
 	# ---------------------------------------------------------
 	
 	if _can_build(cell_pos):
-		# Déduction des crédits grâce à la fonction existante
 		GameManager.add_credits(-factory_cost)
+<<<<<<< Updated upstream
 		
 		# Création de l'usine
+=======
+		occupied_cells[cell_pos] = true
+		
+>>>>>>> Stashed changes
 		var factory_instance: Node2D = factory_scene.instantiate()
-		# Ajoute en tant qu'enfant du nœud de bâtiments (si défini) avant de positionner
 		if buildings_node:
 			buildings_node.add_child(factory_instance)
 		else:
 			add_child(factory_instance)
+<<<<<<< Updated upstream
 			
 		# Positionner l'instance au centre de la case en coordonnées globales
 		factory_instance.global_position = preview_sprite.global_position
@@ -177,12 +202,28 @@ func _try_place_building() -> void:
 			"cost": factory_cost
 		}
 		last_build_state_changed.emit(true)
+=======
+		factory_instance.global_position = preview_sprite.global_position
+		if factory_instance.has_method("set_z_index"):
+			factory_instance.z_index = preview_sprite.z_index - 1
+		for child in factory_instance.get_children():
+			if child is Sprite2D:
+				child.centered = true
+				child.region_enabled = false
+			elif child is AnimatedSprite2D:
+				child.centered = true
+
+		# ← assignation direction tapis, maintenant au bon endroit
+		if factory_instance.has_method("get_direction"):
+			factory_instance.direction = _current_belt_direction
+
+func set_belt_direction(dir: Vector2) -> void:
+	_current_belt_direction = dir  # ← fonctionne maintenant car la var est au niveau classe
+>>>>>>> Stashed changes
 
 func _can_build(cell_pos: Vector2i) -> bool:
-	# 1. Vérification si une usine est déjà présente
 	if occupied_cells.has(cell_pos):
 		return false
-	# 2. Vérification des fonds disponibles
 	if GameManager.credits < factory_cost:
 		return false
 	return true

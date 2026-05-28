@@ -1,7 +1,13 @@
 [gd_scene format=4 uid="uid://d06nouei2i3yl"]
 
+<<<<<<< Updated upstream
 [ext_resource type="Script" uid="uid://dg3krn5y8658m" path="res://script/BuildingManager.gd" id="2_u2b8d"]
 [ext_resource type="Script" path="res://scene/camera_controller.gd" id="3_0bn3b"]
+=======
+[ext_resource type="Script" uid="uid://rvys5wlny44c" path="res://script/BeltTrack.gd" id="2_ktmlt"]
+[ext_resource type="Script" uid="uid://dg3krn5y8658m" path="res://script/BuildingManager.gd" id="2_u2b8d"]
+[ext_resource type="Script" uid="uid://k84hls15n7gq" path="res://scene/camera_controller.gd" id="3_0bn3b"]
+>>>>>>> Stashed changes
 [ext_resource type="Script" uid="uid://dokhhfob5h6be" path="res://scene/level.gd" id="4_q3wyj"]
 [ext_resource type="Script" path="res://script/DayNightCycle.gd" id="5_ukt71"]
 [ext_resource type="Script" path="res://script/AutoLight.gd" id="6_ismto"]
@@ -157,7 +163,15 @@ sources/0 = SubResource("TileSetAtlasSource_oxop7")
 script = ExtResource("4_q3wyj")
 
 [node name="Buildings" type="Node2D" parent="." unique_id=1816709940]
+<<<<<<< Updated upstream
 y_sort_enabled = true
+=======
+script = ExtResource("2_ktmlt")
+
+[node name="BuildingManager" type="Node2D" parent="." unique_id=835045904 node_paths=PackedStringArray("buildings_node")]
+script = ExtResource("2_u2b8d")
+buildings_node = NodePath("../Buildings")
+>>>>>>> Stashed changes
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1860478233]
 position = Vector2(576, 324)
