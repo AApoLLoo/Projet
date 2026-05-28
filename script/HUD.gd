@@ -1,8 +1,21 @@
 extends CanvasLayer
 
+const ACTION_TOGGLE_SESSION_OVERVIEW: StringName = &"hud_toggle_session_overview"
+
 @onready var day_label: Label = %DayLabel
 @onready var time_label: Label = %TimeLabel
 @onready var money_label: Label = %MoneyLabel
+
+@onready var session_overview_panel: PanelContainer = %SessionOverviewPanel
+@onready var overview_day_value: Label = %OverviewDayValue
+@onready var overview_time_value: Label = %OverviewTimeValue
+@onready var overview_credits_value: Label = %OverviewCreditsValue
+@onready var overview_machines_value: Label = %OverviewMachinesValue
+@onready var overview_active_machines_value: Label = %OverviewActiveMachinesValue
+@onready var overview_production_rate_value: Label = %OverviewProductionRateValue
+@onready var overview_failures_value: Label = %OverviewFailuresValue
+@onready var overview_co2_value: Label = %OverviewCO2Value
+@onready var overview_electricity_value: Label = %OverviewElectricityValue
 
 @onready var btn_pause: Button = %BtnPause
 @onready var btn_x1: Button = %BtnX1
@@ -88,6 +101,10 @@ const ENTITY_PANEL_SCENE := preload("res://scene/entity_panel.tscn")
 var _entity_panel: PanelContainer = null
 
 func _ready() -> void:
+	_ensure_input_actions()
+	if session_overview_panel:
+		session_overview_panel.hide()
+
 	# On s'assure que le menu est caché au démarrage
 	menu_belt.hide()
 	
@@ -152,6 +169,7 @@ func _ready() -> void:
 	var hour: int = int(TimeManager.current_time)
 	var minute: int = int((TimeManager.current_time - hour) * 60)
 	_update_time_display(hour, minute)
+	_update_session_overview()
 
 	# --- GESTION DU MENU DE CONSTRUCTION ---
 	# 1. Cliquer sur "Construction" affiche ou masque le conteneur
@@ -232,6 +250,13 @@ func _ready() -> void:
 		if building_manager:
 			destroy_button.set_pressed(building_manager.is_destroying)
 
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		var key_event: InputEventKey = event
+		if key_event.pressed and not key_event.echo and key_event.is_action_pressed(ACTION_TOGGLE_SESSION_OVERVIEW):
+			_toggle_session_overview()
+			get_viewport().set_input_as_handled()
+
 # --- NOUVELLE FONCTION ---
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
@@ -261,9 +286,11 @@ func _process(_delta: float) -> void:
 
 func _on_time_changed(hour: int, minute: int) -> void:
 	_update_time_display(hour, minute)
+	_update_session_overview()
 
 func _on_day_changed(day: int) -> void:
 	_update_day_display(day)
+	_update_session_overview()
 
 func _update_time_display(hour: int, minute: int) -> void:
 	# Formatage avec des zéros (ex: 08:05)
@@ -274,28 +301,113 @@ func _update_day_display(day: int) -> void:
 
 func _on_resources_updated() -> void:
 	_update_money_display()
+	_update_session_overview()
 
 func _update_money_display() -> void:
 	if money_label and GameManager:
-		var formatted_money: String = String.num(GameManager.credits, 2)
-		if formatted_money.ends_with(".00"):
-			formatted_money = formatted_money.trim_suffix(".00")
-		
-		# Ajouter des espaces pour les milliers (séparateur de milliers simple)
-		var parts: PackedStringArray = formatted_money.split(".")
-		var int_part: String = parts[0]
-		var result: String = ""
-		var count: int = 0
-		for i in range(int_part.length() - 1, -1, -1):
-			if count > 0 and count % 3 == 0:
-				result = " " + result
-			result = int_part[i] + result
-			count += 1
-			
-		if parts.size() > 1:
-			result += "." + parts[1]
-			
-		money_label.text = result + " €"
+		money_label.text = _format_money_value(GameManager.credits)
+
+func _toggle_session_overview() -> void:
+	if session_overview_panel == null:
+		return
+
+	if not session_overview_panel.visible:
+		_update_session_overview()
+
+	session_overview_panel.visible = not session_overview_panel.visible
+
+func _update_session_overview() -> void:
+	if session_overview_panel == null:
+		return
+
+	overview_day_value.text = "Jour %d" % TimeManager.current_day
+	var hour: int = int(TimeManager.current_time)
+	var minute: int = int((TimeManager.current_time - hour) * 60)
+	overview_time_value.text = "%02d:%02d" % [hour, minute]
+
+	if GameManager:
+		overview_credits_value.text = _format_money_value(GameManager.credits)
+		overview_co2_value.text = _format_rate_value(GameManager.co2_emissions, "g/min")
+		overview_electricity_value.text = _format_energy_value(GameManager.energy_usage)
+	else:
+		overview_credits_value.text = "N/A"
+		overview_co2_value.text = "Placeholder"
+		overview_electricity_value.text = "Placeholder"
+
+	var machine_count: int = 0
+	var active_machine_count: int = 0
+	var production_rate_total: float = 0.0
+	if EntityManager:
+		for entity_variant in EntityManager.entities.values():
+			var entity: Entity = entity_variant as Entity
+			if entity == null or not is_instance_valid(entity):
+				continue
+			machine_count += 1
+			if entity.is_active:
+				active_machine_count += 1
+			production_rate_total += entity.production_rate
+
+	overview_machines_value.text = str(machine_count)
+	overview_active_machines_value.text = "%d / %d" % [active_machine_count, machine_count]
+	if machine_count > 0:
+		overview_production_rate_value.text = "%.0f%%" % [production_rate_total / float(machine_count) * 100.0]
+	else:
+		overview_production_rate_value.text = "0%"
+	overview_failures_value.text = "A venir (placeholder)"
+
+func _format_money_value(amount: float) -> String:
+	var formatted_money: String = String.num(amount, 2)
+	if formatted_money.ends_with(".00"):
+		formatted_money = formatted_money.trim_suffix(".00")
+
+	var parts: PackedStringArray = formatted_money.split(".")
+	var int_part: String = parts[0]
+	var result: String = ""
+	var count: int = 0
+	for i in range(int_part.length() - 1, -1, -1):
+		if count > 0 and count % 3 == 0:
+			result = " " + result
+		result = int_part[i] + result
+		count += 1
+
+	if parts.size() > 1:
+		result += "." + parts[1]
+
+	return result + " €"
+
+func _format_rate_value(value: float, unit: String) -> String:
+	return "%s %s" % [String.num(value, 1), unit]
+
+func _format_energy_value(value: float) -> String:
+	if is_zero_approx(value):
+		return "0.0 kW"
+	if value < 0.0:
+		return "%s kW production" % String.num(absf(value), 1)
+	return "%s kW consommation" % String.num(value, 1)
+
+func _ensure_input_actions() -> void:
+	_ensure_action_with_keys(ACTION_TOGGLE_SESSION_OVERVIEW, [KEY_TAB])
+
+func _ensure_action_with_keys(action_name: StringName, keycodes: Array[int]) -> void:
+	if not InputMap.has_action(action_name):
+		InputMap.add_action(action_name)
+
+	var existing_events: Array[InputEvent] = InputMap.action_get_events(action_name)
+	for keycode in keycodes:
+		if _has_physical_key(existing_events, keycode):
+			continue
+		var input_event: InputEventKey = InputEventKey.new()
+		input_event.physical_keycode = keycode
+		InputMap.action_add_event(action_name, input_event)
+
+func _has_physical_key(events: Array[InputEvent], keycode: int) -> bool:
+	for input_event in events:
+		if input_event is InputEventKey:
+			var key_event: InputEventKey = input_event
+			if key_event.physical_keycode == keycode:
+				return true
+	return false
+
 # --- NOUVELLE FONCTION POUR LE SOUS-MENU DES TAPIS ---
 func _on_menu_belt_pressed() -> void:
 	# Si le menu des tapis est visible, on le cache. Sinon, on l'affiche.
