@@ -1,12 +1,4 @@
 extends Control
-# 1. On déclare le conteneur et le bouton principal
-@onready var btn_toggle_build_menu: Button = %BtnToggleBuildMenu # Votre bouton "Construction" principal
-@onready var build_menu_container: VBoxContainer = %BuildMenuContainer # Le conteneur qui cache les structures
-
-# Les sous-boutons présents dans le conteneur
-@onready var btn_build_factory: Button = %BtnBuildFactory 
-@onready var btn_build_belt: Button = %BtnBuildBelt       
-@onready var btn_build_turbine: Button = %BtnBuildTurbine
 
 @onready var _gravity_slider: HSlider = $CenterContainer/PanelContainer/MarginContainer/Content/GravitySlider
 @onready var _gravity_value: Label = $CenterContainer/PanelContainer/MarginContainer/Content/GravityValue
@@ -21,7 +13,6 @@ extends Control
 @onready var _message_dialog: AcceptDialog = $MessageDialog
 
 var _active_settings: Dictionary = {}
-@onready var day_label: Label = %DayLabel
 
 
 func _ready() -> void:
@@ -35,10 +26,6 @@ func _ready() -> void:
 	_apply_button.pressed.connect(_on_apply_pressed)
 	_reset_button.pressed.connect(_on_reset_pressed)
 	_back_button.pressed.connect(_on_back_pressed)
-# 2. Cliquer sur "Construction" affiche ou masque le conteneur
-	btn_toggle_build_menu.pressed.connect(func():
-		build_menu_container.visible = not build_menu_container.visible
-	)
 
 	
 func _update_ui_from_settings() -> void:
