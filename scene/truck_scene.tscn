@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://nkh2ijoou82c"]
+
+[ext_resource type="Texture2D" uid="uid://ol5x3gks7flm" path="res://asset/3.png" id="1_84xpb"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kl1xb"]
+atlas = ExtResource("1_84xpb")
+region = Rect2(0, 0, 87, 60)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0oiqc"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kl1xb")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Pauste_Truck" type="Node2D" unique_id=1323926010]
+
+[node name="Truck" type="AnimatedSprite2D" parent="." unique_id=1261176419]
+z_index = 1
+position = Vector2(46, 0)
+sprite_frames = SubResource("SpriteFrames_0oiqc")
+
+[node name="loadingbar" type="ProgressBar" parent="Truck" unique_id=1770336814]
+visible = false
+z_index = 10
+custom_minimum_size = Vector2(64, 64)
+offset_left = -43.0
+offset_top = -153.0
+offset_right = 85.0
+offset_bottom = -89.0
+step = 10.0

@@ -39,8 +39,10 @@ animations = [{
 }]
 
 [node name="beltmid" type="Node2D" unique_id=2105109412]
+y_sort_enabled = true
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=489065791]
+y_sort_enabled = true
 sprite_frames = SubResource("SpriteFrames_pjtlh")
 autoplay = "default"
 frame_progress = 0.36304194

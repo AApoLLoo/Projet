@@ -47,7 +47,9 @@ func _ready() -> void:
 
 	_build_pause_ui()
 	TimeManager.is_time_running = true
-
+	if has_node("DeliveryManager"):
+		$DeliveryManager.start_delivery()
+		
 func _input(event: InputEvent) -> void:
 	if _preview_mode:
 		return
