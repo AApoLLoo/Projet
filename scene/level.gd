@@ -41,7 +41,7 @@ func _ready() -> void:
 	if _preview_mode:
 		_disable_preview_interactions()
 		return
-		var hud = get_node_or_null("PointLight2D/HUD")
+		var hud = get_node_or_null("HUD")
 		if hud:
 			hud.visible = false
 
@@ -163,7 +163,7 @@ func _set_gameplay_enabled(enabled: bool) -> void:
 func _build_pause_ui() -> void:
 	if _preview_mode:
 		_disable_preview_interactions()
-		var hud = get_node_or_null("PointLight2D/HUD")
+		var hud = get_node_or_null("HUD")
 		if hud:
 			hud.visible = false
 		return

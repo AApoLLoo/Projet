@@ -315,8 +315,8 @@ func _spawn_preview_level_scene() -> void:
 	# Ensure HUD is hidden in the preview instance so it doesn't appear behind the menu
 	if level_instance:
 		var hud_node: Node = null
-		if level_instance.has_node("PointLight2D/HUD"):
-			hud_node = level_instance.get_node("PointLight2D/HUD")
+		if level_instance.has_node("HUD"):
+			hud_node = level_instance.get_node("HUD")
 		else:
 			hud_node = level_instance.find_node("HUD", true, false)
 		if hud_node != null:

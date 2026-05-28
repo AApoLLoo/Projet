@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const ACTION_TOGGLE_SESSION_OVERVIEW: StringName = &"hud_toggle_session_overview"
+const ACTION_TOGGLE_BUILD_MENU: StringName = &"hud_toggle_build_menu"
 
 @onready var day_label: Label = %DayLabel
 @onready var time_label: Label = %TimeLabel
@@ -173,9 +174,7 @@ func _ready() -> void:
 
 	# --- GESTION DU MENU DE CONSTRUCTION ---
 	# 1. Cliquer sur "Construction" affiche ou masque le conteneur
-	btn_toggle_build_menu.pressed.connect(func():
-		build_menu_container.visible = not build_menu_container.visible
-	)
+	btn_toggle_build_menu.pressed.connect(_toggle_build_menu)
 
 	# 2. Les sous-boutons lancent la construction
 	btn_build_factory.pressed.connect(func():
@@ -253,6 +252,10 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		var key_event: InputEventKey = event
+		if key_event.pressed and not key_event.echo and key_event.is_action_pressed(ACTION_TOGGLE_BUILD_MENU):
+			_toggle_build_menu()
+			get_viewport().set_input_as_handled()
+			return
 		if key_event.pressed and not key_event.echo and key_event.is_action_pressed(ACTION_TOGGLE_SESSION_OVERVIEW):
 			_toggle_session_overview()
 			get_viewport().set_input_as_handled()
@@ -315,6 +318,11 @@ func _toggle_session_overview() -> void:
 		_update_session_overview()
 
 	session_overview_panel.visible = not session_overview_panel.visible
+
+func _toggle_build_menu() -> void:
+	if build_menu_container == null:
+		return
+	build_menu_container.visible = not build_menu_container.visible
 
 func _update_session_overview() -> void:
 	if session_overview_panel == null:
@@ -387,6 +395,7 @@ func _format_energy_value(value: float) -> String:
 
 func _ensure_input_actions() -> void:
 	_ensure_action_with_keys(ACTION_TOGGLE_SESSION_OVERVIEW, [KEY_TAB])
+	_ensure_action_with_keys(ACTION_TOGGLE_BUILD_MENU, [KEY_Q])
 
 func _ensure_action_with_keys(action_name: StringName, keycodes: Array[int]) -> void:
 	if not InputMap.has_action(action_name):

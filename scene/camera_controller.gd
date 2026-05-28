@@ -43,7 +43,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if _is_dragging and event is InputEventMouseMotion:
 		var mouse_motion_event: InputEventMouseMotion = event
-		global_position -= mouse_motion_event.relative * zoom
+		global_position -= mouse_motion_event.relative / zoom
 
 func _process(delta: float) -> void:
 	if Input.is_action_just_pressed(ACTION_ZOOM_IN):
@@ -90,7 +90,7 @@ func _is_pan_button(button_index: MouseButton) -> bool:
 	return button_index == MOUSE_BUTTON_LEFT or button_index == MOUSE_BUTTON_MIDDLE or button_index == MOUSE_BUTTON_RIGHT
 
 func _ensure_input_actions() -> void:
-	_ensure_action_with_keys(ACTION_LEFT, [KEY_LEFT, KEY_A, KEY_Q])
+	_ensure_action_with_keys(ACTION_LEFT, [KEY_LEFT, KEY_A])
 	_ensure_action_with_keys(ACTION_RIGHT, [KEY_RIGHT, KEY_D])
 	_ensure_action_with_keys(ACTION_UP, [KEY_UP, KEY_W, KEY_Z])
 	_ensure_action_with_keys(ACTION_DOWN, [KEY_DOWN, KEY_S])

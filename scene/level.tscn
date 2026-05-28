@@ -165,17 +165,10 @@ script = ExtResource("3_0bn3b")
 floor_path = NodePath("")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1676232311]
-visible = false
 script = ExtResource("5_ukt71")
 day_night_gradient = SubResource("Gradient_bddx0")
 
-[node name="PointLight2D" type="PointLight2D" parent="." unique_id=1264541095]
-position = Vector2(579.75, 328.25)
-scale = Vector2(17.914063, 10.1171875)
-texture = SubResource("GradientTexture2D_aw33w")
-script = ExtResource("6_ismto")
-
-[node name="HUD" parent="PointLight2D" unique_id=667082562 instance=ExtResource("7_bddx0")]
+[node name="HUD" parent="." unique_id=667082562 instance=ExtResource("7_bddx0")]
 
 [node name="Floor" type="TileMapLayer" parent="." unique_id=1173680372]
 tile_set = SubResource("TileSet_u2b8d")
