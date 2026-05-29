@@ -6,6 +6,7 @@ const ACTION_TOGGLE_BUILD_MENU: StringName = &"hud_toggle_build_menu"
 @onready var day_label: Label = %DayLabel
 @onready var time_label: Label = %TimeLabel
 @onready var money_label: Label = %MoneyLabel
+@onready var co2_label: Label = %CO2Label
 
 @onready var session_overview_panel: PanelContainer = %SessionOverviewPanel
 @onready var overview_day_value: Label = %OverviewDayValue
@@ -152,6 +153,7 @@ func _ready() -> void:
 	if GameManager:
 		GameManager.resources_updated.connect(_on_resources_updated)
 		_update_money_display()
+		_update_co2_display()
 
 	# --- PANNEAU ENTITÉ ---
 	_entity_panel = ENTITY_PANEL_SCENE.instantiate()
@@ -304,11 +306,16 @@ func _update_day_display(day: int) -> void:
 
 func _on_resources_updated() -> void:
 	_update_money_display()
+	_update_co2_display()
 	_update_session_overview()
 
 func _update_money_display() -> void:
 	if money_label and GameManager:
 		money_label.text = _format_money_value(GameManager.credits)
+
+func _update_co2_display() -> void:
+	if co2_label and GameManager:
+		co2_label.text = _format_rate_value(GameManager.co2_emissions, "g/min CO2")
 
 func _toggle_session_overview() -> void:
 	if session_overview_panel == null:
