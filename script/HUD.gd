@@ -193,10 +193,15 @@ func _ready() -> void:
 		_start_building_process("turbine")
 	)
 
+	_style_button(btn_build_belt, Color.html("#3D6F8E"))
+	_style_button(btn_build_turbine, Color.html("#4F8F5B"))
+	_style_button(btn_build_factory, Color.html("#A66A3F"))
+
 	# --- BOUTON D'ANNULATION DU DERNIER BATIMENT (créé dynamiquement) ---
 	var undo_button: Button = Button.new()
 	undo_button.name = "BtnUndoBuild"
 	undo_button.text = "Annuler dernier bâtiment (50%)"
+	_style_button(undo_button, Color.html("#8A6D2E"))
 	undo_button.visible = false
 	# Positionnement simple : en bas du menu de construction si présent, sinon en haut à gauche
 	if build_menu_container:
@@ -226,6 +231,7 @@ func _ready() -> void:
 		var destroy_button: Button = Button.new()
 		destroy_button.name = "BtnDestroyMode"
 		destroy_button.text = "Mode destruction"
+		_style_button(destroy_button, Color.html("#8A3A3A"))
 		destroy_button.toggle_mode = true
 		destroy_button.set_pressed(false)
 		if build_menu_container:
@@ -439,3 +445,31 @@ func _on_undo_build_pressed() -> void:
 		building_manager.undo_last_build()
 	else:
 		print("Annulation impossible : BuildingManager introuvable ou méthode manquante")
+
+func _style_button(button: Button, base_color: Color, text_color: Color = Color.WHITE) -> void:
+	button.add_theme_stylebox_override("normal", _make_button_style(base_color))
+	button.add_theme_stylebox_override("hover", _make_button_style(base_color.lightened(0.15)))
+	button.add_theme_stylebox_override("pressed", _make_button_style(base_color.darkened(0.15)))
+
+	button.add_theme_color_override("font_color", text_color)
+	button.add_theme_color_override("font_hover_color", text_color)
+	button.add_theme_color_override("font_pressed_color", text_color)
+
+
+func _make_button_style(color: Color) -> StyleBoxFlat:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = color
+	style.border_color = color.darkened(0.35)
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	style.content_margin_left = 8
+	style.content_margin_right = 8
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	return style
