@@ -148,9 +148,7 @@ func _try_place_building() -> void:
 	
 	if _can_build(cell_pos):
 		# Déduction des crédits grâce à la fonction existante
-		var co2_cost: float = 5.0
 		GameManager.add_credits(-factory_cost)
-		GameManager.add_construction_co2(co2_cost)
 		
 		# Création de l'usine
 		var factory_instance: Node2D = factory_scene.instantiate()
@@ -173,7 +171,7 @@ func _try_place_building() -> void:
 		occupied_cells[cell_pos] = {
 			"instance": factory_instance,
 			"cost": factory_cost,
-			"co2_cost": co2_cost
+			
 }
 
 		# Sauvegarde du dernier bâtiment placé pour permettre annulation/remboursement
@@ -181,7 +179,6 @@ func _try_place_building() -> void:
 			"cell_pos": cell_pos,
 			"instance": factory_instance,
 			"cost": factory_cost,
-			"co2_cost": co2_cost
 		}
 		last_build_state_changed.emit(true)
 
@@ -205,7 +202,6 @@ func undo_last_build() -> void:
 	var inst = _last_built.get("instance")
 	var cell = _last_built.get("cell_pos")
 	var cost = float(_last_built.get("cost", 0.0))
-	var co2_cost = float(_last_built.get("co2_cost", 0.0))
 
 	if is_instance_valid(inst):
 		inst.queue_free()
@@ -216,7 +212,6 @@ func undo_last_build() -> void:
 	# Remboursement de 50%
 	GameManager.add_credits(cost * 0.5)
 	# Remboursement de la totalité de consommation de C02
-	GameManager.remove_construction_co2(co2_cost)
 
 	_last_built.clear()
 	last_build_state_changed.emit(false)
