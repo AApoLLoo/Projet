@@ -16,6 +16,8 @@ func _on_totals_changed(energy_total: float, co2_total: float) -> void:
 	energy_usage = energy_total
 	co2_emissions = co2_total
 	resources_updated.emit()
+	
+
 
 func add_credits(amount: float):
 	credits += amount

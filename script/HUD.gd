@@ -6,6 +6,7 @@ const ACTION_TOGGLE_BUILD_MENU: StringName = &"hud_toggle_build_menu"
 @onready var day_label: Label = %DayLabel
 @onready var time_label: Label = %TimeLabel
 @onready var money_label: Label = %MoneyLabel
+@onready var co2_label: Label = %CO2Label
 
 @onready var session_overview_panel: PanelContainer = %SessionOverviewPanel
 @onready var overview_day_value: Label = %OverviewDayValue
@@ -152,6 +153,7 @@ func _ready() -> void:
 	if GameManager:
 		GameManager.resources_updated.connect(_on_resources_updated)
 		_update_money_display()
+		_update_co2_display()
 
 	# --- PANNEAU ENTITÉ ---
 	_entity_panel = ENTITY_PANEL_SCENE.instantiate()
@@ -191,10 +193,15 @@ func _ready() -> void:
 		_start_building_process("turbine")
 	)
 
+	_style_button(btn_build_belt, Color.html("#3D6F8E"))
+	_style_button(btn_build_turbine, Color.html("#4F8F5B"))
+	_style_button(btn_build_factory, Color.html("#A66A3F"))
+
 	# --- BOUTON D'ANNULATION DU DERNIER BATIMENT (créé dynamiquement) ---
 	var undo_button: Button = Button.new()
 	undo_button.name = "BtnUndoBuild"
 	undo_button.text = "Annuler dernier bâtiment (50%)"
+	_style_button(undo_button, Color.html("#8A6D2E"))
 	undo_button.visible = false
 	# Positionnement simple : en bas du menu de construction si présent, sinon en haut à gauche
 	if build_menu_container:
@@ -224,6 +231,7 @@ func _ready() -> void:
 		var destroy_button: Button = Button.new()
 		destroy_button.name = "BtnDestroyMode"
 		destroy_button.text = "Mode destruction"
+		_style_button(destroy_button, Color.html("#8A3A3A"))
 		destroy_button.toggle_mode = true
 		destroy_button.set_pressed(false)
 		if build_menu_container:
@@ -304,11 +312,16 @@ func _update_day_display(day: int) -> void:
 
 func _on_resources_updated() -> void:
 	_update_money_display()
+	_update_co2_display()
 	_update_session_overview()
 
 func _update_money_display() -> void:
 	if money_label and GameManager:
 		money_label.text = _format_money_value(GameManager.credits)
+
+func _update_co2_display() -> void:
+	if co2_label and GameManager:
+		co2_label.text = _format_rate_value(GameManager.co2_emissions, "g/min CO2")
 
 func _toggle_session_overview() -> void:
 	if session_overview_panel == null:
@@ -432,3 +445,31 @@ func _on_undo_build_pressed() -> void:
 		building_manager.undo_last_build()
 	else:
 		print("Annulation impossible : BuildingManager introuvable ou méthode manquante")
+
+func _style_button(button: Button, base_color: Color, text_color: Color = Color.WHITE) -> void:
+	button.add_theme_stylebox_override("normal", _make_button_style(base_color))
+	button.add_theme_stylebox_override("hover", _make_button_style(base_color.lightened(0.15)))
+	button.add_theme_stylebox_override("pressed", _make_button_style(base_color.darkened(0.15)))
+
+	button.add_theme_color_override("font_color", text_color)
+	button.add_theme_color_override("font_hover_color", text_color)
+	button.add_theme_color_override("font_pressed_color", text_color)
+
+
+func _make_button_style(color: Color) -> StyleBoxFlat:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = color
+	style.border_color = color.darkened(0.35)
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	style.content_margin_left = 8
+	style.content_margin_right = 8
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	return style

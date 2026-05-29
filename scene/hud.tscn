@@ -139,6 +139,34 @@ text = "0 �"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="CO2Container" type="MarginContainer" parent="." unique_id=247704804]
+offset_top = 65.0
+offset_right = 200.0
+offset_bottom = 125.0
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="ColorRect" type="ColorRect" parent="CO2Container" unique_id=1416201117]
+layout_mode = 2
+color = Color(0.125, 0.125, 0.125, 0.784)
+
+[node name="MarginContainer" type="MarginContainer" parent="CO2Container" unique_id=768432155]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="CO2Label" type="Label" parent="CO2Container/MarginContainer" unique_id=1909872910]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0.0 g/min CO2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="BuildMenuContainer" type="VBoxContainer" parent="." unique_id=1150902757]
 unique_name_in_owner = true
 anchors_preset = 2
@@ -149,137 +177,6 @@ offset_top = -147.0
 offset_right = 140.0
 offset_bottom = -10.0
 grow_vertical = 0
-
-[node name="SessionOverviewPanel" type="PanelContainer" parent="."]
-unique_name_in_owner = true
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -180.0
-offset_right = 220.0
-offset_bottom = 180.0
-
-[node name="MarginContainer" type="MarginContainer" parent="SessionOverviewPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 18
-
-[node name="VBoxContainer" type="VBoxContainer" parent="SessionOverviewPanel/MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="TitleLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Infos de la partie"
-horizontal_alignment = 1
-
-[node name="InfoGrid" type="GridContainer" parent="SessionOverviewPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-columns = 2
-theme_override_constants/h_separation = 24
-theme_override_constants/v_separation = 8
-
-[node name="DayLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-layout_mode = 2
-text = "Jour"
-
-[node name="OverviewDayValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Jour 1"
-horizontal_alignment = 2
-
-[node name="TimeLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-layout_mode = 2
-text = "Heure"
-
-[node name="OverviewTimeValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "08:00"
-horizontal_alignment = 2
-
-[node name="CreditsLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-layout_mode = 2
-text = "Credits"
-
-[node name="OverviewCreditsValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "0 €"
-horizontal_alignment = 2
-
-[node name="MachinesLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-layout_mode = 2
-text = "Machines total"
-
-[node name="OverviewMachinesValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "0"
-horizontal_alignment = 2
-
-[node name="ActiveMachinesLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-layout_mode = 2
-text = "Machines actives"
-
-[node name="OverviewActiveMachinesValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "0 / 0"
-horizontal_alignment = 2
-
-[node name="ProductionRateLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-layout_mode = 2
-text = "Taux de production"
-
-[node name="OverviewProductionRateValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "0%"
-horizontal_alignment = 2
-
-[node name="FailuresLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-layout_mode = 2
-text = "Machines en panne"
-
-[node name="OverviewFailuresValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "A venir (placeholder)"
-horizontal_alignment = 2
-
-[node name="CO2Label" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-layout_mode = 2
-text = "CO2"
-
-[node name="OverviewCO2Value" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "0.0 g/min"
-horizontal_alignment = 2
-
-[node name="ElectricityLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-layout_mode = 2
-text = "Electricite"
-
-[node name="OverviewElectricityValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "0.0 kW"
-horizontal_alignment = 2
-
-[node name="HintLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "TAB pour ouvrir / fermer"
-horizontal_alignment = 1
 
 [node name="BtnBuildBelt" type="Button" parent="BuildMenuContainer" unique_id=559379114]
 unique_name_in_owner = true
@@ -295,6 +192,137 @@ text = "Turbine"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Usine"
+
+[node name="SessionOverviewPanel" type="PanelContainer" parent="." unique_id=675144948]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -180.0
+offset_right = 220.0
+offset_bottom = 180.0
+
+[node name="MarginContainer" type="MarginContainer" parent="SessionOverviewPanel" unique_id=432869373]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SessionOverviewPanel/MarginContainer" unique_id=1219415110]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer" unique_id=1956281952]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Infos de la partie"
+horizontal_alignment = 1
+
+[node name="InfoGrid" type="GridContainer" parent="SessionOverviewPanel/MarginContainer/VBoxContainer" unique_id=2012156695]
+layout_mode = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="DayLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=164693166]
+layout_mode = 2
+text = "Jour"
+
+[node name="OverviewDayValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1612728383]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Jour 1"
+horizontal_alignment = 2
+
+[node name="TimeLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=488056875]
+layout_mode = 2
+text = "Heure"
+
+[node name="OverviewTimeValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=822626886]
+unique_name_in_owner = true
+layout_mode = 2
+text = "08:00"
+horizontal_alignment = 2
+
+[node name="CreditsLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=2057540841]
+layout_mode = 2
+text = "Credits"
+
+[node name="OverviewCreditsValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1636981734]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 €"
+horizontal_alignment = 2
+
+[node name="MachinesLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1098813945]
+layout_mode = 2
+text = "Machines total"
+
+[node name="OverviewMachinesValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1645397864]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+horizontal_alignment = 2
+
+[node name="ActiveMachinesLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1244793099]
+layout_mode = 2
+text = "Machines actives"
+
+[node name="OverviewActiveMachinesValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=656499050]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 / 0"
+horizontal_alignment = 2
+
+[node name="ProductionRateLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=770963294]
+layout_mode = 2
+text = "Taux de production"
+
+[node name="OverviewProductionRateValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=93367735]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0%"
+horizontal_alignment = 2
+
+[node name="FailuresLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1883435217]
+layout_mode = 2
+text = "Machines en panne"
+
+[node name="OverviewFailuresValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1418545568]
+unique_name_in_owner = true
+layout_mode = 2
+text = "A venir (placeholder)"
+horizontal_alignment = 2
+
+[node name="CO2Label" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1469679323]
+layout_mode = 2
+text = "CO2"
+
+[node name="OverviewCO2Value" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1872482549]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.0 g/min"
+horizontal_alignment = 2
+
+[node name="ElectricityLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1540392897]
+layout_mode = 2
+text = "Electricite"
+
+[node name="OverviewElectricityValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1645637162]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.0 kW"
+horizontal_alignment = 2
+
+[node name="HintLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer" unique_id=533120122]
+layout_mode = 2
+text = "TAB pour ouvrir / fermer"
+horizontal_alignment = 1
 
 [node name="Menu_Belt" type="HBoxContainer" parent="." unique_id=330465475]
 offset_left = 32.0
