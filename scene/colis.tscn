@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://dipvpaxpwcugs"]
+
+[ext_resource type="Script" uid="uid://bvima8o3d32dr" path="res://colis.gd" id="1_y4212"]
+[ext_resource type="Texture2D" uid="uid://0t5fxgxx5gd6" path="res://asset/ELR_CardBoardy_Boxes.png" id="2_7bv4r"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7bv4r"]
+
+[node name="Colis" type="Area2D" unique_id=1648752649]
+script = ExtResource("1_y4212")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=920633653]
+texture = ExtResource("2_7bv4r")
+hframes = 2
+vframes = 5
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=757227631]
+shape = SubResource("RectangleShape2D_7bv4r")

@@ -4,25 +4,19 @@
 [ext_resource type="Script" uid="uid://dg3krn5y8658m" path="res://script/BuildingManager.gd" id="2_u2b8d"]
 [ext_resource type="Script" uid="uid://k84hls15n7gq" path="res://scene/camera_controller.gd" id="3_0bn3b"]
 [ext_resource type="Script" uid="uid://dokhhfob5h6be" path="res://scene/level.gd" id="4_q3wyj"]
-[ext_resource type="Script" path="res://script/DayNightCycle.gd" id="5_ukt71"]
-[ext_resource type="Script" path="res://script/AutoLight.gd" id="6_ismto"]
+[ext_resource type="Script" uid="uid://bx6id27enx61e" path="res://script/DayNightCycle.gd" id="5_ukt71"]
 [ext_resource type="Script" uid="uid://d2gs4e03solck" path="res://scene/floor.gd" id="7_aw33w"]
 [ext_resource type="PackedScene" uid="uid://bnit1gqnd4kqp" path="res://scene/hud.tscn" id="7_bddx0"]
 [ext_resource type="Texture2D" uid="uid://bptn8q5sk28r5" path="res://asset/Tuiles_stan.png" id="7_u2b8d"]
 [ext_resource type="Texture2D" uid="uid://bu3nlmkv3m4nx" path="res://asset/Preview Tile-0001.png" id="9_aw33w"]
 [ext_resource type="Script" uid="uid://cmxii0gy46uyc" path="res://script/Livraison.gd" id="10_oxop7"]
 [ext_resource type="PackedScene" uid="uid://nkh2ijoou82c" path="res://scene/truck_scene.tscn" id="11_gunnj"]
+[ext_resource type="Script" uid="uid://c7bwqiww4ohri" path="res://scene/spawner_colis.gd" id="11_oxop7"]
+[ext_resource type="PackedScene" uid="uid://dipvpaxpwcugs" path="res://scene/colis.tscn" id="12_gunnj"]
 
 [sub_resource type="Gradient" id="Gradient_bddx0"]
 offsets = PackedFloat32Array(0, 0.5106383, 1)
 colors = PackedColorArray(0.14117648, 0, 0.5137255, 1, 0.97082883, 0.5449091, 0.08165432, 1, 0.14117648, 0, 0.5137255, 1)
-
-[sub_resource type="Gradient" id="Gradient_u2b8d"]
-colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_aw33w"]
-gradient = SubResource("Gradient_u2b8d")
-fill_from = Vector2(0, 1)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ktmlt"]
 texture = ExtResource("7_u2b8d")
@@ -193,3 +187,7 @@ buildings_node = NodePath("../Buildings")
 [node name="DeliveryManager" type="Node2D" parent="." unique_id=1757592815]
 script = ExtResource("10_oxop7")
 truck_scene = ExtResource("11_gunnj")
+
+[node name="Spawner_colis" type="Node2D" parent="." unique_id=332699093]
+script = ExtResource("11_oxop7")
+colis_scene = ExtResource("12_gunnj")
