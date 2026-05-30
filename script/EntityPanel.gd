@@ -23,6 +23,7 @@ var current_entity: Entity = null
 var _entity_signal_connected: bool = false
 
 func _ready() -> void:
+	_style_panel()
 	close_btn.pressed.connect(_on_close)
 	recipe_selector.item_selected.connect(_on_recipe_selected)
 	rate_slider.value_changed.connect(_on_rate_changed)
@@ -30,6 +31,27 @@ func _ready() -> void:
 	if GameManager:
 		GameManager.resources_updated.connect(_on_game_resources_updated)
 	hide()
+
+func _style_panel() -> void:
+	UITheme.style_card(self, false, true)
+	UITheme.style_option_button(recipe_selector)
+	UITheme.style_item_list(input_list)
+	UITheme.style_item_list(output_list)
+	UITheme.style_slider(rate_slider, UITheme.ACCENT_SKY)
+	UITheme.style_toggle(active_toggle, UITheme.ACCENT_TEAL)
+	UITheme.style_button(close_btn, UITheme.ACCENT_RED, UITheme.TEXT_LIGHT, false, true)
+	UITheme.style_label(entity_name_label, "section")
+	for label in [
+		$MarginContainer/VBoxContainer/RecipeLabel,
+		$MarginContainer/VBoxContainer/RateLabel_Title,
+		$MarginContainer/VBoxContainer/RecipeDetailsBox/InputBox/InputLabel,
+		$MarginContainer/VBoxContainer/RecipeDetailsBox/OutputBox/OutputLabel,
+		$MarginContainer/VBoxContainer/StatsBox/EnergyBox/EnergyTitle,
+		$MarginContainer/VBoxContainer/StatsBox/Co2Box/Co2Title
+	]:
+		UITheme.style_label(label, "caption")
+	for label in [rate_label, energy_label, co2_label, status_label]:
+		UITheme.style_label(label, "body")
 
 # ─── API publique ─────────────────────────────────────────────────────────────
 

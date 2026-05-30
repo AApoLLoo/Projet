@@ -12,6 +12,12 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var time_label: Label = %TimeLabel
 @onready var money_label: Label = %MoneyLabel
 @onready var co2_label: Label = %CO2Label
+@onready var top_hud_background: ColorRect = $MarginContainer/ColorRect
+@onready var minimap_background: ColorRect = $MinimapContainer/ColorRect
+@onready var resources_background: ColorRect = $ResourcesContainer/ColorRect
+@onready var co2_background: ColorRect = $CO2Container/ColorRect
+@onready var resources_caption: Label = $ResourcesContainer/MarginContainer/VBoxContainer/Caption
+@onready var co2_caption: Label = $CO2Container/MarginContainer/VBoxContainer/Caption
 
 @onready var session_overview_panel: PanelContainer = %SessionOverviewPanel
 @onready var overview_day_value: Label = %OverviewDayValue
@@ -34,6 +40,7 @@ const ORDER_MODE_EXPORT: String = "export"
 # --- NOUVEAUX BOUTONS DE CONSTRUCTION ---
 @onready var btn_toggle_build_menu: Button = %BtnToggleBuildMenu # Le bouton "Construction" principal
 @onready var build_menu_container: VBoxContainer = %BuildMenuContainer # Le conteneur (menu déroulant)
+@onready var build_menu_title: Label = $BuildMenuContainer/BuildMenuTitle
 
 @onready var btn_build_factory: Button = %BtnBuildFactory 
 @onready var btn_build_belt: Button = %BtnBuildBelt       
@@ -144,6 +151,7 @@ var _order_mode: String = ORDER_MODE_IMPORT
 
 func _ready() -> void:
 	_ensure_input_actions()
+	_style_hud()
 	if session_overview_panel:
 		session_overview_panel.hide()
 	if orders_panel:
@@ -305,6 +313,98 @@ func _ready() -> void:
 			)
 		if _building_manager:
 			destroy_button.set_pressed(_building_manager.is_destroying)
+
+func _style_hud() -> void:
+	UITheme.style_label(day_label, "caption")
+	UITheme.style_label(time_label, "metric")
+	UITheme.style_label(resources_caption, "caption")
+	UITheme.style_label(co2_caption, "caption")
+	UITheme.style_label(money_label, "metric")
+	UITheme.style_label(co2_label, "body")
+	UITheme.style_label(build_menu_title, "caption")
+	day_label.add_theme_color_override("font_color", UITheme.INK_MUTED)
+	resources_background.color = UITheme.SURFACE_GLASS
+	co2_background.color = UITheme.SURFACE_GLASS
+	top_hud_background.color = UITheme.SURFACE_GLASS
+	minimap_background.color = UITheme.SURFACE_GLASS
+	for button in [btn_pause, btn_x1, btn_x2, btn_x4]:
+		UITheme.style_button(button, Color("#E9EEF1"), UITheme.INK_DARK, false, true)
+	for button in [btn_toggle_build_menu, btn_toggle_orders, btn_toggle_session_overview]:
+		UITheme.style_button(button, UITheme.ACCENT_GOLD, UITheme.INK_DARK, true, true)
+	for button in [btn_build_belt, btn_build_turbine, btn_build_factory]:
+		button.custom_minimum_size = Vector2(0.0, 44.0)
+	for button in [curve_top, curve_down, curve_right, curve_left, belt_droit, belt_left]:
+		UITheme.style_button(button, Color("#E9EEF1"), UITheme.INK_DARK, false, true)
+	UITheme.style_card(orders_panel, false, true)
+	UITheme.style_card(session_overview_panel, false, true)
+	_style_order_panels()
+
+func _style_order_panels() -> void:
+	for button in [
+		btn_order_mode_import,
+		btn_order_mode_export,
+		btn_choose_default_delivery_point,
+		btn_choose_order_delivery_point,
+		btn_clear_order_delivery_point,
+		btn_submit_order
+	]:
+		UITheme.style_button(button, UITheme.ACCENT_TEAL if button == btn_submit_order else Color("#E9EEF1"), UITheme.TEXT_LIGHT if button == btn_submit_order else UITheme.INK_DARK, false, true)
+	UITheme.style_option_button(order_resource_selector)
+	UITheme.style_spin_box(order_quantity_spinbox)
+	for label in [
+		orders_title_label,
+		$OrdersPanel/MarginContainer/VBoxContainer/TitleLabel,
+		$SessionOverviewPanel/MarginContainer/VBoxContainer/TitleLabel
+	]:
+		UITheme.style_label(label, "section")
+	for label in [
+		order_unit_cost_label,
+		order_total_cost_label,
+		estimated_cost_label,
+		order_margin_label,
+		inventory_summary_label,
+		orders_status_label,
+		export_history_title,
+		export_history_label,
+		$SessionOverviewPanel/MarginContainer/VBoxContainer/HintLabel
+	]:
+		UITheme.style_label(label, "caption")
+	for label in [
+		order_unit_cost_value,
+		order_total_cost_value,
+		estimated_cost_value,
+		order_margin_value,
+		order_stock_value,
+		default_delivery_point_value,
+		order_delivery_point_value,
+		overview_day_value,
+		overview_time_value,
+		overview_credits_value,
+		overview_machines_value,
+		overview_active_machines_value,
+		overview_production_rate_value,
+		overview_failures_value,
+		overview_co2_value,
+		overview_electricity_value
+	]:
+		UITheme.style_label(label, "body")
+	for label in [
+		$SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid/DayLabel,
+		$SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid/TimeLabel,
+		$SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid/CreditsLabel,
+		$SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid/MachinesLabel,
+		$SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid/ActiveMachinesLabel,
+		$SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid/ProductionRateLabel,
+		$SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid/FailuresLabel,
+		$SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid/CO2Label,
+		$SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid/ElectricityLabel,
+		$OrdersPanel/MarginContainer/VBoxContainer/OrderGrid/ResourceLabel,
+		$OrdersPanel/MarginContainer/VBoxContainer/OrderGrid/QuantityLabel,
+		$OrdersPanel/MarginContainer/VBoxContainer/OrderGrid/StockLabel,
+		$OrdersPanel/MarginContainer/VBoxContainer/OrderGrid/DefaultDeliveryPointLabel,
+		$OrdersPanel/MarginContainer/VBoxContainer/OrderGrid/OrderDeliveryPointLabel
+	]:
+		UITheme.style_label(label, "small")
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
@@ -811,29 +911,4 @@ func _on_undo_build_pressed() -> void:
 		print("Annulation impossible : BuildingManager introuvable ou méthode manquante")
 
 func _style_button(button: Button, base_color: Color, text_color: Color = Color.WHITE) -> void:
-	button.add_theme_stylebox_override("normal", _make_button_style(base_color))
-	button.add_theme_stylebox_override("hover", _make_button_style(base_color.lightened(0.15)))
-	button.add_theme_stylebox_override("pressed", _make_button_style(base_color.darkened(0.15)))
-
-	button.add_theme_color_override("font_color", text_color)
-	button.add_theme_color_override("font_hover_color", text_color)
-	button.add_theme_color_override("font_pressed_color", text_color)
-
-
-func _make_button_style(color: Color) -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = color
-	style.border_color = color.darkened(0.35)
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.corner_radius_top_left = 4
-	style.corner_radius_top_right = 4
-	style.corner_radius_bottom_left = 4
-	style.corner_radius_bottom_right = 4
-	style.content_margin_left = 8
-	style.content_margin_right = 8
-	style.content_margin_top = 6
-	style.content_margin_bottom = 6
-	return style
+	UITheme.style_button(button, base_color, text_color, false, true)

@@ -18,67 +18,99 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(1, 1, 1, 0.04)
+color = Color(0.04, 0.09, 0.12, 0.64)
 
-[node name="MenuButtons" type="VBoxContainer" parent="." unique_id=251925214]
+[node name="MenuBounds" type="MarginContainer" parent="." unique_id=185541002]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -142.0
-offset_top = -142.0
-offset_right = 188.0
-offset_bottom = 298.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="CenterContainer" type="CenterContainer" parent="MenuBounds" unique_id=179590133]
+layout_mode = 2
+
+[node name="ContentStack" type="VBoxContainer" parent="MenuBounds/CenterContainer" unique_id=169864838]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MenuCard" type="PanelContainer" parent="MenuBounds/CenterContainer/ContentStack" unique_id=88807514]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MenuBounds/CenterContainer/ContentStack/MenuCard" unique_id=204478599]
+layout_mode = 2
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 22
+
+[node name="MenuButtons" type="VBoxContainer" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer" unique_id=251925214]
+layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="StartButton" type="Button" parent="MenuButtons" unique_id=1084796760]
-custom_minimum_size = Vector2(330, 56)
+[node name="MenuTitle" type="Label" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=793208003]
 layout_mode = 2
-text = "[START NEW GAME]"
+text = "Actions rapides"
 
-[node name="LoadButton" type="Button" parent="MenuButtons" unique_id=1941782341]
-custom_minimum_size = Vector2(330, 56)
+[node name="MenuDescriptionLabel" type="Label" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=356164227]
 layout_mode = 2
-text = "LOAD RECENT SESSION"
+text = "Nouvelle partie: reprends la derniere sauvegarde si elle existe, sinon demarre un site vierge."
+autowrap_mode = 3
 
-[node name="LabButton" type="Button" parent="MenuButtons" unique_id=1446686155]
-custom_minimum_size = Vector2(330, 56)
+[node name="StartButton" type="Button" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=1084796760]
+custom_minimum_size = Vector2(300, 54)
 layout_mode = 2
-text = "MODIFIER LAB"
+text = "Nouvelle partie"
 
-[node name="TutorialButton" type="Button" parent="MenuButtons" unique_id=216766424]
-custom_minimum_size = Vector2(330, 56)
+[node name="LoadButton" type="Button" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=1941782341]
+custom_minimum_size = Vector2(300, 54)
+layout_mode = 2
+text = "Reprendre une session"
+
+[node name="LabButton" type="Button" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=1446686155]
+custom_minimum_size = Vector2(300, 54)
+layout_mode = 2
+text = "Laboratoire"
+
+[node name="TutorialButton" type="Button" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=216766424]
+custom_minimum_size = Vector2(300, 54)
 layout_mode = 2
 text = "TUTORIAL"
 
-[node name="SettingsButton" type="Button" parent="MenuButtons" unique_id=1522601819]
-custom_minimum_size = Vector2(330, 56)
+[node name="SettingsButton" type="Button" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=1522601819]
+custom_minimum_size = Vector2(300, 54)
 layout_mode = 2
-text = "SETTINGS"
+text = "Reglages"
 
-[node name="AchievementsButton" type="Button" parent="MenuButtons" unique_id=124663486]
-custom_minimum_size = Vector2(330, 56)
+[node name="AchievementsButton" type="Button" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=124663486]
+custom_minimum_size = Vector2(300, 54)
 layout_mode = 2
-text = "ACHIEVEMENTS"
+text = "Achievements"
 
-[node name="QuitButton" type="Button" parent="MenuButtons" unique_id=39767664]
-custom_minimum_size = Vector2(330, 56)
+[node name="QuitButton" type="Button" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=39767664]
+custom_minimum_size = Vector2(300, 54)
 layout_mode = 2
-text = "QUIT"
+text = "Quitter"
+
+[node name="MenuFootnote" type="Label" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=181933558]
+layout_mode = 2
+text = "Raccourcis: Esc pour revenir, les sauvegardes recentes apparaissent automatiquement."
+autowrap_mode = 3
 
 [node name="BottomLeftPanel" type="PanelContainer" parent="." unique_id=587624548]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = -118.0
-offset_right = 416.0
-offset_bottom = -32.0
+offset_left = 24.0
+offset_top = -154.0
+offset_right = 324.0
+offset_bottom = -34.0
 grow_vertical = 0
 
 [node name="BottomLeftMargin" type="MarginContainer" parent="BottomLeftPanel" unique_id=461979880]
@@ -90,7 +122,7 @@ theme_override_constants/margin_bottom = 10
 
 [node name="BottomLeftLabel" type="Label" parent="BottomLeftPanel/BottomLeftMargin" unique_id=1846832211]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 17
 text = "CURRENT ACTIVE UNIVERSE RULE:
 Default Physics (1.0g)"
 autowrap_mode = 2
@@ -102,19 +134,23 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -352.0
-offset_top = -170.0
+offset_left = -324.0
+offset_top = -154.0
 offset_right = -24.0
-offset_bottom = -26.0
+offset_bottom = -34.0
 grow_horizontal = 0
 grow_vertical = 0
 
 [node name="BottomRightMargin" type="MarginContainer" parent="BottomRightPanel" unique_id=1820492936]
 layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 10
 
 [node name="BottomRightLabel" type="Label" parent="BottomRightPanel/BottomRightMargin" unique_id=175793846]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 17
 text = "Antoine, Antoine, Ethan, Louis, Enzo
 v0.8.1 (Prototype)"
 horizontal_alignment = 2

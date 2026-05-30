@@ -5,13 +5,17 @@ const SETTINGS_SCENE: String = "res://scene/settings.tscn"
 const ACHIEVEMENTS_SCENE: String = "res://scene/achivements.tscn"
 
 @onready var _bottom_left_label: Label = $BottomLeftPanel/BottomLeftMargin/BottomLeftLabel
-@onready var _start_button: Button = $MenuButtons/StartButton
-@onready var _load_button: Button = $MenuButtons/LoadButton
-@onready var _lab_button: Button = $MenuButtons/LabButton
-@onready var _tutorial_button: Button = $MenuButtons/TutorialButton
-@onready var _settings_button: Button = $MenuButtons/SettingsButton
-@onready var _achievements_button: Button = $MenuButtons/AchievementsButton
-@onready var _quit_button: Button = $MenuButtons/QuitButton
+@onready var _menu_card: PanelContainer = $MenuBounds/CenterContainer/ContentStack/MenuCard
+@onready var _menu_description_label: Label = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/MenuDescriptionLabel
+@onready var _menu_title: Label = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/MenuTitle
+@onready var _menu_footnote: Label = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/MenuFootnote
+@onready var _start_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/StartButton
+@onready var _load_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/LoadButton
+@onready var _lab_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/LabButton
+@onready var _tutorial_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/TutorialButton
+@onready var _settings_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/SettingsButton
+@onready var _achievements_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/AchievementsButton
+@onready var _quit_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/QuitButton
 @onready var _left_panel: PanelContainer = $BottomLeftPanel
 @onready var _right_panel: PanelContainer = $BottomRightPanel
 @onready var _message_dialog: AcceptDialog = $MessageDialog
@@ -21,24 +25,29 @@ var _preview_viewport: SubViewport
 var _load_dialog: ConfirmationDialog
 var _load_slot_list: ItemList
 var _load_slot_ids: Array[String] = []
+var _menu_descriptions: Dictionary = {}
 
 func _ready() -> void:
+	UITheme.style_screen(self)
 	_update_physics_panel()
 	_setup_map_preview()
 	_setup_load_dialog()
 	resized.connect(_on_menu_resized)
 	_style_buttons()
-	_style_info_panels()
+	_style_panels()
+	_style_text()
+	_configure_menu_descriptions()
+	_update_responsive_layout()
 	_connect_actions()
 
 func _style_buttons() -> void:
-	_apply_button_style(_start_button, Color(0.41, 0.72, 0.53), Color(0.95, 0.98, 0.96))
-	_apply_button_style(_load_button, Color(0.75, 0.79, 0.85), Color(0.08, 0.11, 0.17))
-	_apply_button_style(_lab_button, Color(0.44, 0.64, 0.86), Color(0.06, 0.12, 0.23))
-	_apply_button_style(_tutorial_button, Color(0.93, 0.79, 0.38), Color(0.15, 0.12, 0.06))
-	_apply_button_style(_settings_button, Color(0.94, 0.95, 0.96), Color(0.08, 0.11, 0.17))
-	_apply_button_style(_achievements_button, Color(0.94, 0.95, 0.96), Color(0.08, 0.11, 0.17))
-	_apply_button_style(_quit_button, Color(0.94, 0.95, 0.96), Color(0.08, 0.11, 0.17))
+	_apply_button_style(_start_button, UITheme.ACCENT_TEAL, UITheme.TEXT_LIGHT)
+	_apply_button_style(_load_button, UITheme.ACCENT_GOLD, UITheme.INK_DARK)
+	_apply_button_style(_lab_button, UITheme.ACCENT_SKY, UITheme.TEXT_LIGHT)
+	_apply_button_style(_tutorial_button, Color("#E7C46A"), UITheme.INK_DARK)
+	_apply_button_style(_settings_button, Color("#E9EEF1"), UITheme.INK_DARK)
+	_apply_button_style(_achievements_button, Color("#E9EEF1"), UITheme.INK_DARK)
+	_apply_button_style(_quit_button, UITheme.ACCENT_RED, UITheme.TEXT_LIGHT)
 
 func _update_physics_panel() -> void:
 	if _bottom_left_label:
@@ -46,11 +55,12 @@ func _update_physics_panel() -> void:
 		var g: float = SettingsManager._to_float(settings.get("physics_gravity", 9.8), 9.8)
 		var t: float = SettingsManager._to_float(settings.get("physics_temperature", 20.0), 20.0)
 		var f: float = SettingsManager._to_float(settings.get("physics_friction", 1.0), 1.0)
-		_bottom_left_label.text = "CURRENT ACTIVE UNIVERSE RULE:\nPhysique Modifiee :\nGravite: %.1f m/s²\nTemp: %.1f °C\nFrottement: %.1f" % [g, t, f]
+		_bottom_left_label.text = "Univers actif\nGravite %.1f m/s²\nTemperature %.1f °C\nFrottement %.1f" % [g, t, f]
 
-func _style_info_panels() -> void:
-	_left_panel.add_theme_stylebox_override("panel", _make_panel_style())
-	_right_panel.add_theme_stylebox_override("panel", _make_panel_style())
+func _style_panels() -> void:
+	UITheme.style_card(_menu_card, false, true, 0.68)
+	UITheme.style_card(_left_panel, false, true, 0.6)
+	UITheme.style_card(_right_panel, true, true, 0.58)
 
 func _connect_actions() -> void:
 	_start_button.pressed.connect(_on_start_pressed)
@@ -62,52 +72,34 @@ func _connect_actions() -> void:
 	_quit_button.pressed.connect(_on_quit_pressed)
 
 func _apply_button_style(button: Button, base_color: Color, text_color: Color) -> void:
-	button.add_theme_stylebox_override("normal", _make_button_style(base_color, base_color.darkened(0.28)))
-	button.add_theme_stylebox_override("hover", _make_button_style(base_color.lightened(0.08), base_color.darkened(0.25)))
-	button.add_theme_stylebox_override("pressed", _make_button_style(base_color.darkened(0.08), base_color.darkened(0.35)))
-	button.add_theme_stylebox_override("focus", _make_button_style(base_color.lightened(0.12), base_color.darkened(0.2)))
-	button.add_theme_color_override("font_color", text_color)
-	button.add_theme_color_override("font_hover_color", text_color)
-	button.add_theme_color_override("font_pressed_color", text_color)
-	button.add_theme_color_override("font_focus_color", text_color)
-	button.add_theme_font_size_override("font_size", 20)
-	button.focus_mode = Control.FOCUS_NONE
+	UITheme.style_button(button, base_color, text_color)
 
-func _make_button_style(fill_color: Color, border_color: Color) -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = fill_color
-	style.border_color = border_color
-	style.border_width_left = 2
-	style.border_width_top = 2
-	style.border_width_right = 2
-	style.border_width_bottom = 2
-	style.corner_radius_top_left = 10
-	style.corner_radius_top_right = 10
-	style.corner_radius_bottom_right = 10
-	style.corner_radius_bottom_left = 10
-	style.shadow_color = Color(0.0, 0.0, 0.0, 0.18)
-	style.shadow_size = 3
-	style.content_margin_left = 10.0
-	style.content_margin_right = 10.0
-	style.content_margin_top = 6.0
-	style.content_margin_bottom = 6.0
-	return style
+func _style_text() -> void:
+	UITheme.style_label(_menu_description_label, "body")
+	UITheme.style_label(_menu_title, "section")
+	UITheme.style_label(_menu_footnote, "caption")
+	UITheme.style_label(_bottom_left_label, "small")
+	UITheme.style_label(_right_panel.get_node("BottomRightMargin/BottomRightLabel"), "small", true)
 
-func _make_panel_style() -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = Color(0.96, 0.97, 0.99, 0.9)
-	style.border_color = Color(0.73, 0.79, 0.88, 0.95)
-	style.border_width_left = 2
-	style.border_width_top = 2
-	style.border_width_right = 2
-	style.border_width_bottom = 2
-	style.corner_radius_top_left = 12
-	style.corner_radius_top_right = 12
-	style.corner_radius_bottom_right = 12
-	style.corner_radius_bottom_left = 12
-	style.shadow_color = Color(0.0, 0.0, 0.0, 0.18)
-	style.shadow_size = 4
-	return style
+func _configure_menu_descriptions() -> void:
+	_menu_descriptions = {
+		_start_button: "Demarre une nouvelle ligne de production, ou reprend automatiquement la derniere sauvegarde disponible.",
+		_load_button: "Choisis un slot precis et repars depuis un point de progression recent.",
+		_lab_button: "Passe dans le laboratoire pour regler les parametres de simulation avant de jouer.",
+		_tutorial_button: "Accede au futur parcours guide pour prendre en main les bases de l'automatisation.",
+		_settings_button: "Ajuste l'affichage, l'audio et les options de confort depuis un ecran unifie.",
+		_achievements_button: "Consulte les objectifs de progression et ce qui reste a debloquer.",
+		_quit_button: "Ferme le jeu proprement apres avoir sauvegarde ta progression."
+	}
+	for button_variant in _menu_descriptions.keys():
+		var button: Button = button_variant
+		button.mouse_entered.connect(func() -> void: _set_menu_description(button))
+	_set_menu_description(_start_button)
+
+func _set_menu_description(button: Button) -> void:
+	if button == null:
+		return
+	_menu_description_label.text = _menu_descriptions.get(button, "")
 
 func _on_start_pressed() -> void:
 	# Continuer la dernière sauvegarde si elle existe, sinon démarrer une nouvelle partie.
@@ -175,6 +167,30 @@ func _setup_map_preview() -> void:
 
 func _on_menu_resized() -> void:
 	_resize_preview_viewport()
+	_update_responsive_layout()
+
+func _update_responsive_layout() -> void:
+	var viewport_size: Vector2 = get_viewport_rect().size
+	var compact_layout: bool = viewport_size.x < 1180.0 or viewport_size.y < 760.0
+	var tiny_layout: bool = viewport_size.x < 940.0 or viewport_size.y < 620.0
+	var button_width: float = 300.0
+	if viewport_size.x < 1280.0:
+		button_width = 272.0
+	if viewport_size.x < 1080.0:
+		button_width = 244.0
+	if viewport_size.x < 940.0:
+		button_width = 216.0
+	for button in [_start_button, _load_button, _lab_button, _tutorial_button, _settings_button, _achievements_button, _quit_button]:
+		button.custom_minimum_size = Vector2(button_width, 50.0 if compact_layout else 54.0)
+	_menu_card.custom_minimum_size = Vector2(button_width + 44.0, 0.0)
+	_left_panel.visible = not tiny_layout
+	_right_panel.visible = not tiny_layout
+	if compact_layout:
+		_left_panel.offset_right = 280.0
+		_right_panel.offset_left = -280.0
+	else:
+		_left_panel.offset_right = 324.0
+		_right_panel.offset_left = -324.0
 
 func _resize_preview_viewport() -> void:
 	if _preview_viewport == null:
@@ -213,6 +229,19 @@ func _setup_load_dialog() -> void:
 	_load_slot_list.custom_minimum_size = Vector2(390.0, 230.0)
 	_load_slot_list.select_mode = ItemList.SELECT_SINGLE
 	dialog_vbox.add_child(_load_slot_list)
+	_style_load_dialog()
+
+func _style_load_dialog() -> void:
+	if _load_dialog == null:
+		return
+	if _load_slot_list:
+		UITheme.style_item_list(_load_slot_list)
+	var ok_button: Button = _load_dialog.get_ok_button()
+	if ok_button:
+		UITheme.style_button(ok_button, UITheme.ACCENT_TEAL, UITheme.TEXT_LIGHT, false, true)
+	var cancel_button: Button = _load_dialog.get_cancel_button()
+	if cancel_button:
+		UITheme.style_button(cancel_button, Color("#E9EEF1"), UITheme.INK_DARK, false, true)
 
 func _open_load_dialog() -> void:
 	_populate_load_slots()
