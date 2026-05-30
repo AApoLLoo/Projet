@@ -98,6 +98,15 @@ func set_camera_world_position(target_position: Vector2) -> void:
 func get_camera_world_position() -> Vector2:
 	return global_position
 
+func get_visible_world_rect() -> Rect2:
+	var viewport_size: Vector2 = get_viewport_rect().size
+	var visible_size: Vector2 = Vector2(
+		viewport_size.x / maxf(zoom.x, 0.001),
+		viewport_size.y / maxf(zoom.y, 0.001)
+	)
+	var visible_position: Vector2 = global_position - visible_size * 0.5
+	return Rect2(visible_position, visible_size)
+
 func _is_pan_button(button_index: MouseButton) -> bool:
 	return button_index == MOUSE_BUTTON_LEFT or button_index == MOUSE_BUTTON_MIDDLE or button_index == MOUSE_BUTTON_RIGHT
 

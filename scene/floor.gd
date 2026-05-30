@@ -121,6 +121,16 @@ func get_generation_state() -> Dictionary:
 		"active_chunk_radius" : 2,
 	}
 
+func get_world_bounds() -> Rect2:
+	var generation_state: Dictionary = get_generation_state()
+	var cell_size_value: float = float(generation_state.get("cell_size", 32))
+	var grid_width_value: float = float(generation_state.get("grid_width", 0))
+	var grid_height_value: float = float(generation_state.get("grid_height", 0))
+	return Rect2(
+		Vector2.ZERO,
+		Vector2(grid_width_value * cell_size_value, grid_height_value * cell_size_value)
+	)
+
 func _to_int(value: Variant, fallback: int) -> int:
 	if value is int:
 		return int(value)

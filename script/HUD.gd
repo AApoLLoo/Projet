@@ -14,6 +14,8 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var co2_label: Label = %CO2Label
 @onready var top_hud_background: ColorRect = $MarginContainer/ColorRect
 @onready var minimap_background: ColorRect = $MinimapContainer/ColorRect
+@onready var minimap_surface: Control = %MinimapSurface
+@onready var minimap_viewport: SubViewport = %SubViewport
 @onready var resources_background: ColorRect = $ResourcesContainer/ColorRect
 @onready var co2_background: ColorRect = $CO2Container/ColorRect
 @onready var resources_caption: Label = $ResourcesContainer/MarginContainer/VBoxContainer/Caption
@@ -138,8 +140,14 @@ var buildings_data = {
 	}
 }
 @onready var minimap_camera: Camera2D = %MinimapCamera
+@onready var minimap_overlay: Control = %MinimapOverlay
 
 const ENTITY_PANEL_SCENE := preload("res://scene/entity_panel.tscn")
+const MINIMAP_FACTORY_COLOR: Color = Color(0.95, 0.71, 0.28, 0.96)
+const MINIMAP_TURBINE_COLOR: Color = Color(0.4, 0.88, 0.52, 0.96)
+const MINIMAP_CONVEYOR_COLOR: Color = Color(0.88, 0.9, 0.93, 0.82)
+const MINIMAP_DELIVERY_COLOR: Color = Color(1.0, 0.82, 0.24, 1.0)
+const MINIMAP_ORDER_TARGET_COLOR: Color = Color(0.35, 0.9, 1.0, 1.0)
 var _entity_panel: PanelContainer = null
 var _building_manager: Node = null
 var _delivery_manager: Node = null
@@ -148,6 +156,8 @@ var _delivery_selection_context: String = ""
 var _orderable_resources: Array[Dictionary] = []
 var _is_delivery_point_selection_active: bool = false
 var _order_mode: String = ORDER_MODE_IMPORT
+var _minimap_world_rect: Rect2 = Rect2()
+var _minimap_viewport_size: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
 	_ensure_input_actions()
@@ -228,6 +238,7 @@ func _ready() -> void:
 	_update_time_display(hour, minute)
 	_update_session_overview()
 	_bind_runtime_managers()
+	_setup_minimap()
 	_setup_order_panel()
 
 	# --- GESTION DU MENU DE CONSTRUCTION ---
@@ -443,10 +454,162 @@ func _on_entity_selected(entity) -> void:
 		_entity_panel.setup(entity)
 
 func _process(_delta: float) -> void:
-	# Synchroniser la caméra de la minimap avec la caméra principale
-	var main_camera = get_viewport().get_camera_2d()
-	if main_camera and is_instance_valid(main_camera):
-		minimap_camera.global_position = main_camera.global_position
+	_update_minimap()
+
+func _setup_minimap() -> void:
+	if minimap_viewport:
+		minimap_viewport.world_2d = get_viewport().world_2d
+		minimap_viewport.transparent_bg = true
+		minimap_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	if minimap_camera:
+		minimap_camera.enabled = true
+	if minimap_overlay and minimap_overlay.has_signal("navigate_requested") and not minimap_overlay.navigate_requested.is_connected(_on_minimap_navigate_requested):
+		minimap_overlay.navigate_requested.connect(_on_minimap_navigate_requested)
+	_sync_minimap_viewport_size()
+
+func _update_minimap() -> void:
+	if minimap_overlay == null:
+		return
+
+	var main_camera: Camera2D = _get_main_camera()
+	var world_rect: Rect2 = _get_minimap_world_rect()
+	if world_rect.size.x <= 0.0 or world_rect.size.y <= 0.0 or main_camera == null:
+		if minimap_overlay.has_method("clear_state"):
+			minimap_overlay.call("clear_state")
+		return
+
+	_sync_minimap_viewport_size()
+	_sync_minimap_camera(world_rect)
+	var camera_rect: Rect2 = _get_camera_visible_rect(main_camera)
+	var markers: Array[Dictionary] = _build_minimap_markers()
+	if minimap_overlay.has_method("update_state"):
+		minimap_overlay.call("update_state", world_rect, camera_rect, markers)
+
+func _get_main_camera() -> Camera2D:
+	var current_camera: Camera2D = get_viewport().get_camera_2d()
+	if current_camera == minimap_camera:
+		return null
+	return current_camera
+
+func _get_minimap_world_rect() -> Rect2:
+	if _minimap_world_rect.size.x > 0.0 and _minimap_world_rect.size.y > 0.0:
+		return _minimap_world_rect
+
+	var current_scene: Node = get_tree().current_scene
+	if current_scene == null:
+		return Rect2()
+
+	var floor_node: Node = current_scene.find_child("Floor", true, false)
+	if floor_node and floor_node.has_method("get_world_bounds"):
+		_minimap_world_rect = floor_node.call("get_world_bounds")
+		return _minimap_world_rect
+	if floor_node and floor_node.has_method("get_generation_state"):
+		var generation_state: Dictionary = floor_node.call("get_generation_state")
+		var cell_size_value: float = float(generation_state.get("cell_size", 32))
+		var grid_width_value: float = float(generation_state.get("grid_width", 0))
+		var grid_height_value: float = float(generation_state.get("grid_height", 0))
+		_minimap_world_rect = Rect2(Vector2.ZERO, Vector2(grid_width_value * cell_size_value, grid_height_value * cell_size_value))
+	return _minimap_world_rect
+
+func _sync_minimap_viewport_size() -> void:
+	if minimap_viewport == null or minimap_surface == null:
+		return
+	var surface_size: Vector2 = minimap_surface.size
+	var next_size: Vector2i = Vector2i(
+		maxi(1, int(round(surface_size.x))),
+		maxi(1, int(round(surface_size.y)))
+	)
+	if next_size == _minimap_viewport_size:
+		return
+	_minimap_viewport_size = next_size
+	minimap_viewport.size = next_size
+
+func _sync_minimap_camera(world_rect: Rect2) -> void:
+	if minimap_camera == null or minimap_viewport == null:
+		return
+	minimap_camera.enabled = true
+	minimap_camera.global_position = world_rect.get_center()
+	var viewport_size: Vector2i = minimap_viewport.size
+	if viewport_size.x <= 0 or viewport_size.y <= 0:
+		return
+	var zoom_x: float = float(viewport_size.x) / maxf(world_rect.size.x, 1.0)
+	var zoom_y: float = float(viewport_size.y) / maxf(world_rect.size.y, 1.0)
+	var target_zoom: float = maxf(minf(zoom_x, zoom_y) * 0.9, 0.0001)
+	minimap_camera.zoom = Vector2(target_zoom, target_zoom)
+
+func _get_camera_visible_rect(main_camera: Camera2D) -> Rect2:
+	if main_camera.has_method("get_visible_world_rect"):
+		return main_camera.call("get_visible_world_rect")
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var visible_size: Vector2 = Vector2(
+		viewport_size.x / maxf(main_camera.zoom.x, 0.001),
+		viewport_size.y / maxf(main_camera.zoom.y, 0.001)
+	)
+	return Rect2(main_camera.global_position - visible_size * 0.5, visible_size)
+
+func _build_minimap_markers() -> Array[Dictionary]:
+	var markers: Array[Dictionary] = []
+	if EntityManager:
+		for entity_variant in EntityManager.entities.values():
+			var entity: Entity = entity_variant as Entity
+			if entity == null or not is_instance_valid(entity):
+				continue
+			markers.append({
+				"position": entity.global_position,
+				"color": _get_minimap_entity_color(entity.entity_type),
+				"radius": _get_minimap_entity_radius(entity.entity_type)
+			})
+	if GameManager and GameManager.has_method("get_default_delivery_point_state"):
+		var default_point: Dictionary = GameManager.get_default_delivery_point_state()
+		if bool(default_point.get("has_point", false)):
+			markers.append({
+				"position": Vector2(float(default_point.get("world_x", 0.0)), float(default_point.get("world_y", 0.0))),
+				"color": MINIMAP_DELIVERY_COLOR,
+				"radius": 4.0
+			})
+	if bool(_pending_order_delivery_point.get("has_point", false)):
+		markers.append({
+			"position": Vector2(float(_pending_order_delivery_point.get("world_x", 0.0)), float(_pending_order_delivery_point.get("world_y", 0.0))),
+			"color": MINIMAP_ORDER_TARGET_COLOR,
+			"radius": 4.0
+		})
+	return markers
+
+func _get_minimap_entity_color(entity_type: String) -> Color:
+	if entity_type == "factory":
+		return MINIMAP_FACTORY_COLOR
+	if entity_type == "turbine":
+		return MINIMAP_TURBINE_COLOR
+	return MINIMAP_CONVEYOR_COLOR
+
+func _get_minimap_entity_radius(entity_type: String) -> float:
+	if entity_type == "factory":
+		return 3.4
+	if entity_type == "turbine":
+		return 3.0
+	return 2.1
+
+func _on_minimap_navigate_requested(world_position: Vector2) -> void:
+	if _is_minimap_navigation_blocked():
+		return
+	var main_camera: Camera2D = _get_main_camera()
+	if main_camera == null:
+		return
+	if main_camera.has_method("set_camera_world_position"):
+		main_camera.call("set_camera_world_position", world_position)
+	else:
+		main_camera.global_position = world_position
+
+func _is_minimap_navigation_blocked() -> bool:
+	if _building_manager == null:
+		return false
+	if _building_manager.has_method("is_delivery_point_selection_active") and bool(_building_manager.call("is_delivery_point_selection_active")):
+		return true
+	if bool(_building_manager.get("is_building")):
+		return true
+	if bool(_building_manager.get("is_destroying")):
+		return true
+	return false
 
 func _on_time_changed(hour: int, minute: int) -> void:
 	_update_time_display(hour, minute)

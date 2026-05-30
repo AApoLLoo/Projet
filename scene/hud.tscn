@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bnit1gqnd4kqp"]
 
 [ext_resource type="Script" uid="uid://5nx80apmymd" path="res://script/HUD.gd" id="1_hud"]
+[ext_resource type="Script" path="res://script/MinimapOverlay.gd" id="2_minimap_overlay"]
 
 [node name="HUD" type="CanvasLayer" unique_id=745135006]
 script = ExtResource("1_hud")
@@ -111,19 +112,47 @@ theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="MinimapContainer/MarginContainer" unique_id=215455807]
+[node name="MinimapSurface" type="Control" parent="MinimapContainer/MarginContainer" unique_id=215455806]
+unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="MinimapContainer/MarginContainer/MinimapSurface" unique_id=215455807]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 stretch = true
 
-[node name="SubViewport" type="SubViewport" parent="MinimapContainer/MarginContainer/SubViewportContainer" unique_id=700621053]
+[node name="SubViewport" type="SubViewport" parent="MinimapContainer/MarginContainer/MinimapSurface/SubViewportContainer" unique_id=700621053]
+unique_name_in_owner = true
 transparent_bg = true
+disable_3d = true
 handle_input_locally = false
 size = Vector2i(292, 292)
 render_target_update_mode = 4
 
-[node name="MinimapCamera" type="Camera2D" parent="MinimapContainer/MarginContainer/SubViewportContainer/SubViewport" unique_id=1370892464]
+[node name="MinimapCamera" type="Camera2D" parent="MinimapContainer/MarginContainer/MinimapSurface/SubViewportContainer/SubViewport" unique_id=1370892464]
 unique_name_in_owner = true
 zoom = Vector2(0.05, 0.05)
+
+[node name="MinimapOverlay" type="Control" parent="MinimapContainer/MarginContainer/MinimapSurface" unique_id=215455808]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("2_minimap_overlay")
 
 [node name="ResourcesContainer" type="MarginContainer" parent="." unique_id=590475848]
 offset_left = 18.0
