@@ -143,6 +143,7 @@ func save_level_state_to_slot(slot_id: String, camera_position: Vector2, floor_s
 		state["credits"] = GameManager.credits
 		state["resource_stock"] = GameManager.get_resource_stock_snapshot()
 		state["delivery_point"] = GameManager.get_default_delivery_point_state()
+		state["export_history"] = GameManager.get_export_history()
 	# Sauvegarder toutes les entités actives
 	var entities_array: Array = []
 	for entity in EntityManager.entities.values():
@@ -233,6 +234,7 @@ func get_default_state() -> Dictionary:
 	state["credits"] = 12500.0
 	state["resource_stock"] = {}
 	state["delivery_point"] = {}
+	state["export_history"] = []
 	state["entities"] = []
 	return state
 
@@ -253,6 +255,8 @@ func _sanitize_state(raw_state: Dictionary) -> Dictionary:
 	state["resource_stock"] = raw_resource_stock if raw_resource_stock is Dictionary else {}
 	var raw_delivery_point: Variant = raw_state.get("delivery_point")
 	state["delivery_point"] = raw_delivery_point if raw_delivery_point is Dictionary else {}
+	var raw_export_history: Variant = raw_state.get("export_history")
+	state["export_history"] = raw_export_history if raw_export_history is Array else []
 	# Préserver le tableau des entités tel quel (validé case par case à la restauration)
 	var raw_entities: Variant = raw_state.get("entities")
 	state["entities"] = raw_entities if raw_entities is Array else []

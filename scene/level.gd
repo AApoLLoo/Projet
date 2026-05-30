@@ -289,7 +289,8 @@ func _apply_start_state() -> void:
 		GameManager.apply_saved_state(
 			start_state.get("credits", 12500.0),
 			start_state.get("resource_stock", {}),
-			start_state.get("delivery_point", {})
+			start_state.get("delivery_point", {}),
+			start_state.get("export_history", [])
 		)
 
 	# Restaurer les entités sauvegardées (bâtiments avec leur état)

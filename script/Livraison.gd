@@ -1,5 +1,11 @@
 extends Node
 
+const JOB_IMPORT: String = "import"
+const JOB_EXPORT: String = "export"
+const EXPORT_MARGIN_FACTOR: float = 0.28
+const EXPORT_ENERGY_COST_PER_KW_MINUTE: float = 0.25
+const EXPORT_TIME_COST_PER_SECOND: float = 1.5
+
 const ORDERABLE_RESOURCE_ORDER: Array[String] = [
 	"charbon",
 	"gaz",
@@ -9,13 +15,49 @@ const ORDERABLE_RESOURCE_ORDER: Array[String] = [
 	"piece_avancee",
 ]
 
-const ORDERABLE_RESOURCES: Dictionary = {
-	"charbon": {"label": "Charbon", "unit_cost": 45.0},
-	"gaz": {"label": "Gaz", "unit_cost": 70.0},
-	"matiere_brute": {"label": "Matiere brute", "unit_cost": 55.0},
-	"metal": {"label": "Metal", "unit_cost": 95.0},
-	"piece_base": {"label": "Piece de base", "unit_cost": 120.0},
-	"piece_avancee": {"label": "Piece avancee", "unit_cost": 240.0},
+const RESOURCE_CATALOG: Dictionary = {
+	"charbon": {
+		"label": "Charbon",
+		"import_unit_cost": 45.0,
+		"export_unit_value": 0.0,
+		"can_import": true,
+		"can_export": false,
+	},
+	"gaz": {
+		"label": "Gaz",
+		"import_unit_cost": 70.0,
+		"export_unit_value": 0.0,
+		"can_import": true,
+		"can_export": false,
+	},
+	"matiere_brute": {
+		"label": "Matiere brute",
+		"import_unit_cost": 55.0,
+		"export_unit_value": 0.0,
+		"can_import": true,
+		"can_export": false,
+	},
+	"metal": {
+		"label": "Metal",
+		"import_unit_cost": 95.0,
+		"export_unit_value": 0.0,
+		"can_import": true,
+		"can_export": false,
+	},
+	"piece_base": {
+		"label": "Piece de base",
+		"import_unit_cost": 120.0,
+		"export_unit_value": 0.0,
+		"can_import": true,
+		"can_export": true,
+	},
+	"piece_avancee": {
+		"label": "Piece avancee",
+		"import_unit_cost": 240.0,
+		"export_unit_value": 0.0,
+		"can_import": true,
+		"can_export": true,
+	},
 }
 
 signal order_submitted(order)
@@ -35,22 +77,43 @@ var _pending_orders: Array[Dictionary] = []
 var _current_order: Dictionary = {}
 var _delivery_in_progress: bool = false
 
-func get_orderable_resources() -> Array[Dictionary]:
+func get_orderable_resources(job_type: String = JOB_IMPORT) -> Array[Dictionary]:
 	var resources: Array[Dictionary] = []
 	for resource_id in ORDERABLE_RESOURCE_ORDER:
-		var entry: Dictionary = ORDERABLE_RESOURCES.get(resource_id, {})
+		if not _is_resource_available_for_job(resource_id, job_type):
+			continue
+		var entry: Dictionary = RESOURCE_CATALOG.get(resource_id, {})
 		resources.append({
 			"id": resource_id,
 			"label": String(entry.get("label", resource_id.capitalize())),
-			"unit_cost": float(entry.get("unit_cost", 0.0)),
+			"unit_cost": get_unit_cost(resource_id, job_type),
+			"estimated_production_cost": get_estimated_production_cost(resource_id),
+			"margin_value": get_margin_value(resource_id),
+			"margin_percent": get_margin_percent(resource_id),
+			"job_type": job_type,
 		})
 	return resources
 
-func get_unit_cost(resource_id: String) -> float:
-	return float(ORDERABLE_RESOURCES.get(resource_id, {}).get("unit_cost", 0.0))
+func get_unit_cost(resource_id: String, job_type: String = JOB_IMPORT) -> float:
+	var resource_entry: Dictionary = RESOURCE_CATALOG.get(resource_id, {})
+	if job_type == JOB_EXPORT:
+		return _get_export_unit_value(resource_id)
+	return float(resource_entry.get("import_unit_cost", 0.0))
 
 func get_resource_label(resource_id: String) -> String:
-	return String(ORDERABLE_RESOURCES.get(resource_id, {}).get("label", resource_id.capitalize()))
+	return String(RESOURCE_CATALOG.get(resource_id, {}).get("label", resource_id.capitalize()))
+
+func get_estimated_production_cost(resource_id: String) -> float:
+	return _get_estimated_production_cost(resource_id)
+
+func get_margin_value(resource_id: String) -> float:
+	return _get_export_unit_value(resource_id) - _get_estimated_production_cost(resource_id)
+
+func get_margin_percent(resource_id: String) -> float:
+	var production_cost: float = _get_estimated_production_cost(resource_id)
+	if is_zero_approx(production_cost):
+		return 0.0
+	return get_margin_value(resource_id) / production_cost
 
 func is_delivery_in_progress() -> bool:
 	return _delivery_in_progress
@@ -62,29 +125,43 @@ func get_current_order() -> Dictionary:
 	return _current_order.duplicate(true)
 
 func submit_order(resource_id: String, quantity: int, custom_delivery_point: Dictionary = {}) -> bool:
+	return _submit_job(JOB_IMPORT, resource_id, quantity, custom_delivery_point)
+
+func submit_export(resource_id: String, quantity: int, custom_delivery_point: Dictionary = {}) -> bool:
+	return _submit_job(JOB_EXPORT, resource_id, quantity, custom_delivery_point)
+
+func _submit_job(job_type: String, resource_id: String, quantity: int, custom_delivery_point: Dictionary = {}) -> bool:
 	if truck_scene == null:
 		_fail_delivery("Aucune scene de camion n'est assignee dans DeliveryManager.")
 		return false
-	if not ORDERABLE_RESOURCES.has(resource_id):
+	if not RESOURCE_CATALOG.has(resource_id):
 		_fail_delivery("Ressource inconnue : %s" % resource_id)
+		return false
+	if not _is_resource_available_for_job(resource_id, job_type):
+		_fail_delivery("Cette ressource ne peut pas etre %see." % [_get_job_action_label(job_type)])
 		return false
 
 	var safe_quantity: int = maxi(1, quantity)
 	var delivery_point: Dictionary = _resolve_delivery_point(custom_delivery_point)
 	if not bool(delivery_point.get("has_point", false)):
-		_fail_delivery("Choisis un point de livraison sur la carte avant de commander.")
+		_fail_delivery("Choisis un point de livraison sur la carte avant de lancer ce trajet.")
 		return false
 
-	var unit_cost: float = get_unit_cost(resource_id)
+	var unit_cost: float = get_unit_cost(resource_id, job_type)
 	var total_cost: float = unit_cost * float(safe_quantity)
-	if GameManager and GameManager.credits < total_cost:
+	if job_type == JOB_IMPORT and GameManager and GameManager.credits < total_cost:
 		_fail_delivery("Credits insuffisants pour cette commande.")
 		return false
+	if job_type == JOB_EXPORT and (GameManager == null or not GameManager.has_resources({resource_id: safe_quantity})):
+		_fail_delivery("Stock insuffisant pour exporter %s x%d." % [get_resource_label(resource_id), safe_quantity])
+		return false
 
-	if GameManager:
+	if job_type == JOB_IMPORT and GameManager:
 		GameManager.add_credits(-total_cost)
 
 	var order: Dictionary = {
+		"job_type": job_type,
+		"job_label": _get_job_label(job_type),
 		"resource_id": resource_id,
 		"resource_label": get_resource_label(resource_id),
 		"quantity": safe_quantity,
@@ -122,6 +199,9 @@ func _try_start_next_delivery() -> void:
 
 	var next_order: Dictionary = _pending_orders.pop_front()
 	queue_changed.emit(_pending_orders.size())
+	if not _prepare_job_for_dispatch(next_order):
+		_try_start_next_delivery()
+		return
 	_start_delivery(next_order)
 
 func _start_delivery(order: Dictionary) -> void:
@@ -176,8 +256,12 @@ func _set_truck_unloading_state(truck_instance: Node2D, unloading: bool) -> void
 func _apply_delivery_payload(order: Dictionary) -> void:
 	if not GameManager:
 		return
+	var job_type: String = String(order.get("job_type", JOB_IMPORT))
 	var resource_id: String = String(order.get("resource_id", ""))
 	if resource_id.is_empty():
+		return
+	if job_type == JOB_EXPORT:
+		GameManager.add_credits(float(order.get("total_cost", 0.0)))
 		return
 	GameManager.add_resource_stock({resource_id: int(order.get("quantity", 0))})
 
@@ -191,3 +275,78 @@ func _finish_delivery(order: Dictionary) -> void:
 func _fail_delivery(message: String) -> void:
 	push_warning(message)
 	delivery_failed.emit(message)
+
+func _prepare_job_for_dispatch(order: Dictionary) -> bool:
+	var job_type: String = String(order.get("job_type", JOB_IMPORT))
+	if job_type != JOB_EXPORT:
+		return true
+	if GameManager == null:
+		_fail_delivery("GameManager introuvable pour preparer l'export.")
+		return false
+	var resource_id: String = String(order.get("resource_id", ""))
+	var quantity: int = int(order.get("quantity", 0))
+	if resource_id.is_empty() or quantity <= 0:
+		_fail_delivery("Export invalide: donnees de ressource manquantes.")
+		return false
+	if not GameManager.consume_resources({resource_id: quantity}):
+		_fail_delivery("Stock insuffisant au depart du camion pour exporter %s x%d." % [get_resource_label(resource_id), quantity])
+		return false
+	return true
+
+func _is_resource_available_for_job(resource_id: String, job_type: String) -> bool:
+	var resource_entry: Dictionary = RESOURCE_CATALOG.get(resource_id, {})
+	if job_type == JOB_EXPORT:
+		return bool(resource_entry.get("can_export", false))
+	return bool(resource_entry.get("can_import", false))
+
+func _get_job_label(job_type: String) -> String:
+	if job_type == JOB_EXPORT:
+		return "Export"
+	return "Import"
+
+func _get_job_action_label(job_type: String) -> String:
+	if job_type == JOB_EXPORT:
+		return "export"
+	return "import"
+
+func _get_export_unit_value(resource_id: String) -> float:
+	var resource_entry: Dictionary = RESOURCE_CATALOG.get(resource_id, {})
+	var configured_value: float = float(resource_entry.get("export_unit_value", 0.0))
+	if configured_value > 0.0:
+		return configured_value
+	var estimated_cost: float = _get_estimated_production_cost(resource_id)
+	if estimated_cost <= 0.0:
+		return 0.0
+	return snappedf(estimated_cost * (1.0 + EXPORT_MARGIN_FACTOR), 0.01)
+
+func _get_estimated_production_cost(resource_id: String, visited: Array[String] = []) -> float:
+	if visited.has(resource_id):
+		return 0.0
+
+	var recipe: Dictionary = _find_recipe_for_output(resource_id)
+	if recipe.is_empty():
+		return float(RESOURCE_CATALOG.get(resource_id, {}).get("import_unit_cost", 0.0))
+
+	var next_visited: Array[String] = visited.duplicate()
+	next_visited.append(resource_id)
+	var inputs: Dictionary = recipe.get("inputs", {})
+	var total_input_cost: float = 0.0
+	for input_id in inputs.keys():
+		var quantity: float = float(inputs[input_id])
+		total_input_cost += _get_estimated_production_cost(String(input_id), next_visited) * quantity
+
+	var production_time: float = float(recipe.get("production_time", 0.0))
+	var energy_delta: float = maxf(0.0, float(recipe.get("energy_delta", 0.0)))
+	var energy_cost: float = (energy_delta * (production_time / 60.0)) * EXPORT_ENERGY_COST_PER_KW_MINUTE
+	var time_cost: float = production_time * EXPORT_TIME_COST_PER_SECOND
+	var output_quantity: float = maxf(1.0, float(recipe.get("outputs", {}).get(resource_id, 1.0)))
+	return snappedf((total_input_cost + energy_cost + time_cost) / output_quantity, 0.01)
+
+func _find_recipe_for_output(resource_id: String) -> Dictionary:
+	for recipe_group in RecipeDatabase.recipes.values():
+		for recipe_variant in recipe_group:
+			var recipe: Dictionary = recipe_variant
+			var outputs: Dictionary = recipe.get("outputs", {})
+			if outputs.has(resource_id):
+				return recipe
+	return {}

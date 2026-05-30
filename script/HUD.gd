@@ -5,6 +5,8 @@ signal order_delivery_preview_changed(point_state)
 const ACTION_TOGGLE_ORDER_PANEL: StringName = &"hud_toggle_order_panel"
 const ACTION_TOGGLE_SESSION_OVERVIEW: StringName = &"hud_toggle_session_overview"
 const ACTION_TOGGLE_BUILD_MENU: StringName = &"hud_toggle_build_menu"
+const ORDER_MODE_IMPORT: String = "import"
+const ORDER_MODE_EXPORT: String = "export"
 
 @onready var day_label: Label = %DayLabel
 @onready var time_label: Label = %TimeLabel
@@ -47,15 +49,26 @@ const ACTION_TOGGLE_BUILD_MENU: StringName = &"hud_toggle_build_menu"
 @onready var belt_left: Button = $Menu_Belt/Belt_left
 
 @onready var orders_panel: PanelContainer = %OrdersPanel
+@onready var orders_title_label: Label = $OrdersPanel/MarginContainer/VBoxContainer/TitleLabel
+@onready var btn_order_mode_import: Button = %BtnOrderModeImport
+@onready var btn_order_mode_export: Button = %BtnOrderModeExport
 @onready var order_resource_selector: OptionButton = %OrderResourceSelector
 @onready var order_quantity_spinbox: SpinBox = %OrderQuantitySpinBox
+@onready var order_unit_cost_label: Label = $OrdersPanel/MarginContainer/VBoxContainer/OrderGrid/UnitCostLabel
 @onready var order_unit_cost_value: Label = %OrderUnitCostValue
+@onready var order_total_cost_label: Label = $OrdersPanel/MarginContainer/VBoxContainer/OrderGrid/TotalCostLabel
 @onready var order_total_cost_value: Label = %OrderTotalCostValue
+@onready var estimated_cost_label: Label = %EstimatedCostLabel
+@onready var estimated_cost_value: Label = %EstimatedCostValue
+@onready var order_margin_label: Label = %MarginLabel
+@onready var order_margin_value: Label = %OrderMarginValue
 @onready var order_stock_value: Label = %OrderStockValue
 @onready var default_delivery_point_value: Label = %DefaultDeliveryPointValue
 @onready var order_delivery_point_value: Label = %OrderDeliveryPointValue
 @onready var inventory_summary_label: Label = %InventorySummaryLabel
 @onready var orders_status_label: Label = %OrdersStatusLabel
+@onready var export_history_title: Label = %ExportHistoryTitle
+@onready var export_history_label: Label = %ExportHistoryLabel
 @onready var btn_choose_default_delivery_point: Button = %BtnChooseDefaultDeliveryPoint
 @onready var btn_choose_order_delivery_point: Button = %BtnChooseOrderDeliveryPoint
 @onready var btn_clear_order_delivery_point: Button = %BtnClearOrderDeliveryPoint
@@ -127,6 +140,7 @@ var _pending_order_delivery_point: Dictionary = {}
 var _delivery_selection_context: String = ""
 var _orderable_resources: Array[Dictionary] = []
 var _is_delivery_point_selection_active: bool = false
+var _order_mode: String = ORDER_MODE_IMPORT
 
 func _ready() -> void:
 	_ensure_input_actions()
@@ -182,6 +196,8 @@ func _ready() -> void:
 		GameManager.resources_updated.connect(_on_resources_updated)
 		if GameManager.has_signal("default_delivery_point_changed"):
 			GameManager.default_delivery_point_changed.connect(_on_default_delivery_point_changed)
+		if GameManager.has_signal("export_history_changed"):
+			GameManager.export_history_changed.connect(_on_export_history_changed)
 		_update_money_display()
 		_update_co2_display()
 
@@ -444,23 +460,16 @@ func _setup_order_panel() -> void:
 	if orders_panel == null or order_resource_selector == null or order_quantity_spinbox == null:
 		return
 
-	order_resource_selector.clear()
-	_orderable_resources.clear()
-	if _delivery_manager and _delivery_manager.has_method("get_orderable_resources"):
-		_orderable_resources = _delivery_manager.get_orderable_resources()
-	for index in _orderable_resources.size():
-		var resource_entry: Dictionary = _orderable_resources[index]
-		order_resource_selector.add_item(String(resource_entry.get("label", "Ressource")), index)
-		order_resource_selector.set_item_metadata(index, String(resource_entry.get("id", "")))
-	if order_resource_selector.item_count > 0:
-		order_resource_selector.select(0)
-
 	order_resource_selector.item_selected.connect(_on_order_resource_selected)
 	order_quantity_spinbox.value_changed.connect(_on_order_quantity_changed)
+	btn_order_mode_import.pressed.connect(func(): _set_order_mode(ORDER_MODE_IMPORT))
+	btn_order_mode_export.pressed.connect(func(): _set_order_mode(ORDER_MODE_EXPORT))
 	btn_choose_default_delivery_point.pressed.connect(_on_choose_default_delivery_point_pressed)
 	btn_choose_order_delivery_point.pressed.connect(_on_choose_order_delivery_point_pressed)
 	btn_clear_order_delivery_point.pressed.connect(_on_clear_order_delivery_point_pressed)
 	btn_submit_order.pressed.connect(_on_submit_order_pressed)
+	_refresh_orderable_resources()
+	_update_export_history_display()
 	_update_order_panel()
 
 func _update_order_panel() -> void:
@@ -471,21 +480,36 @@ func _update_order_panel() -> void:
 	var quantity: int = maxi(1, int(order_quantity_spinbox.value)) if order_quantity_spinbox else 1
 	var unit_cost: float = 0.0
 	if _delivery_manager and _delivery_manager.has_method("get_unit_cost"):
-		unit_cost = _delivery_manager.get_unit_cost(resource_id)
+		unit_cost = _delivery_manager.get_unit_cost(resource_id, _order_mode)
+	orders_title_label.text = "Import de ressources" if _order_mode == ORDER_MODE_IMPORT else "Contrats d'export"
+	order_unit_cost_label.text = "Prix unitaire" if _order_mode == ORDER_MODE_IMPORT else "Valeur unitaire"
+	order_total_cost_label.text = "Cout total" if _order_mode == ORDER_MODE_IMPORT else "Gain total"
+	estimated_cost_label.visible = _order_mode == ORDER_MODE_EXPORT
+	estimated_cost_value.visible = _order_mode == ORDER_MODE_EXPORT
+	order_margin_label.visible = _order_mode == ORDER_MODE_EXPORT
+	order_margin_value.visible = _order_mode == ORDER_MODE_EXPORT
+	export_history_title.visible = _order_mode == ORDER_MODE_EXPORT
+	export_history_label.visible = _order_mode == ORDER_MODE_EXPORT
+	btn_submit_order.text = "Commander" if _order_mode == ORDER_MODE_IMPORT else "Exporter"
+	btn_order_mode_import.disabled = _order_mode == ORDER_MODE_IMPORT
+	btn_order_mode_export.disabled = _order_mode == ORDER_MODE_EXPORT
 	order_unit_cost_value.text = _format_money_value(unit_cost)
 	order_total_cost_value.text = _format_money_value(unit_cost * float(quantity))
+	if _order_mode == ORDER_MODE_EXPORT:
+		estimated_cost_value.text = _format_estimated_cost_value(resource_id)
+		order_margin_value.text = _format_margin_value(resource_id)
 	order_stock_value.text = str(GameManager.get_resource_stock(resource_id)) if GameManager else "0"
 	default_delivery_point_value.text = _format_delivery_point_label(GameManager.get_default_delivery_point_state() if GameManager else {})
 	order_delivery_point_value.text = _format_effective_delivery_choice()
 	inventory_summary_label.text = _build_inventory_summary()
-	btn_submit_order.disabled = _is_delivery_point_selection_active
+	btn_submit_order.disabled = _is_delivery_point_selection_active or resource_id.is_empty()
 	btn_choose_default_delivery_point.disabled = _is_delivery_point_selection_active and _delivery_selection_context != "default"
 	btn_choose_order_delivery_point.disabled = _is_delivery_point_selection_active and _delivery_selection_context != "order"
 	btn_clear_order_delivery_point.disabled = _is_delivery_point_selection_active
 	if _is_delivery_point_selection_active:
 		orders_status_label.text = "Selection active: clique sur la carte, ou ESC / clic droit pour annuler."
 	elif orders_status_label.text.is_empty():
-		orders_status_label.text = "Aucune commande en cours."
+		orders_status_label.text = "Aucun trajet en cours."
 
 func _build_inventory_summary() -> String:
 	if not GameManager:
@@ -497,8 +521,51 @@ func _build_inventory_summary() -> String:
 			continue
 		parts.append("%s: %d" % [resource_entry.get("label", resource_id), GameManager.get_resource_stock(resource_id)])
 	if parts.is_empty():
-		return "Stock vide"
+		return "Aucune ressource disponible pour l'export" if _order_mode == ORDER_MODE_EXPORT else "Aucune ressource disponible pour l'import"
+	if _order_mode == ORDER_MODE_EXPORT:
+		return "Produits vendables | " + " | ".join(parts)
 	return " | ".join(parts)
+
+func _format_margin_value(resource_id: String) -> String:
+	if resource_id.is_empty() or _delivery_manager == null:
+		return "N/A"
+	if not _delivery_manager.has_method("get_margin_value") or not _delivery_manager.has_method("get_margin_percent"):
+		return "N/A"
+	var margin_value: float = float(_delivery_manager.get_margin_value(resource_id))
+	var margin_percent: float = float(_delivery_manager.get_margin_percent(resource_id)) * 100.0
+	return "%s (%s%%)" % [_format_money_value(margin_value), String.num(margin_percent, 0)]
+
+func _format_estimated_cost_value(resource_id: String) -> String:
+	if resource_id.is_empty() or _delivery_manager == null:
+		return "N/A"
+	if not _delivery_manager.has_method("get_estimated_production_cost"):
+		return "N/A"
+	return _format_money_value(float(_delivery_manager.get_estimated_production_cost(resource_id)))
+
+func _set_order_mode(order_mode: String) -> void:
+	if order_mode != ORDER_MODE_IMPORT and order_mode != ORDER_MODE_EXPORT:
+		return
+	if _order_mode == order_mode:
+		return
+	_order_mode = order_mode
+	_refresh_orderable_resources()
+	orders_status_label.text = "Mode import actif." if _order_mode == ORDER_MODE_IMPORT else "Mode export actif."
+	_update_export_history_display()
+	_update_order_panel()
+
+func _refresh_orderable_resources() -> void:
+	if order_resource_selector == null:
+		return
+	order_resource_selector.clear()
+	_orderable_resources.clear()
+	if _delivery_manager and _delivery_manager.has_method("get_orderable_resources"):
+		_orderable_resources = _delivery_manager.get_orderable_resources(_order_mode)
+	for index in _orderable_resources.size():
+		var resource_entry: Dictionary = _orderable_resources[index]
+		order_resource_selector.add_item(String(resource_entry.get("label", "Ressource")), index)
+		order_resource_selector.set_item_metadata(index, String(resource_entry.get("id", "")))
+	if order_resource_selector.item_count > 0:
+		order_resource_selector.select(0)
 
 func _get_selected_resource_id() -> String:
 	if order_resource_selector == null or order_resource_selector.item_count == 0:
@@ -553,7 +620,7 @@ func _on_choose_order_delivery_point_pressed() -> void:
 		orders_status_label.text = "Selection de point indisponible."
 		return
 	_delivery_selection_context = "order"
-	orders_status_label.text = "Clique sur la carte pour definir la destination de cette commande."
+	orders_status_label.text = "Clique sur la carte pour definir la destination de cette commande." if _order_mode == ORDER_MODE_IMPORT else "Clique sur la carte pour definir la destination de cet export."
 	_building_manager.start_delivery_point_selection()
 
 func _on_clear_order_delivery_point_pressed() -> void:
@@ -563,19 +630,24 @@ func _on_clear_order_delivery_point_pressed() -> void:
 	_update_order_panel()
 
 func _on_submit_order_pressed() -> void:
-	if _delivery_manager == null or not _delivery_manager.has_method("submit_order"):
+	if _delivery_manager == null:
 		orders_status_label.text = "DeliveryManager introuvable."
 		return
 	var resource_id: String = _get_selected_resource_id()
 	if resource_id.is_empty():
-		orders_status_label.text = "Choisis une ressource a commander."
+		orders_status_label.text = "Choisis une ressource a traiter."
 		return
 	var quantity: int = maxi(1, int(order_quantity_spinbox.value))
 	var custom_point: Dictionary = _pending_order_delivery_point if bool(_pending_order_delivery_point.get("has_point", false)) else {}
-	if _delivery_manager.submit_order(resource_id, quantity, custom_point):
+	var submit_succeeded: bool = false
+	if _order_mode == ORDER_MODE_EXPORT and _delivery_manager.has_method("submit_export"):
+		submit_succeeded = _delivery_manager.submit_export(resource_id, quantity, custom_point)
+	elif _order_mode == ORDER_MODE_IMPORT and _delivery_manager.has_method("submit_order"):
+		submit_succeeded = _delivery_manager.submit_order(resource_id, quantity, custom_point)
+	if submit_succeeded:
 		_pending_order_delivery_point.clear()
 		order_delivery_preview_changed.emit({})
-		orders_status_label.text = "Commande envoyee. Le camion arrive des que possible."
+		orders_status_label.text = "Commande envoyee. Le camion arrive des que possible." if _order_mode == ORDER_MODE_IMPORT else "Contrat d'export lance. Paiement a l'arrivee du camion."
 		_update_order_panel()
 
 func _on_delivery_point_selected(cell_pos: Vector2i, world_pos: Vector2) -> void:
@@ -588,7 +660,7 @@ func _on_delivery_point_selected(cell_pos: Vector2i, world_pos: Vector2) -> void
 		"order":
 			_pending_order_delivery_point = point_state
 			order_delivery_preview_changed.emit(_pending_order_delivery_point.duplicate(true))
-			orders_status_label.text = "Destination de commande prete."
+			orders_status_label.text = "Destination de commande prete." if _order_mode == ORDER_MODE_IMPORT else "Destination d'export prete."
 		_:
 			orders_status_label.text = "Point de livraison selectionne."
 	_delivery_selection_context = ""
@@ -605,16 +677,57 @@ func _on_default_delivery_point_changed(_has_point: bool, _cell_pos: Vector2i, _
 	_update_order_panel()
 
 func _on_order_submitted(order: Dictionary) -> void:
-	orders_status_label.text = "Commande en file: %s x%d" % [order.get("resource_label", "Ressource"), int(order.get("quantity", 0))]
+	orders_status_label.text = "%s en file: %s x%d" % [order.get("job_label", "Trajet"), order.get("resource_label", "Ressource"), int(order.get("quantity", 0))]
 	_update_order_panel()
 
 func _on_delivery_started(order: Dictionary) -> void:
-	orders_status_label.text = "Livraison en cours: %s x%d" % [order.get("resource_label", "Ressource"), int(order.get("quantity", 0))]
+	orders_status_label.text = "%s en cours: %s x%d" % [order.get("job_label", "Trajet"), order.get("resource_label", "Ressource"), int(order.get("quantity", 0))]
 	_update_order_panel()
 
 func _on_delivery_completed(order: Dictionary) -> void:
-	orders_status_label.text = "Livraison terminee: %s x%d" % [order.get("resource_label", "Ressource"), int(order.get("quantity", 0))]
+	if String(order.get("job_type", ORDER_MODE_IMPORT)) == ORDER_MODE_EXPORT:
+		if GameManager:
+			GameManager.record_export_gain(
+				String(order.get("resource_id", "")),
+				String(order.get("resource_label", "Ressource")),
+				int(order.get("quantity", 0)),
+				float(order.get("total_cost", 0.0))
+			)
+		orders_status_label.text = "Export termine: %s x%d, gain %s" % [
+			order.get("resource_label", "Ressource"),
+			int(order.get("quantity", 0)),
+			_format_money_value(float(order.get("total_cost", 0.0)))
+		]
+	else:
+		orders_status_label.text = "Import termine: %s x%d" % [order.get("resource_label", "Ressource"), int(order.get("quantity", 0))]
 	_update_order_panel()
+
+func _update_export_history_display() -> void:
+	if export_history_label == null:
+		return
+	if GameManager == null:
+		export_history_label.text = "Historique indisponible."
+		return
+	var history_entries: Array[Dictionary] = GameManager.get_export_history()
+	if history_entries.is_empty():
+		export_history_label.text = "Aucun export termine."
+		return
+	var lines: PackedStringArray = []
+	for history_entry in history_entries:
+		lines.append(
+			"J%d %02d:%02d - %s x%d -> %s" % [
+				int(history_entry.get("day", 1)),
+				int(history_entry.get("hour", 0)),
+				int(history_entry.get("minute", 0)),
+				history_entry.get("resource_label", "Ressource"),
+				int(history_entry.get("quantity", 0)),
+				_format_money_value(float(history_entry.get("total_value", 0.0)))
+			]
+		)
+	export_history_label.text = "\n".join(lines)
+
+func _on_export_history_changed(_history: Array) -> void:
+	_update_export_history_display()
 
 func _on_delivery_failed(message: String) -> void:
 	orders_status_label.text = message

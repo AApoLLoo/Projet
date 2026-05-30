@@ -227,6 +227,20 @@ layout_mode = 2
 text = "Commandes de ressources"
 theme_override_font_sizes/font_size = 18
 
+[node name="ModeRow" type="HBoxContainer" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211027]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BtnOrderModeImport" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer/ModeRow" unique_id=498211028]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Import"
+
+[node name="BtnOrderModeExport" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer/ModeRow" unique_id=498211029]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Export"
+
 [node name="InventorySummaryLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211005]
 unique_name_in_owner = true
 layout_mode = 2
@@ -276,6 +290,26 @@ text = "Cout total"
 unique_name_in_owner = true
 layout_mode = 2
 text = "0 €"
+
+[node name="EstimatedCostLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211034]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Cout estime"
+
+[node name="EstimatedCostValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211035]
+unique_name_in_owner = true
+layout_mode = 2
+text = "N/A"
+
+[node name="MarginLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211030]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Marge"
+
+[node name="OrderMarginValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211031]
+unique_name_in_owner = true
+layout_mode = 2
+text = "N/A"
 
 [node name="StockLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211015]
 layout_mode = 2
@@ -328,6 +362,17 @@ unique_name_in_owner = true
 layout_mode = 2
 autowrap_mode = 3
 text = "Aucune commande en cours."
+
+[node name="ExportHistoryTitle" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211032]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Derniers gains d'export"
+
+[node name="ExportHistoryLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211033]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = "Aucun export termine."
 
 [node name="BtnSubmitOrder" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211026]
 unique_name_in_owner = true

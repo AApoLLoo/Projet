@@ -8,6 +8,7 @@ const DEFAULT_RESOURCE_STOCK: Dictionary = {
 	"piece_base": 0,
 	"piece_avancee": 0,
 }
+const MAX_EXPORT_HISTORY_ENTRIES: int = 5
 
 # Ressources globales (Maquette HUD)
 var credits: float = 12500.0
@@ -17,11 +18,13 @@ var resource_stock: Dictionary = DEFAULT_RESOURCE_STOCK.duplicate(true)
 var has_default_delivery_point: bool = false
 var default_delivery_cell: Vector2i = Vector2i.ZERO
 var default_delivery_position: Vector2 = Vector2.ZERO
+var export_history: Array[Dictionary] = []
 
 # Signaux pour mettre à jour l'UI automatiquement
 signal resources_updated
 signal stock_changed(stock_snapshot)
 signal default_delivery_point_changed(has_point, cell_pos, world_pos)
+signal export_history_changed(history)
 
 func _ready() -> void:
 	# Synchroniser les totaux énergie/CO2 depuis l'EntityManager
@@ -33,11 +36,13 @@ func _on_totals_changed(energy_total: float, co2_total: float) -> void:
 	co2_emissions = co2_total
 	resources_updated.emit()
 
-func apply_saved_state(saved_credits: float, saved_stock: Dictionary = {}, saved_delivery_point: Dictionary = {}) -> void:
+func apply_saved_state(saved_credits: float, saved_stock: Dictionary = {}, saved_delivery_point: Dictionary = {}, saved_export_history: Array = []) -> void:
 	credits = saved_credits
 	_set_resource_stock_bulk(saved_stock)
 	_restore_default_delivery_point(saved_delivery_point)
+	export_history = _sanitize_export_history(saved_export_history)
 	_emit_resource_signals(true)
+	export_history_changed.emit(get_export_history())
 
 func add_credits(amount: float) -> void:
 	credits += amount
@@ -121,6 +126,29 @@ func get_default_delivery_point_state() -> Dictionary:
 		"world_y": default_delivery_position.y,
 	}
 
+func get_export_history() -> Array[Dictionary]:
+	return export_history.duplicate(true)
+
+func record_export_gain(resource_id: String, resource_label: String, quantity: int, total_value: float) -> void:
+	var hour: int = 0
+	var minute: int = 0
+	if TimeManager:
+		hour = int(TimeManager.current_time)
+		minute = int((TimeManager.current_time - hour) * 60)
+	var history_entry: Dictionary = {
+		"resource_id": resource_id,
+		"resource_label": resource_label,
+		"quantity": quantity,
+		"total_value": total_value,
+		"day": TimeManager.current_day if TimeManager else 1,
+		"hour": hour,
+		"minute": minute,
+	}
+	export_history.push_front(history_entry)
+	while export_history.size() > MAX_EXPORT_HISTORY_ENTRIES:
+		export_history.pop_back()
+	export_history_changed.emit(get_export_history())
+
 func _set_resource_stock_bulk(saved_stock: Dictionary) -> void:
 	resource_stock = DEFAULT_RESOURCE_STOCK.duplicate(true)
 	for resource_id in saved_stock.keys():
@@ -135,6 +163,25 @@ func _restore_default_delivery_point(saved_delivery_point: Dictionary) -> void:
 		)
 	else:
 		clear_default_delivery_point(false)
+
+func _sanitize_export_history(raw_history: Array) -> Array[Dictionary]:
+	var sanitized_history: Array[Dictionary] = []
+	for entry_variant in raw_history:
+		if not (entry_variant is Dictionary):
+			continue
+		var entry: Dictionary = entry_variant
+		sanitized_history.append({
+			"resource_id": String(entry.get("resource_id", "")),
+			"resource_label": String(entry.get("resource_label", "Ressource")),
+			"quantity": int(entry.get("quantity", 0)),
+			"total_value": float(entry.get("total_value", 0.0)),
+			"day": int(entry.get("day", 1)),
+			"hour": int(entry.get("hour", 0)),
+			"minute": int(entry.get("minute", 0)),
+		})
+		if sanitized_history.size() >= MAX_EXPORT_HISTORY_ENTRIES:
+			break
+	return sanitized_history
 
 func _emit_resource_signals(include_stock_signal: bool) -> void:
 	resources_updated.emit()
