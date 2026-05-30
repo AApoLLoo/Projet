@@ -127,8 +127,8 @@ func _refresh_recipe_details() -> void:
 			input_list.add_item("(aucune)")
 		else:
 			for item in inputs:
-				var stock_amount: int = GameManager.get_resource_stock(item) if GameManager else 0
-				input_list.add_item("%s ×%d (stock %d)" % [item, inputs[item], stock_amount])
+				var buffered_amount: int = current_entity.get_buffer_amount("input", String(item))
+				input_list.add_item("%s ×%d (buffer %d)" % [item, inputs[item], buffered_amount])
 
 	output_list.clear()
 	if recipe.is_empty():
@@ -139,7 +139,11 @@ func _refresh_recipe_details() -> void:
 			output_list.add_item("(aucune)")
 		else:
 			for item in outputs:
-				output_list.add_item("%s ×%d" % [item, outputs[item]])
+				if String(item) == "energie":
+					output_list.add_item("%s ×%d" % [item, outputs[item]])
+					continue
+				var buffered_amount: int = current_entity.get_buffer_amount("output", String(item))
+				output_list.add_item("%s ×%d (sortie %d)" % [item, outputs[item], buffered_amount])
 
 func _refresh_stats() -> void:
 	if current_entity == null:
@@ -184,4 +188,10 @@ func _display_name(entity_type: String) -> String:
 	match entity_type:
 		"turbine":  return "Turbine"
 		"factory":  return "Usine"
+		"belt_right": return "Convoyeur droite"
+		"belt_left": return "Convoyeur gauche"
+		"curve_top": return "Convoyeur courbe haut"
+		"curve_down": return "Convoyeur courbe bas"
+		"curve_left": return "Convoyeur courbe gauche"
+		"curve_right": return "Convoyeur courbe droite"
 		_:          return entity_type.capitalize()

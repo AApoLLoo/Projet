@@ -1,0 +1,50 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
+[ext_resource type="Texture2D" path="res://asset/Curve_0003.png" id="2_curveleft"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1"]
+atlas = ExtResource("2_curveleft")
+region = Rect2(0, 0, 172, 171)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2"]
+atlas = ExtResource("2_curveleft")
+region = Rect2(172, 0, 172, 171)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3"]
+atlas = ExtResource("2_curveleft")
+region = Rect2(344, 0, 172, 171)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4"]
+atlas = ExtResource("2_curveleft")
+region = Rect2(516, 0, 172, 171)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_curveleft"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="curveleft" type="Node2D"]
+script = ExtResource("1_conveyorentity")
+conveyor_kind = "curve_left"
+input_offset = Vector2i(0, 1)
+output_offset = Vector2i(-1, 0)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_curveleft")
+autoplay = "default"

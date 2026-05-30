@@ -1,5 +1,6 @@
-[gd_scene format=3 uid="uid://ds3pp37c56env"]
+[gd_scene load_steps=2 format=3 uid="uid://ds3pp37c56env"]
 
+[ext_resource type="Script" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
 [ext_resource type="Texture2D" uid="uid://pv15tlalwcff" path="res://asset/belt-mid.png" id="1_7er7n"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ymtvf"]
@@ -39,6 +40,10 @@ animations = [{
 }]
 
 [node name="beltend" type="Node2D" unique_id=1135212051]
+script = ExtResource("1_conveyorentity")
+conveyor_kind = "belt_left"
+input_offset = Vector2i(1, 0)
+output_offset = Vector2i(-1, 0)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1121658579]
 sprite_frames = SubResource("SpriteFrames_d1fhf")

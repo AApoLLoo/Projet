@@ -3,7 +3,13 @@ extends Node2D
 # Correspondance entity_type → scène pour la restauration des sauvegardes
 const _ENTITY_SCENES: Dictionary = {
 	"turbine": preload("res://scene/turbine_2d.tscn"),
-	"factory": preload("res://scene/factory.tscn")
+	"factory": preload("res://scene/factory.tscn"),
+	"belt_right": preload("res://scene/ASSET/belt/beltmid.tscn"),
+	"belt_left": preload("res://scene/ASSET/belt/beltleft.tscn"),
+	"curve_top": preload("res://scene/ASSET/beltcurvetop.tscn"),
+	"curve_down": preload("res://scene/ASSET/belt/curvedown.tscn"),
+	"curve_left": preload("res://scene/ASSET/belt/curveleft.tscn"),
+	"curve_right": preload("res://scene/ASSET/belt/curveright.tscn")
 }
 
 # --- MODIFICATION ICI : Ajout du lien vers le TileMap Isométrique ---

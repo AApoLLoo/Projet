@@ -118,7 +118,7 @@ var buildings_data = {
 		"frames": 4
 	},
 	"curve_left": {
-		"scene": preload("res://scene/ASSET/belt/curveright.tscn"),
+		"scene": preload("res://scene/ASSET/belt/curveleft.tscn"),
 		"texture": preload("res://asset/Curve_0003.png"),
 		"cost": 60.0,
 		"frames": 4

@@ -8,6 +8,12 @@ extends Node
 
 # Dictionnaire entity_id -> Entity
 var entities: Dictionary = {}
+const CARDINAL_NEIGHBOR_OFFSETS: Array[Vector2i] = [
+	Vector2i(0, -1),
+	Vector2i(1, 0),
+	Vector2i(0, 1),
+	Vector2i(-1, 0),
+]
 
 # Émis quand les totaux changent
 # energy_total : kW net (négatif = production nette, positif = consommation nette)
@@ -60,3 +66,19 @@ func get_entities_of_type(entity_type: String) -> Array:
 # Retourne le nombre total d'entités enregistrées
 func count() -> int:
 	return entities.size()
+
+func get_entity_at_cell(cell_pos: Vector2i) -> Entity:
+	for entity in entities.values():
+		if not is_instance_valid(entity):
+			continue
+		if entity.cell_position == cell_pos:
+			return entity
+	return null
+
+func get_adjacent_entities(cell_pos: Vector2i) -> Array:
+	var neighbors: Array = []
+	for offset in CARDINAL_NEIGHBOR_OFFSETS:
+		var neighbor: Entity = get_entity_at_cell(cell_pos + offset)
+		if neighbor != null:
+			neighbors.append(neighbor)
+	return neighbors
