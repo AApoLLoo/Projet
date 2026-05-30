@@ -281,13 +281,13 @@ func _apply_delivery_payload(order: Dictionary) -> void:
 			# Décale légèrement chaque colis pour éviter la superposition
 			mat.global_position = base_pos + Vector2((i % 5) * 40, (i / 5) * 40)
 			# Passe le type de ressource au matériau pour qu'il adapte son apparence
-			mat.destination = resource_id
+			if mat.has_method("set_resource"):
+				mat.call("set_resource", resource_id, 1)
+			else:
+				mat.destination = resource_id
 			get_tree().current_scene.add_child(mat)
 	else:
 		push_warning("Livraison: materiau_scene non assignée, les matériaux ne spawneront pas.")
-
-	# Ajoute quand même au stock GameManager
-	GameManager.add_resource_stock({resource_id: int(order.get("quantity", 0))})
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _finish_delivery(order: Dictionary) -> void:

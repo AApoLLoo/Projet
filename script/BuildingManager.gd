@@ -124,6 +124,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 	if not is_building:
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			if _try_pickup_conveyor_item_at_mouse():
+				get_viewport().set_input_as_handled()
+				return
 		# ── Mode sélection : détecter les clics sur les bâtiments existants ──
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
@@ -346,6 +350,20 @@ func _try_select_entity_at_mouse() -> void:
 		entity_selected.emit(inst)
 	else:
 		entity_selected.emit(null)
+
+func _try_pickup_conveyor_item_at_mouse() -> bool:
+	var mouse_pos: Vector2 = get_global_mouse_position()
+	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
+
+	if not occupied_cells.has(cell_pos):
+		return false
+
+	var inst: Variant = occupied_cells[cell_pos].get("instance")
+	if not is_instance_valid(inst) or not (inst is ConveyorEntity):
+		return false
+
+	var conveyor: ConveyorEntity = inst
+	return conveyor.eject_carried_item()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Restauration des entités depuis une sauvegarde

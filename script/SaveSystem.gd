@@ -136,6 +136,8 @@ func save_level_state_to_slot(slot_id: String, camera_position: Vector2, floor_s
 	state["cell_size"] = _to_int(floor_state.get("cell_size"), DEFAULT_CELL_SIZE)
 	state["chunk_size"] = _to_int(floor_state.get("chunk_size"), DEFAULT_CHUNK_SIZE)
 	state["active_chunk_radius"] = _to_int(floor_state.get("active_chunk_radius"), DEFAULT_ACTIVE_CHUNK_RADIUS)
+	var raw_ground_materials: Variant = floor_state.get("ground_materials", [])
+	state["ground_materials"] = raw_ground_materials if raw_ground_materials is Array else []
 	state["saved_at_unix"] = int(Time.get_unix_time_from_system())
 	state["game_day"] = TimeManager.current_day
 	state["game_time"] = TimeManager.current_time
@@ -235,6 +237,7 @@ func get_default_state() -> Dictionary:
 	state["resource_stock"] = {}
 	state["delivery_point"] = {}
 	state["export_history"] = []
+	state["ground_materials"] = []
 	state["entities"] = []
 	return state
 
@@ -257,6 +260,8 @@ func _sanitize_state(raw_state: Dictionary) -> Dictionary:
 	state["delivery_point"] = raw_delivery_point if raw_delivery_point is Dictionary else {}
 	var raw_export_history: Variant = raw_state.get("export_history")
 	state["export_history"] = raw_export_history if raw_export_history is Array else []
+	var raw_ground_materials: Variant = raw_state.get("ground_materials")
+	state["ground_materials"] = raw_ground_materials if raw_ground_materials is Array else []
 	# Préserver le tableau des entités tel quel (validé case par case à la restauration)
 	var raw_entities: Variant = raw_state.get("entities")
 	state["entities"] = raw_entities if raw_entities is Array else []
