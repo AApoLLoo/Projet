@@ -68,6 +68,7 @@ signal queue_changed(queue_size)
 signal delivery_state_changed(is_active, current_order)
 
 @export var truck_scene: PackedScene
+@export var materiau_scene: PackedScene  
 @export var spawn_position: Vector2 = Vector2(-200, 100)
 @export var exit_position: Vector2 = Vector2(1000, 600)
 @export var drive_time: float = 3.0
@@ -253,6 +254,7 @@ func _set_truck_unloading_state(truck_instance: Node2D, unloading: bool) -> void
 			anim.stop()
 			anim.frame = 0
 
+# ─── MODIFIÉ : spawn des matériaux au point de livraison ───────────────────────
 func _apply_delivery_payload(order: Dictionary) -> void:
 	if not GameManager:
 		return
@@ -260,10 +262,33 @@ func _apply_delivery_payload(order: Dictionary) -> void:
 	var resource_id: String = String(order.get("resource_id", ""))
 	if resource_id.is_empty():
 		return
+
+	# Export : on crédite juste le joueur, pas de spawn
 	if job_type == JOB_EXPORT:
 		GameManager.add_credits(float(order.get("total_cost", 0.0)))
 		return
+
+	# Import : on spawne un matériau par unité commandée au point de livraison
+	if materiau_scene:
+		var delivery_point: Dictionary = order.get("delivery_point", {})
+		var base_pos: Vector2 = Vector2(
+			float(delivery_point.get("world_x", 0.0)),
+			float(delivery_point.get("world_y", 0.0))
+		)
+		var quantity: int = int(order.get("quantity", 0))
+		for i in quantity:
+			var mat = materiau_scene.instantiate()
+			# Décale légèrement chaque colis pour éviter la superposition
+			mat.global_position = base_pos + Vector2((i % 5) * 40, (i / 5) * 40)
+			# Passe le type de ressource au matériau pour qu'il adapte son apparence
+			mat.destination = resource_id
+			get_tree().current_scene.add_child(mat)
+	else:
+		push_warning("Livraison: materiau_scene non assignée, les matériaux ne spawneront pas.")
+
+	# Ajoute quand même au stock GameManager
 	GameManager.add_resource_stock({resource_id: int(order.get("quantity", 0))})
+# ──────────────────────────────────────────────────────────────────────────────
 
 func _finish_delivery(order: Dictionary) -> void:
 	_current_order.clear()

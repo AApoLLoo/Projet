@@ -146,29 +146,6 @@ tile_layout = 3
 tile_size = Vector2i(56, 26)
 sources/0 = SubResource("TileSetAtlasSource_oxop7")
 
-[sub_resource type="GDScript" id="GDScript_ktmlt"]
-script/source = "extends Node2D
-
-@export var colis_scene : PackedScene
-
-var spawn_position = Vector2(0, 0)
-
-func _ready():
-	spawn_position = get_viewport_rect().size / 2
-	spawn_loop()
-
-func spawn_loop():
-	while true:
-		await get_tree().create_timer(2.0).timeout
-		spawn_colis()
-
-func spawn_colis():
-	var colis = colis_scene.instantiate()
-	colis.global_position = spawn_position
-	
-	get_parent().add_child(colis)
-"
-
 [node name="Level" type="Node2D" unique_id=1328862578]
 script = ExtResource("4_q3wyj")
 
@@ -203,7 +180,4 @@ buildings_node = NodePath("../Buildings")
 [node name="DeliveryManager" type="Node2D" parent="." unique_id=1757592815]
 script = ExtResource("10_oxop7")
 truck_scene = ExtResource("11_gunnj")
-
-[node name="Spawner" type="Node2D" parent="." unique_id=2070743422]
-script = SubResource("GDScript_ktmlt")
-colis_scene = ExtResource("12_gunnj")
+materiau_scene = ExtResource("12_gunnj")
