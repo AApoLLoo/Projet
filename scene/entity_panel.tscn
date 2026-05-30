@@ -166,6 +166,11 @@ text = "0.0 g/min"
 [node name="HSep4" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=123456789]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Arret"
+
 [node name="ActiveToggle" type="CheckButton" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2

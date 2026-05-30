@@ -2,6 +2,7 @@ extends Camera2D
 
 @export var move_speed: float = 900.0
 @export var floor_path: NodePath = ^"../Floor"
+@export var building_manager_path: NodePath = ^"../BuildingManager"
 @export var min_zoom: float = 0.4
 @export var max_zoom: float = 2.5
 @export var zoom_step: float = 0.1
@@ -14,6 +15,7 @@ const ACTION_ZOOM_IN: StringName = &"camera_zoom_in"
 const ACTION_ZOOM_OUT: StringName = &"camera_zoom_out"
 
 var _is_dragging: bool = false
+@onready var _building_manager: Node = get_node_or_null(building_manager_path)
 
 func _ready() -> void:
 	_ensure_input_actions()
@@ -32,6 +34,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				_apply_zoom_delta(zoom_step)
 				return
 		if _is_pan_button(mouse_button_event.button_index):
+			if _is_delivery_point_selection_active():
+				_is_dragging = false
+				return
 			_is_dragging = mouse_button_event.pressed
 			return
 
@@ -55,6 +60,13 @@ func _process(delta: float) -> void:
 	if direction != Vector2.ZERO:
 		global_position += direction * move_speed * delta
 		_clamp_position_to_limits()
+
+func _is_delivery_point_selection_active() -> bool:
+	if _building_manager == null:
+		_building_manager = get_node_or_null(building_manager_path)
+	if _building_manager and _building_manager.has_method("is_delivery_point_selection_active"):
+		return bool(_building_manager.call("is_delivery_point_selection_active"))
+	return false
 
 func _update_limits_from_floor() -> void:
 	var floor_node: Node = get_node_or_null(floor_path)

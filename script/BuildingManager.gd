@@ -24,8 +24,12 @@ signal last_build_state_changed(available)
 signal destroy_mode_changed(enabled)
 # Signal émis quand l'utilisateur clique sur un bâtiment existant (null = clic dans le vide)
 signal entity_selected(entity)
+signal delivery_point_selected(cell_pos, world_pos)
+signal delivery_point_hovered(cell_pos, world_pos)
+signal delivery_point_selection_changed(enabled)
 
 var is_destroying: bool = false
+var is_selecting_delivery_point: bool = false
 
 # Détection clic vs drag : position souris au moment du press
 var _mouse_press_pos: Vector2 = Vector2.ZERO
@@ -33,6 +37,7 @@ const _CLICK_THRESHOLD: float = 5.0
 
 # Informations sur le dernier bâtiment placé (cell_pos, instance, cost)
 var _last_built: Dictionary = {}
+var _last_delivery_hover_cell: Vector2i = Vector2i(2147483647, 2147483647)
 
 func _ready() -> void:
 	preview_sprite = Sprite2D.new()
@@ -60,6 +65,9 @@ func get_world_pos(cell_pos: Vector2i) -> Vector2:
 # ----------------------------------------
 
 func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1) -> void:
+	if is_selecting_delivery_point:
+		stop_delivery_point_selection()
+
 	# Quitter le mode destruction si actif
 	if is_destroying:
 		stop_destroying()
@@ -84,6 +92,17 @@ func stop_building() -> void:
 	preview_sprite.visible = false
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_selecting_delivery_point:
+		if event.is_action_pressed("ui_cancel") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed):
+			stop_delivery_point_selection()
+			get_viewport().set_input_as_handled()
+			return
+
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			_select_delivery_point_at_mouse()
+			get_viewport().set_input_as_handled()
+			return
+
 	# Gestion du mode destruction (prioritaire)
 	if is_destroying:
 		# Clic droit ou Echap pour annuler le mode destruction
@@ -123,8 +142,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _process(_delta: float) -> void:
+	if is_selecting_delivery_point:
+		_update_delivery_point_hover_preview()
 	if is_building:
 		_update_preview()
+
+func _update_delivery_point_hover_preview() -> void:
+	var mouse_pos: Vector2 = get_global_mouse_position()
+	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
+	if cell_pos == _last_delivery_hover_cell:
+		return
+	_last_delivery_hover_cell = cell_pos
+	delivery_point_hovered.emit(cell_pos, get_world_pos(cell_pos))
 
 func _update_preview() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
@@ -219,6 +248,8 @@ func undo_last_build() -> void:
 
 func start_destroying() -> void:
 	# Passe en mode destruction; conserve le mode jusqu'à annulation
+	if is_selecting_delivery_point:
+		stop_delivery_point_selection()
 	is_destroying = true
 	# S'assurer de quitter le mode construction si actif
 	if is_building:
@@ -234,6 +265,31 @@ func toggle_destroying() -> void:
 		stop_destroying()
 	else:
 		start_destroying()
+
+func start_delivery_point_selection() -> void:
+	if is_building:
+		stop_building()
+	if is_destroying:
+		stop_destroying()
+	is_selecting_delivery_point = true
+	_last_delivery_hover_cell = Vector2i(2147483647, 2147483647)
+	entity_selected.emit(null)
+	delivery_point_selection_changed.emit(true)
+
+func stop_delivery_point_selection() -> void:
+	is_selecting_delivery_point = false
+	_last_delivery_hover_cell = Vector2i(2147483647, 2147483647)
+	delivery_point_selection_changed.emit(false)
+
+func is_delivery_point_selection_active() -> bool:
+	return is_selecting_delivery_point
+
+func _select_delivery_point_at_mouse() -> void:
+	var mouse_pos: Vector2 = get_global_mouse_position()
+	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
+	var world_pos: Vector2 = get_world_pos(cell_pos)
+	delivery_point_selected.emit(cell_pos, world_pos)
+	stop_delivery_point_selection()
 
 
 func _try_destroy_at_mouse() -> void:
@@ -293,8 +349,11 @@ func _try_select_entity_at_mouse() -> void:
 func clear_runtime_state() -> void:
 	occupied_cells.clear()
 	_last_built.clear()
+	is_selecting_delivery_point = false
+	_last_delivery_hover_cell = Vector2i(2147483647, 2147483647)
 	last_build_state_changed.emit(false)
 	entity_selected.emit(null)
+	delivery_point_selection_changed.emit(false)
 
 func restore_entities(entities_data: Array) -> int:
 	clear_runtime_state()

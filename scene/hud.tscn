@@ -72,6 +72,16 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Construction"
 
+[node name="BtnToggleOrders" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1987654322]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Commandes"
+
+[node name="BtnToggleSessionOverview" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1987654323]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Infos"
+
 [node name="MinimapContainer" type="MarginContainer" parent="." unique_id=987692439]
 anchors_preset = 3
 anchor_left = 1.0
@@ -192,6 +202,137 @@ text = "Turbine"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Usine"
+
+[node name="OrdersPanel" type="PanelContainer" parent="." unique_id=498211001]
+unique_name_in_owner = true
+visible = false
+offset_left = 210.0
+offset_top = 10.0
+offset_right = 570.0
+offset_bottom = 300.0
+
+[node name="MarginContainer" type="MarginContainer" parent="OrdersPanel" unique_id=498211002]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OrdersPanel/MarginContainer" unique_id=498211003]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211004]
+layout_mode = 2
+text = "Commandes de ressources"
+theme_override_font_sizes/font_size = 18
+
+[node name="InventorySummaryLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211005]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = "Stock vide"
+
+[node name="OrderGrid" type="GridContainer" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211006]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 6
+
+[node name="ResourceLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211007]
+layout_mode = 2
+text = "Ressource"
+
+[node name="OrderResourceSelector" type="OptionButton" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211008]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="QuantityLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211009]
+layout_mode = 2
+text = "Quantite"
+
+[node name="OrderQuantitySpinBox" type="SpinBox" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211010]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+max_value = 500.0
+step = 1.0
+value = 10.0
+
+[node name="UnitCostLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211011]
+layout_mode = 2
+text = "Prix unitaire"
+
+[node name="OrderUnitCostValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211012]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 €"
+
+[node name="TotalCostLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211013]
+layout_mode = 2
+text = "Cout total"
+
+[node name="OrderTotalCostValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211014]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 €"
+
+[node name="StockLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211015]
+layout_mode = 2
+text = "Stock courant"
+
+[node name="OrderStockValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211016]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+
+[node name="DefaultDeliveryPointLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211017]
+layout_mode = 2
+text = "Point par defaut"
+
+[node name="DefaultDeliveryPointValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211018]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Aucun"
+
+[node name="OrderDeliveryPointLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211019]
+layout_mode = 2
+text = "Point de cette commande"
+
+[node name="OrderDeliveryPointValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211020]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Aucun"
+
+[node name="ButtonsRow" type="HBoxContainer" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211021]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BtnChooseDefaultDeliveryPoint" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer/ButtonsRow" unique_id=498211022]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Point par defaut"
+
+[node name="BtnChooseOrderDeliveryPoint" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer/ButtonsRow" unique_id=498211023]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Point de commande"
+
+[node name="BtnClearOrderDeliveryPoint" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer/ButtonsRow" unique_id=498211024]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Effacer point"
+
+[node name="OrdersStatusLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211025]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = "Aucune commande en cours."
+
+[node name="BtnSubmitOrder" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211026]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Commander"
 
 [node name="SessionOverviewPanel" type="PanelContainer" parent="." unique_id=675144948]
 unique_name_in_owner = true
@@ -321,7 +462,7 @@ horizontal_alignment = 2
 
 [node name="HintLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer" unique_id=533120122]
 layout_mode = 2
-text = "TAB pour ouvrir / fermer"
+text = "I pour ouvrir / fermer"
 horizontal_alignment = 1
 
 [node name="Menu_Belt" type="HBoxContainer" parent="." unique_id=330465475]

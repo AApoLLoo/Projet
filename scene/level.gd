@@ -23,6 +23,10 @@ var _save_name_input: LineEdit
 var _save_dialog_slot_ids: Array[String] = []
 var _save_dialog_slot_names: Array[String] = []
 var _save_dialog_slot_labels: Array[String] = []
+var _delivery_point_marker: Node2D
+var _order_delivery_preview_marker: Node2D
+var _delivery_point_hover_marker: Node2D
+var _marker_pulse_time: float = 0.0
 
 func set_preview_mode(enabled: bool) -> void:
 	_preview_mode = enabled
@@ -38,6 +42,7 @@ func _ready() -> void:
 		dlg.popup_centered()
 
 	_apply_start_state()
+	_setup_delivery_point_marker()
 	if _preview_mode:
 		_disable_preview_interactions()
 		return
@@ -47,8 +52,161 @@ func _ready() -> void:
 
 	_build_pause_ui()
 	TimeManager.is_time_running = true
-	if has_node("DeliveryManager"):
-		$DeliveryManager.start_delivery()
+
+func _setup_delivery_point_marker() -> void:
+	if _delivery_point_marker == null:
+		_delivery_point_marker = _create_delivery_point_marker(
+			"DeliveryPointMarker",
+			Color(0.96, 0.74, 0.18, 0.35),
+			Color(1.0, 0.9, 0.35, 0.95),
+			Color(1.0, 0.95, 0.55, 0.95),
+			18.0,
+			8.0
+		)
+		add_child(_delivery_point_marker)
+	if _order_delivery_preview_marker == null:
+		_order_delivery_preview_marker = _create_delivery_point_marker(
+			"OrderDeliveryPreviewMarker",
+			Color(0.18, 0.78, 0.95, 0.22),
+			Color(0.4, 0.95, 1.0, 0.95),
+			Color(0.75, 1.0, 1.0, 0.95),
+			14.0,
+			6.0
+		)
+		_order_delivery_preview_marker.hide()
+		add_child(_order_delivery_preview_marker)
+	if _delivery_point_hover_marker == null:
+		_delivery_point_hover_marker = _create_delivery_point_marker(
+			"DeliveryPointHoverMarker",
+			Color(0.28, 1.0, 0.62, 0.18),
+			Color(0.45, 1.0, 0.7, 0.95),
+			Color(0.85, 1.0, 0.9, 0.95),
+			12.0,
+			5.0
+		)
+		_delivery_point_hover_marker.hide()
+		add_child(_delivery_point_hover_marker)
+	if GameManager and GameManager.has_signal("default_delivery_point_changed"):
+		if not GameManager.default_delivery_point_changed.is_connected(_on_default_delivery_point_changed):
+			GameManager.default_delivery_point_changed.connect(_on_default_delivery_point_changed)
+	var hud: Node = get_node_or_null("HUD")
+	if hud and hud.has_signal("order_delivery_preview_changed"):
+		if not hud.order_delivery_preview_changed.is_connected(_on_order_delivery_preview_changed):
+			hud.order_delivery_preview_changed.connect(_on_order_delivery_preview_changed)
+	var building_manager: Node = get_node_or_null("BuildingManager")
+	if building_manager and building_manager.has_signal("delivery_point_hovered"):
+		if not building_manager.delivery_point_hovered.is_connected(_on_delivery_point_hovered):
+			building_manager.delivery_point_hovered.connect(_on_delivery_point_hovered)
+	if building_manager and building_manager.has_signal("delivery_point_selection_changed"):
+		if not building_manager.delivery_point_selection_changed.is_connected(_on_delivery_point_selection_changed):
+			building_manager.delivery_point_selection_changed.connect(_on_delivery_point_selection_changed)
+	_refresh_delivery_point_marker()
+
+func _create_delivery_point_marker(marker_name: String, fill_color: Color, outline_color: Color, crosshair_color: Color, radius: float, crosshair_radius: float) -> Node2D:
+	var marker_root: Node2D = Node2D.new()
+	marker_root.name = marker_name
+	marker_root.z_index = 200
+	marker_root.hide()
+
+	var fill: Polygon2D = Polygon2D.new()
+	fill.name = "Fill"
+	fill.polygon = PackedVector2Array([
+		Vector2(0.0, -radius),
+		Vector2(radius, 0.0),
+		Vector2(0.0, radius),
+		Vector2(-radius, 0.0),
+	])
+	fill.color = fill_color
+	marker_root.add_child(fill)
+
+	var outline: Line2D = Line2D.new()
+	outline.name = "Outline"
+	outline.width = 2.0
+	outline.default_color = outline_color
+	outline.closed = true
+	outline.points = PackedVector2Array([
+		Vector2(0.0, -radius),
+		Vector2(radius, 0.0),
+		Vector2(0.0, radius),
+		Vector2(-radius, 0.0),
+	])
+	marker_root.add_child(outline)
+
+	var crosshair: Line2D = Line2D.new()
+	crosshair.name = "Crosshair"
+	crosshair.width = 2.0
+	crosshair.default_color = crosshair_color
+	crosshair.points = PackedVector2Array([
+		Vector2(-crosshair_radius, 0.0),
+		Vector2(crosshair_radius, 0.0),
+		Vector2(0.0, -crosshair_radius),
+		Vector2(0.0, crosshair_radius),
+	])
+	marker_root.add_child(crosshair)
+
+	return marker_root
+
+func _on_default_delivery_point_changed(_has_point: bool, _cell_pos: Vector2i, _world_pos: Vector2) -> void:
+	_refresh_delivery_point_marker()
+
+func _refresh_delivery_point_marker() -> void:
+	if _delivery_point_marker == null:
+		return
+	if GameManager == null:
+		_delivery_point_marker.hide()
+		return
+	var point_state: Dictionary = GameManager.get_default_delivery_point_state()
+	if not bool(point_state.get("has_point", false)):
+		_delivery_point_marker.hide()
+		return
+	_delivery_point_marker.global_position = Vector2(
+		float(point_state.get("world_x", 0.0)),
+		float(point_state.get("world_y", 0.0))
+	)
+	_delivery_point_marker.show()
+
+func _on_order_delivery_preview_changed(point_state: Dictionary) -> void:
+	_refresh_order_delivery_preview_marker(point_state)
+
+func _refresh_order_delivery_preview_marker(point_state: Dictionary) -> void:
+	if _order_delivery_preview_marker == null:
+		return
+	if not bool(point_state.get("has_point", false)):
+		_order_delivery_preview_marker.hide()
+		return
+	_order_delivery_preview_marker.global_position = Vector2(
+		float(point_state.get("world_x", 0.0)),
+		float(point_state.get("world_y", 0.0))
+	)
+	_order_delivery_preview_marker.show()
+
+func _on_delivery_point_hovered(_cell_pos: Vector2i, world_pos: Vector2) -> void:
+	if _delivery_point_hover_marker == null:
+		return
+	_delivery_point_hover_marker.global_position = world_pos
+	_delivery_point_hover_marker.show()
+
+func _on_delivery_point_selection_changed(enabled: bool) -> void:
+	if enabled:
+		return
+	if _delivery_point_hover_marker:
+		_delivery_point_hover_marker.hide()
+
+func _process(delta: float) -> void:
+	_marker_pulse_time += delta
+	_animate_marker(_delivery_point_marker, 1.0, 0.08, 0.75)
+	_animate_marker(_order_delivery_preview_marker, 1.0, 0.04, 0.35)
+	_animate_marker(_delivery_point_hover_marker, 1.0, 0.05, 0.3)
+
+func _animate_marker(marker: Node2D, base_scale: float, scale_amplitude: float, alpha_floor: float) -> void:
+	if marker == null or not marker.visible:
+		return
+	var pulse: float = 0.5 + 0.5 * sin(_marker_pulse_time * TAU)
+	var scale_value: float = base_scale + (pulse * scale_amplitude)
+	marker.scale = Vector2.ONE * scale_value
+	var fill: Polygon2D = marker.get_node_or_null("Fill") as Polygon2D
+	if fill:
+		fill.color.a = lerpf(alpha_floor * 0.4, alpha_floor, pulse)
 		
 func _input(event: InputEvent) -> void:
 	if _preview_mode:
@@ -128,8 +286,11 @@ func _apply_start_state() -> void:
 	TimeManager.current_time = start_state.get("game_time", 8.0)
 	
 	if GameManager:
-		GameManager.credits = start_state.get("credits", 12500.0)
-		GameManager.resources_updated.emit()
+		GameManager.apply_saved_state(
+			start_state.get("credits", 12500.0),
+			start_state.get("resource_stock", {}),
+			start_state.get("delivery_point", {})
+		)
 
 	# Restaurer les entités sauvegardées (bâtiments avec leur état)
 	var entities_data: Array = start_state.get("entities", [])

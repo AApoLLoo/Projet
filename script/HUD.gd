@@ -1,5 +1,8 @@
 extends CanvasLayer
 
+signal order_delivery_preview_changed(point_state)
+
+const ACTION_TOGGLE_ORDER_PANEL: StringName = &"hud_toggle_order_panel"
 const ACTION_TOGGLE_SESSION_OVERVIEW: StringName = &"hud_toggle_session_overview"
 const ACTION_TOGGLE_BUILD_MENU: StringName = &"hud_toggle_build_menu"
 
@@ -23,6 +26,8 @@ const ACTION_TOGGLE_BUILD_MENU: StringName = &"hud_toggle_build_menu"
 @onready var btn_x1: Button = %BtnX1
 @onready var btn_x2: Button = %BtnX2
 @onready var btn_x4: Button = %BtnX4
+@onready var btn_toggle_orders: Button = %BtnToggleOrders
+@onready var btn_toggle_session_overview: Button = %BtnToggleSessionOverview
 
 # --- NOUVEAUX BOUTONS DE CONSTRUCTION ---
 @onready var btn_toggle_build_menu: Button = %BtnToggleBuildMenu # Le bouton "Construction" principal
@@ -40,6 +45,21 @@ const ACTION_TOGGLE_BUILD_MENU: StringName = &"hud_toggle_build_menu"
 @onready var curve_left: Button = $Menu_Belt/Curve_left
 @onready var belt_droit: Button = $Menu_Belt/Belt_droit
 @onready var belt_left: Button = $Menu_Belt/Belt_left
+
+@onready var orders_panel: PanelContainer = %OrdersPanel
+@onready var order_resource_selector: OptionButton = %OrderResourceSelector
+@onready var order_quantity_spinbox: SpinBox = %OrderQuantitySpinBox
+@onready var order_unit_cost_value: Label = %OrderUnitCostValue
+@onready var order_total_cost_value: Label = %OrderTotalCostValue
+@onready var order_stock_value: Label = %OrderStockValue
+@onready var default_delivery_point_value: Label = %DefaultDeliveryPointValue
+@onready var order_delivery_point_value: Label = %OrderDeliveryPointValue
+@onready var inventory_summary_label: Label = %InventorySummaryLabel
+@onready var orders_status_label: Label = %OrdersStatusLabel
+@onready var btn_choose_default_delivery_point: Button = %BtnChooseDefaultDeliveryPoint
+@onready var btn_choose_order_delivery_point: Button = %BtnChooseOrderDeliveryPoint
+@onready var btn_clear_order_delivery_point: Button = %BtnClearOrderDeliveryPoint
+@onready var btn_submit_order: Button = %BtnSubmitOrder
 
 # --- DICTIONNAIRE MIS À JOUR ---
 # --- DICTIONNAIRE MIS À JOUR AVEC DIRECTIONS ET VIRAGES ---
@@ -101,11 +121,19 @@ var buildings_data = {
 
 const ENTITY_PANEL_SCENE := preload("res://scene/entity_panel.tscn")
 var _entity_panel: PanelContainer = null
+var _building_manager: Node = null
+var _delivery_manager: Node = null
+var _pending_order_delivery_point: Dictionary = {}
+var _delivery_selection_context: String = ""
+var _orderable_resources: Array[Dictionary] = []
+var _is_delivery_point_selection_active: bool = false
 
 func _ready() -> void:
 	_ensure_input_actions()
 	if session_overview_panel:
 		session_overview_panel.hide()
+	if orders_panel:
+		orders_panel.hide()
 
 	# On s'assure que le menu est caché au démarrage
 	menu_belt.hide()
@@ -152,6 +180,8 @@ func _ready() -> void:
 	
 	if GameManager:
 		GameManager.resources_updated.connect(_on_resources_updated)
+		if GameManager.has_signal("default_delivery_point_changed"):
+			GameManager.default_delivery_point_changed.connect(_on_default_delivery_point_changed)
 		_update_money_display()
 		_update_co2_display()
 
@@ -173,9 +203,13 @@ func _ready() -> void:
 	var minute: int = int((TimeManager.current_time - hour) * 60)
 	_update_time_display(hour, minute)
 	_update_session_overview()
+	_bind_runtime_managers()
+	_setup_order_panel()
 
 	# --- GESTION DU MENU DE CONSTRUCTION ---
 	# 1. Cliquer sur "Construction" affiche ou masque le conteneur
+	btn_toggle_orders.pressed.connect(_toggle_orders_panel)
+	btn_toggle_session_overview.pressed.connect(_toggle_session_overview)
 	btn_toggle_build_menu.pressed.connect(_toggle_build_menu)
 
 	# 2. Les sous-boutons lancent la construction
@@ -213,19 +247,18 @@ func _ready() -> void:
 	undo_button.pressed.connect(_on_undo_build_pressed)
 
 	# Connexion au BuildingManager pour synchroniser la visibilité
-	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
-	if building_manager:
+	if _building_manager:
 		# Si le BuildingManager offre un signal, on l'écoute
-		if building_manager.has_signal("last_build_state_changed"):
-			building_manager.last_build_state_changed.connect(func(available):
+		if _building_manager.has_signal("last_build_state_changed"):
+			_building_manager.last_build_state_changed.connect(func(available):
 				undo_button.visible = available
 			)
 		# Set initial visibility si nécessaire
-		undo_button.visible = building_manager.has_method("has_last_build") and building_manager.has_last_build()
+		undo_button.visible = _building_manager.has_method("has_last_build") and _building_manager.has_last_build()
 
 		# Connecter la sélection d'entité
-		if building_manager.has_signal("entity_selected"):
-			building_manager.entity_selected.connect(_on_entity_selected)
+		if _building_manager.has_signal("entity_selected") and not _building_manager.entity_selected.is_connected(_on_entity_selected):
+			_building_manager.entity_selected.connect(_on_entity_selected)
 
 		# --- BOUTON MODE DESTRUCTION (toggle) ---
 		var destroy_button: Button = Button.new()
@@ -250,16 +283,20 @@ func _ready() -> void:
 		)
 
 		# Synchroniser l'état du bouton avec le BuildingManager
-		if building_manager and building_manager.has_signal("destroy_mode_changed"):
-			building_manager.destroy_mode_changed.connect(func(enabled):
+		if _building_manager and _building_manager.has_signal("destroy_mode_changed"):
+			_building_manager.destroy_mode_changed.connect(func(enabled):
 				destroy_button.set_pressed(enabled)
 			)
-		if building_manager:
-			destroy_button.set_pressed(building_manager.is_destroying)
+		if _building_manager:
+			destroy_button.set_pressed(_building_manager.is_destroying)
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		var key_event: InputEventKey = event
+		if key_event.pressed and not key_event.echo and key_event.is_action_pressed(ACTION_TOGGLE_ORDER_PANEL):
+			_toggle_orders_panel()
+			get_viewport().set_input_as_handled()
+			return
 		if key_event.pressed and not key_event.echo and key_event.is_action_pressed(ACTION_TOGGLE_BUILD_MENU):
 			_toggle_build_menu()
 			get_viewport().set_input_as_handled()
@@ -314,6 +351,7 @@ func _on_resources_updated() -> void:
 	_update_money_display()
 	_update_co2_display()
 	_update_session_overview()
+	_update_order_panel()
 
 func _update_money_display() -> void:
 	if money_label and GameManager:
@@ -331,6 +369,12 @@ func _toggle_session_overview() -> void:
 		_update_session_overview()
 
 	session_overview_panel.visible = not session_overview_panel.visible
+
+func _toggle_orders_panel() -> void:
+	if orders_panel == null:
+		return
+	_update_order_panel()
+	orders_panel.visible = not orders_panel.visible
 
 func _toggle_build_menu() -> void:
 	if build_menu_container == null:
@@ -376,6 +420,212 @@ func _update_session_overview() -> void:
 		overview_production_rate_value.text = "0%"
 	overview_failures_value.text = "A venir (placeholder)"
 
+func _bind_runtime_managers() -> void:
+	_building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
+	_delivery_manager = get_tree().current_scene.find_child("DeliveryManager", true, false)
+
+	if _building_manager and _building_manager.has_signal("delivery_point_selected") and not _building_manager.delivery_point_selected.is_connected(_on_delivery_point_selected):
+		_building_manager.delivery_point_selected.connect(_on_delivery_point_selected)
+	if _building_manager and _building_manager.has_signal("delivery_point_selection_changed") and not _building_manager.delivery_point_selection_changed.is_connected(_on_delivery_point_selection_changed):
+		_building_manager.delivery_point_selection_changed.connect(_on_delivery_point_selection_changed)
+	if _delivery_manager:
+		if _delivery_manager.has_signal("order_submitted") and not _delivery_manager.order_submitted.is_connected(_on_order_submitted):
+			_delivery_manager.order_submitted.connect(_on_order_submitted)
+		if _delivery_manager.has_signal("delivery_started") and not _delivery_manager.delivery_started.is_connected(_on_delivery_started):
+			_delivery_manager.delivery_started.connect(_on_delivery_started)
+		if _delivery_manager.has_signal("delivery_completed") and not _delivery_manager.delivery_completed.is_connected(_on_delivery_completed):
+			_delivery_manager.delivery_completed.connect(_on_delivery_completed)
+		if _delivery_manager.has_signal("delivery_failed") and not _delivery_manager.delivery_failed.is_connected(_on_delivery_failed):
+			_delivery_manager.delivery_failed.connect(_on_delivery_failed)
+		if _delivery_manager.has_signal("queue_changed") and not _delivery_manager.queue_changed.is_connected(_on_delivery_queue_changed):
+			_delivery_manager.queue_changed.connect(_on_delivery_queue_changed)
+
+func _setup_order_panel() -> void:
+	if orders_panel == null or order_resource_selector == null or order_quantity_spinbox == null:
+		return
+
+	order_resource_selector.clear()
+	_orderable_resources.clear()
+	if _delivery_manager and _delivery_manager.has_method("get_orderable_resources"):
+		_orderable_resources = _delivery_manager.get_orderable_resources()
+	for index in _orderable_resources.size():
+		var resource_entry: Dictionary = _orderable_resources[index]
+		order_resource_selector.add_item(String(resource_entry.get("label", "Ressource")), index)
+		order_resource_selector.set_item_metadata(index, String(resource_entry.get("id", "")))
+	if order_resource_selector.item_count > 0:
+		order_resource_selector.select(0)
+
+	order_resource_selector.item_selected.connect(_on_order_resource_selected)
+	order_quantity_spinbox.value_changed.connect(_on_order_quantity_changed)
+	btn_choose_default_delivery_point.pressed.connect(_on_choose_default_delivery_point_pressed)
+	btn_choose_order_delivery_point.pressed.connect(_on_choose_order_delivery_point_pressed)
+	btn_clear_order_delivery_point.pressed.connect(_on_clear_order_delivery_point_pressed)
+	btn_submit_order.pressed.connect(_on_submit_order_pressed)
+	_update_order_panel()
+
+func _update_order_panel() -> void:
+	if orders_panel == null:
+		return
+
+	var resource_id: String = _get_selected_resource_id()
+	var quantity: int = maxi(1, int(order_quantity_spinbox.value)) if order_quantity_spinbox else 1
+	var unit_cost: float = 0.0
+	if _delivery_manager and _delivery_manager.has_method("get_unit_cost"):
+		unit_cost = _delivery_manager.get_unit_cost(resource_id)
+	order_unit_cost_value.text = _format_money_value(unit_cost)
+	order_total_cost_value.text = _format_money_value(unit_cost * float(quantity))
+	order_stock_value.text = str(GameManager.get_resource_stock(resource_id)) if GameManager else "0"
+	default_delivery_point_value.text = _format_delivery_point_label(GameManager.get_default_delivery_point_state() if GameManager else {})
+	order_delivery_point_value.text = _format_effective_delivery_choice()
+	inventory_summary_label.text = _build_inventory_summary()
+	btn_submit_order.disabled = _is_delivery_point_selection_active
+	btn_choose_default_delivery_point.disabled = _is_delivery_point_selection_active and _delivery_selection_context != "default"
+	btn_choose_order_delivery_point.disabled = _is_delivery_point_selection_active and _delivery_selection_context != "order"
+	btn_clear_order_delivery_point.disabled = _is_delivery_point_selection_active
+	if _is_delivery_point_selection_active:
+		orders_status_label.text = "Selection active: clique sur la carte, ou ESC / clic droit pour annuler."
+	elif orders_status_label.text.is_empty():
+		orders_status_label.text = "Aucune commande en cours."
+
+func _build_inventory_summary() -> String:
+	if not GameManager:
+		return "Stock indisponible"
+	var parts: PackedStringArray = []
+	for resource_entry in _orderable_resources:
+		var resource_id: String = String(resource_entry.get("id", ""))
+		if resource_id.is_empty():
+			continue
+		parts.append("%s: %d" % [resource_entry.get("label", resource_id), GameManager.get_resource_stock(resource_id)])
+	if parts.is_empty():
+		return "Stock vide"
+	return " | ".join(parts)
+
+func _get_selected_resource_id() -> String:
+	if order_resource_selector == null or order_resource_selector.item_count == 0:
+		return ""
+	var selected_index: int = order_resource_selector.selected
+	if selected_index < 0:
+		selected_index = 0
+	return String(order_resource_selector.get_item_metadata(selected_index))
+
+func _format_delivery_point_label(point_state: Dictionary) -> String:
+	if not bool(point_state.get("has_point", false)):
+		return "Aucun"
+	return "Case (%d, %d)" % [int(point_state.get("cell_x", 0)), int(point_state.get("cell_y", 0))]
+
+func _format_effective_delivery_choice() -> String:
+	if _is_delivery_point_selection_active and _delivery_selection_context == "order":
+		return "Choix specifique en cours..."
+	if bool(_pending_order_delivery_point.get("has_point", false)):
+		return "Specifique: %s" % _format_delivery_point_label(_pending_order_delivery_point)
+	var default_point: Dictionary = GameManager.get_default_delivery_point_state() if GameManager else {}
+	if bool(default_point.get("has_point", false)):
+		return "Par defaut: %s" % _format_delivery_point_label(default_point)
+	if _is_delivery_point_selection_active and _delivery_selection_context == "default":
+		return "Choix du point par defaut en cours..."
+	return "Aucun point disponible"
+
+func _make_delivery_point_state(cell_pos: Vector2i, world_pos: Vector2) -> Dictionary:
+	return {
+		"has_point": true,
+		"cell_x": cell_pos.x,
+		"cell_y": cell_pos.y,
+		"world_x": world_pos.x,
+		"world_y": world_pos.y,
+	}
+
+func _on_order_resource_selected(_index: int) -> void:
+	_update_order_panel()
+
+func _on_order_quantity_changed(_value: float) -> void:
+	_update_order_panel()
+
+func _on_choose_default_delivery_point_pressed() -> void:
+	if _building_manager == null or not _building_manager.has_method("start_delivery_point_selection"):
+		orders_status_label.text = "Selection de point indisponible."
+		return
+	_delivery_selection_context = "default"
+	orders_status_label.text = "Clique sur la carte pour definir le point de livraison par defaut."
+	_building_manager.start_delivery_point_selection()
+
+func _on_choose_order_delivery_point_pressed() -> void:
+	if _building_manager == null or not _building_manager.has_method("start_delivery_point_selection"):
+		orders_status_label.text = "Selection de point indisponible."
+		return
+	_delivery_selection_context = "order"
+	orders_status_label.text = "Clique sur la carte pour definir la destination de cette commande."
+	_building_manager.start_delivery_point_selection()
+
+func _on_clear_order_delivery_point_pressed() -> void:
+	_pending_order_delivery_point.clear()
+	order_delivery_preview_changed.emit({})
+	orders_status_label.text = "La commande utilisera le point par defaut."
+	_update_order_panel()
+
+func _on_submit_order_pressed() -> void:
+	if _delivery_manager == null or not _delivery_manager.has_method("submit_order"):
+		orders_status_label.text = "DeliveryManager introuvable."
+		return
+	var resource_id: String = _get_selected_resource_id()
+	if resource_id.is_empty():
+		orders_status_label.text = "Choisis une ressource a commander."
+		return
+	var quantity: int = maxi(1, int(order_quantity_spinbox.value))
+	var custom_point: Dictionary = _pending_order_delivery_point if bool(_pending_order_delivery_point.get("has_point", false)) else {}
+	if _delivery_manager.submit_order(resource_id, quantity, custom_point):
+		_pending_order_delivery_point.clear()
+		order_delivery_preview_changed.emit({})
+		orders_status_label.text = "Commande envoyee. Le camion arrive des que possible."
+		_update_order_panel()
+
+func _on_delivery_point_selected(cell_pos: Vector2i, world_pos: Vector2) -> void:
+	var point_state: Dictionary = _make_delivery_point_state(cell_pos, world_pos)
+	match _delivery_selection_context:
+		"default":
+			if GameManager:
+				GameManager.set_default_delivery_point(cell_pos, world_pos)
+			orders_status_label.text = "Point de livraison par defaut mis a jour."
+		"order":
+			_pending_order_delivery_point = point_state
+			order_delivery_preview_changed.emit(_pending_order_delivery_point.duplicate(true))
+			orders_status_label.text = "Destination de commande prete."
+		_:
+			orders_status_label.text = "Point de livraison selectionne."
+	_delivery_selection_context = ""
+	_update_order_panel()
+
+func _on_delivery_point_selection_changed(enabled: bool) -> void:
+	_is_delivery_point_selection_active = enabled
+	if not enabled and not _delivery_selection_context.is_empty():
+		_delivery_selection_context = ""
+		orders_status_label.text = "Selection annulee."
+	_update_order_panel()
+
+func _on_default_delivery_point_changed(_has_point: bool, _cell_pos: Vector2i, _world_pos: Vector2) -> void:
+	_update_order_panel()
+
+func _on_order_submitted(order: Dictionary) -> void:
+	orders_status_label.text = "Commande en file: %s x%d" % [order.get("resource_label", "Ressource"), int(order.get("quantity", 0))]
+	_update_order_panel()
+
+func _on_delivery_started(order: Dictionary) -> void:
+	orders_status_label.text = "Livraison en cours: %s x%d" % [order.get("resource_label", "Ressource"), int(order.get("quantity", 0))]
+	_update_order_panel()
+
+func _on_delivery_completed(order: Dictionary) -> void:
+	orders_status_label.text = "Livraison terminee: %s x%d" % [order.get("resource_label", "Ressource"), int(order.get("quantity", 0))]
+	_update_order_panel()
+
+func _on_delivery_failed(message: String) -> void:
+	orders_status_label.text = message
+	_update_order_panel()
+
+func _on_delivery_queue_changed(queue_size: int) -> void:
+	if queue_size > 0:
+		btn_toggle_orders.text = "Commandes [%d]" % queue_size
+	else:
+		btn_toggle_orders.text = "Commandes"
+
 func _format_money_value(amount: float) -> String:
 	var formatted_money: String = String.num(amount, 2)
 	if formatted_money.ends_with(".00"):
@@ -407,7 +657,8 @@ func _format_energy_value(value: float) -> String:
 	return "%s kW consommation" % String.num(value, 1)
 
 func _ensure_input_actions() -> void:
-	_ensure_action_with_keys(ACTION_TOGGLE_SESSION_OVERVIEW, [KEY_TAB])
+	_ensure_action_with_keys(ACTION_TOGGLE_ORDER_PANEL, [KEY_TAB])
+	_ensure_action_with_keys(ACTION_TOGGLE_SESSION_OVERVIEW, [KEY_I])
 	_ensure_action_with_keys(ACTION_TOGGLE_BUILD_MENU, [KEY_Q])
 
 func _ensure_action_with_keys(action_name: StringName, keycodes: Array[int]) -> void:

@@ -13,6 +13,7 @@ extends PanelContainer
 @onready var rate_label: Label              = %RateLabel
 @onready var energy_label: Label            = %EnergyLabel
 @onready var co2_label: Label               = %Co2Label
+@onready var status_label: Label            = %StatusLabel
 @onready var active_toggle: CheckButton     = %ActiveToggle
 @onready var close_btn: Button              = %CloseBtn
 
@@ -26,6 +27,8 @@ func _ready() -> void:
 	recipe_selector.item_selected.connect(_on_recipe_selected)
 	rate_slider.value_changed.connect(_on_rate_changed)
 	active_toggle.toggled.connect(_on_active_toggled)
+	if GameManager:
+		GameManager.resources_updated.connect(_on_game_resources_updated)
 	hide()
 
 # ─── API publique ─────────────────────────────────────────────────────────────
@@ -124,7 +127,8 @@ func _refresh_recipe_details() -> void:
 			input_list.add_item("(aucune)")
 		else:
 			for item in inputs:
-				input_list.add_item("%s ×%d" % [item, inputs[item]])
+				var stock_amount: int = GameManager.get_resource_stock(item) if GameManager else 0
+				input_list.add_item("%s ×%d (stock %d)" % [item, inputs[item], stock_amount])
 
 	output_list.clear()
 	if recipe.is_empty():
@@ -159,6 +163,20 @@ func _refresh_stats() -> void:
 		co2_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
 	else:
 		co2_label.remove_theme_color_override("font_color")
+
+	status_label.text = current_entity.get_status_text()
+	if current_entity.get_status_text() == "Operationnel":
+		status_label.add_theme_color_override("font_color", Color(0.2, 0.9, 0.2))
+	elif current_entity.get_status_text() == "En attente de ressources":
+		status_label.add_theme_color_override("font_color", Color(0.95, 0.75, 0.2))
+	else:
+		status_label.remove_theme_color_override("font_color")
+
+func _on_game_resources_updated() -> void:
+	if current_entity == null:
+		return
+	_refresh_recipe_details()
+	_refresh_stats()
 
 # ─── Utilitaire ───────────────────────────────────────────────────────────────
 

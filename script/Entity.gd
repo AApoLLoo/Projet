@@ -28,9 +28,13 @@ var build_cost: float = 0.0
 var is_active: bool = false :
 	set(value):
 		is_active = value
+		if not is_active:
+			_production_timer = 0.0
 		_on_active_changed(value)
 		entity_updated.emit(self)
 		EntityManager.recalculate_totals()
+
+var _production_timer: float = 0.0
 
 # ─── Signaux ─────────────────────────────────────────────────────────────────
 
@@ -44,9 +48,25 @@ signal entity_updated(entity: Entity)
 
 func _ready() -> void:
 	entity_id = _generate_id()
+	set_process(true)
 	# La sous-classe appelle super._ready() puis définit entity_type et
 	# charge ses recettes avant d'appeler _post_ready().
 	_post_ready()
+
+func _process(delta: float) -> void:
+	if not _can_operate_now():
+		return
+
+	var cycle_duration: float = _get_cycle_duration()
+	if cycle_duration <= 0.0:
+		return
+
+	_production_timer += delta
+	while _production_timer >= cycle_duration:
+		if not _run_production_cycle():
+			_production_timer = 0.0
+			break
+		_production_timer -= cycle_duration
 
 func _post_ready() -> void:
 	# Charger la première recette disponible par défaut
@@ -62,13 +82,13 @@ func _exit_tree() -> void:
 
 # kW effectif : recipe.energy_delta × taux × (1 si actif, 0 sinon)
 func get_energy_delta() -> float:
-	if not is_active or current_recipe.is_empty():
+	if not _can_operate_now():
 		return 0.0
 	return current_recipe.get("energy_delta", 0.0) * production_rate
 
 # g/min effectif
 func get_co2_rate() -> float:
-	if not is_active or current_recipe.is_empty():
+	if not _can_operate_now():
 		return 0.0
 	return current_recipe.get("co2_rate", 0.0) * production_rate
 
@@ -76,11 +96,13 @@ func get_co2_rate() -> float:
 
 func set_recipe(recipe: Dictionary) -> void:
 	current_recipe = recipe
+	_production_timer = 0.0
 	entity_updated.emit(self)
 	EntityManager.recalculate_totals()
 
 func set_production_rate(rate: float) -> void:
 	production_rate = clampf(rate, 0.0, 1.0)
+	_production_timer = 0.0
 	entity_updated.emit(self)
 	EntityManager.recalculate_totals()
 
@@ -94,8 +116,19 @@ func get_stats() -> Dictionary:
 		"is_active": is_active,
 		"energy_delta": get_energy_delta(),
 		"co2_rate": get_co2_rate(),
-		"cell_position": cell_position
+		"cell_position": cell_position,
+		"status_text": get_status_text()
 	}
+
+func get_status_text() -> String:
+	if not is_active:
+		return "Arret"
+	if current_recipe.is_empty():
+		return "Aucune recette"
+	var inputs: Dictionary = current_recipe.get("inputs", {})
+	if not inputs.is_empty() and not _has_required_inputs():
+		return "En attente de ressources"
+	return "Operationnel"
 
 # Sérialisation pour la sauvegarde future
 func serialize() -> Dictionary:
@@ -134,6 +167,46 @@ func deserialize(data: Dictionary) -> void:
 # Appelé quand is_active change (ex: jouer/arrêter une animation)
 func _on_active_changed(_active: bool) -> void:
 	pass
+
+func _can_operate_now() -> bool:
+	if not is_active or current_recipe.is_empty() or production_rate <= 0.0:
+		return false
+	var inputs: Dictionary = current_recipe.get("inputs", {})
+	if inputs.is_empty():
+		return true
+	return _has_required_inputs()
+
+func _has_required_inputs() -> bool:
+	if GameManager == null:
+		return false
+	return GameManager.has_resources(current_recipe.get("inputs", {}))
+
+func _get_cycle_duration() -> float:
+	if current_recipe.is_empty():
+		return 0.0
+	var base_duration: float = maxf(0.1, float(current_recipe.get("production_time", 1.0)))
+	return base_duration / maxf(production_rate, 0.01)
+
+func _run_production_cycle() -> bool:
+	var inputs: Dictionary = current_recipe.get("inputs", {})
+	if not inputs.is_empty():
+		if GameManager == null or not GameManager.consume_resources(inputs):
+			entity_updated.emit(self)
+			EntityManager.recalculate_totals()
+			return false
+
+	var outputs: Dictionary = current_recipe.get("outputs", {})
+	var stock_outputs: Dictionary = {}
+	for resource_id in outputs.keys():
+		if resource_id == "energie":
+			continue
+		stock_outputs[resource_id] = int(outputs[resource_id])
+	if not stock_outputs.is_empty() and GameManager:
+		GameManager.add_resource_stock(stock_outputs)
+
+	entity_updated.emit(self)
+	EntityManager.recalculate_totals()
+	return true
 
 # ─── Interne ─────────────────────────────────────────────────────────────────
 
