@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://dkcdd7lr0ashv"]
+
+[ext_resource type="Script" uid="uid://luydtrtunans" path="res://scene/materiaux.gd" id="1_3t020"]
+[ext_resource type="Texture2D" uid="uid://87m6wdapl6di" path="res://asset/resources_basic.png" id="2_7bv4r"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7bv4r"]
+
+[node name="Materiaux" type="Area2D" unique_id=1648752649]
+script = ExtResource("1_3t020")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=920633653]
+texture = ExtResource("2_7bv4r")
+hframes = 11
+vframes = 10
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=757227631]
+shape = SubResource("RectangleShape2D_7bv4r")
