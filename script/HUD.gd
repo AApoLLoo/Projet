@@ -343,7 +343,7 @@ func _style_hud() -> void:
 	for button in [btn_toggle_build_menu, btn_toggle_orders, btn_toggle_session_overview]:
 		UITheme.style_button(button, UITheme.ACCENT_GOLD, UITheme.INK_DARK, true, true)
 	for button in [btn_build_belt, btn_build_turbine, btn_build_factory]:
-		button.custom_minimum_size = Vector2(0.0, 44.0)
+		button.custom_minimum_size = Vector2(305.0, 44.0)
 	for button in [curve_top, curve_down, curve_right, curve_left, belt_droit, belt_left]:
 		UITheme.style_button(button, Color("#E9EEF1"), UITheme.INK_DARK, false, true)
 	UITheme.style_card(orders_panel, false, true)
@@ -438,9 +438,6 @@ func _start_building_process(building_type: String) -> void:
 	if building_manager:
 		var data = buildings_data[building_type]
 		building_manager.start_building(data["scene"], data["cost"], data["texture"], data.get("frames", 1))
-		# Fermer le menu de construction après la sélection
-		if build_menu_container:
-			build_menu_container.visible = false
 		# Masquer le panneau entité quand on entre en mode construction
 		if _entity_panel:
 			_entity_panel.hide()
@@ -655,11 +652,15 @@ func _toggle_orders_panel() -> void:
 	_update_order_panel()
 	orders_panel.visible = not orders_panel.visible
 
+# APRÈS
 func _toggle_build_menu() -> void:
 	if build_menu_container == null:
 		return
+	# Si on ferme le menu, on annule aussi le mode construction (supprime le fantôme)
+	if build_menu_container.visible and _building_manager:
+		_building_manager.stop_building()
 	build_menu_container.visible = not build_menu_container.visible
-
+	
 func _update_session_overview() -> void:
 	if session_overview_panel == null:
 		return
