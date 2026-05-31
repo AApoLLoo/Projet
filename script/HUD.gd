@@ -164,6 +164,10 @@ func _ready() -> void:
 	_style_hud()
 	if session_overview_panel:
 		session_overview_panel.hide()
+	if ContractManager:
+		ContractManager.contract_arrived.connect(_on_contract_arrived)
+		ContractManager.contract_completed.connect(_on_contract_completed)
+		ContractManager.contract_failed.connect(_on_contract_failed)
 	if orders_panel:
 		orders_panel.hide()
 
@@ -324,10 +328,55 @@ func _ready() -> void:
 			)
 		if _building_manager:
 			destroy_button.set_pressed(_building_manager.is_destroying)
+	
+func _on_contract_arrived(contract: Dictionary) -> void:
+	_show_hint_toast("📦 Contrat J%d : livrer %d %s → +%.0f €" % [
+		int(contract["day_issued"]),
+		int(contract["quantity"]),
+		String(contract["resource_label"]),
+		float(contract["reward"])
+	])
 
+func _on_contract_completed(contract: Dictionary) -> void:
+	_show_hint_toast("✓ Contrat rempli ! +%.0f €" % float(contract["reward"]))
+
+func _on_contract_failed(contract: Dictionary) -> void:
+	_show_hint_toast("✗ Contrat échoué : -%.0f €" % float(contract["penalty"]))
+	
+func _show_hint_toast(message: String) -> void:
+	var toast := PanelContainer.new()
+	toast.set_anchors_preset(Control.PRESET_CENTER)
+	toast.offset_left = -280.0
+	toast.offset_right = 280.0
+	toast.offset_top = 40.0
+	toast.offset_bottom = 80.0
+	var style := StyleBoxFlat.new()
+	style.bg_color = UITheme.ACCENT_GOLD
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	style.content_margin_left = 14.0
+	style.content_margin_right = 14.0
+	style.content_margin_top = 8.0
+	style.content_margin_bottom = 8.0
+	toast.add_theme_stylebox_override("panel", style)
+	add_child(toast)
+	var label := Label.new()
+	label.text = message
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", UITheme.INK_DARK)
+	toast.add_child(label)
+	var tween := create_tween()
+	tween.tween_interval(4.0)
+	tween.tween_property(toast, "modulate:a", 0.0, 0.8)
+	tween.tween_callback(toast.queue_free)
+	
 func _style_hud() -> void:
 	UITheme.style_label(day_label, "caption")
 	UITheme.style_label(time_label, "metric")
+	day_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	UITheme.style_label(resources_caption, "caption")
 	UITheme.style_label(co2_caption, "caption")
 	UITheme.style_label(money_label, "metric")
@@ -357,19 +406,22 @@ func _build_shortcut_bar() -> void:
 	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	bar.anchor_top = 1.0
 	bar.anchor_bottom = 1.0
-	bar.offset_top = -44.0
-	bar.offset_bottom = 0.0
-	UITheme.style_card(bar, false, true, 0.82)
-
-	# CenterContainer force le centrage vertical réel
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bar.add_child(center)
+	bar.offset_top = -32.0
+	bar.offset_bottom = -20.0
+	
+	var bar_style := StyleBoxFlat.new()
+	bar_style.bg_color = UITheme.SURFACE_GLASS
+	bar_style.bg_color.a = 0.82
+	bar_style.content_margin_left = 0.0
+	bar_style.content_margin_right = 0.0
+	bar_style.content_margin_top = 2.0    # ← marge haut réduite
+	bar_style.content_margin_bottom = 2.0 # ← marge bas réduite
+	bar.add_theme_stylebox_override("panel", bar_style)
 
 	var hbox := HBoxContainer.new()
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox.add_theme_constant_override("separation", 6)
-	center.add_child(hbox)
+	bar.add_child(hbox)
 
 	var shortcuts: Array = [
 		["Échap", "Menu Pause"],
@@ -1015,6 +1067,7 @@ func _on_choose_default_delivery_point_pressed() -> void:
 	_delivery_selection_context = "default"
 	orders_status_label.text = "Clique sur la carte pour definir le point de livraison par defaut."
 	_building_manager.start_delivery_point_selection()
+	orders_panel.hide()
 
 func _on_choose_order_delivery_point_pressed() -> void:
 	if _building_manager == null or not _building_manager.has_method("start_delivery_point_selection"):
@@ -1037,6 +1090,9 @@ func _on_submit_order_pressed() -> void:
 	var resource_id: String = _get_selected_resource_id()
 	if resource_id.is_empty():
 		orders_status_label.text = "Choisis une ressource a traiter."
+		return
+	if GameManager and not GameManager.has_default_delivery_point and not bool(_pending_order_delivery_point.get("has_point", false)):
+		_show_hint_toast("⚠ Définis un point de livraison avant de commander")
 		return
 	var quantity: int = maxi(1, int(order_quantity_spinbox.value))
 	var custom_point: Dictionary = _pending_order_delivery_point if bool(_pending_order_delivery_point.get("has_point", false)) else {}
@@ -1065,6 +1121,7 @@ func _on_delivery_point_selected(cell_pos: Vector2i, world_pos: Vector2) -> void
 		_:
 			orders_status_label.text = "Point de livraison selectionne."
 	_delivery_selection_context = ""
+	orders_panel.show()
 	_update_order_panel()
 
 func _on_delivery_point_selection_changed(enabled: bool) -> void:

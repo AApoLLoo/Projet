@@ -47,14 +47,14 @@ const RESOURCE_CATALOG: Dictionary = {
 	"piece_base": {
 		"label": "Piece de base",
 		"import_unit_cost": 120.0,
-		"export_unit_value": 0.0,
+		"export_unit_value": 180.0,  
 		"can_import": true,
 		"can_export": true,
 	},
 	"piece_avancee": {
 		"label": "Piece avancee",
 		"import_unit_cost": 240.0,
-		"export_unit_value": 0.0,
+		"export_unit_value": 420.0,   
 		"can_import": true,
 		"can_export": true,
 	},
