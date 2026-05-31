@@ -125,7 +125,7 @@ func _style_screen() -> void:
 	UITheme.style_card(_display_card, false, false)
 	UITheme.style_card(_audio_card, false, false)
 	UITheme.style_option_button(_resolution_option)
-	UITheme.style_toggle(_fullscreen_check, UITheme.ACCENT_GOLD)
+	UITheme.style_checkbox(_fullscreen_check)
 	UITheme.style_slider(_master_slider, UITheme.ACCENT_TEAL)
 	UITheme.style_slider(_music_slider, UITheme.ACCENT_SKY)
 	UITheme.style_slider(_sfx_slider, UITheme.ACCENT_GOLD)

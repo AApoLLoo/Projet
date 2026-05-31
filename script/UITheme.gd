@@ -2,7 +2,7 @@ class_name UITheme
 extends RefCounted
 
 const INK_DARK := Color("#10202D")
-const INK_MUTED := Color("#5F7286")
+const INK_MUTED := Color("#3D5266")
 const SURFACE := Color("#F5F1EA")
 const SURFACE_SOFT := Color("#FFF9F1")
 const SURFACE_DARK := Color("#1A2B38")
@@ -22,6 +22,28 @@ static func style_screen(root: Control) -> void:
 	root.add_theme_color_override("font_disabled_color", INK_MUTED)
 	root.add_theme_constant_override("outline_size", 0)
 
+static func style_option_button(option_button: OptionButton, fill_color: Color = SURFACE_SOFT) -> void:
+	if option_button == null:
+		return
+	option_button.add_theme_stylebox_override("normal", _make_button_style(fill_color, BORDER_STRONG, true))
+	option_button.add_theme_stylebox_override("hover", _make_button_style(fill_color.lightened(0.03), BORDER_STRONG, true))
+	option_button.add_theme_stylebox_override("pressed", _make_button_style(fill_color.darkened(0.03), BORDER_STRONG, true))
+	# Ajoute un style disabled visible :
+	var disabled_style := _make_button_style(Color(BORDER_SOFT.r, BORDER_SOFT.g, BORDER_SOFT.b, 0.6), BORDER_SOFT, true)
+	option_button.add_theme_stylebox_override("disabled", disabled_style)
+	option_button.add_theme_color_override("font_color", INK_DARK)
+	option_button.add_theme_color_override("font_disabled_color", INK_MUTED)  # ← était transparent
+	option_button.add_theme_font_size_override("font_size", 17)
+
+static func style_checkbox(checkbox: CheckBox) -> void:
+	if checkbox == null:
+		return
+	checkbox.add_theme_color_override("font_color", INK_DARK)
+	checkbox.add_theme_color_override("font_hover_color", INK_DARK)
+	checkbox.add_theme_color_override("font_pressed_color", INK_DARK)
+	checkbox.add_theme_color_override("font_disabled_color", INK_MUTED)
+	checkbox.add_theme_font_size_override("font_size", 17)
+	
 static func style_card(panel: PanelContainer, dark: bool = false, translucent: bool = false, alpha: float = -1.0) -> void:
 	if panel == null:
 		return
@@ -82,7 +104,7 @@ static func style_label(label: Label, role: String = "body", light_text: bool = 
 			size = 22
 		"caption":
 			size = 13
-			color = Color("#7C8A97") if not light_text else Color("#D6E2EA")
+			color = Color("#3D5266") if not light_text else Color("#D6E2EA")
 		"metric":
 			size = 24
 		"small":
@@ -90,32 +112,30 @@ static func style_label(label: Label, role: String = "body", light_text: bool = 
 	label.add_theme_font_size_override("font_size", size)
 	label.add_theme_color_override("font_color", color)
 
-static func style_option_button(option_button: OptionButton, fill_color: Color = SURFACE_SOFT) -> void:
-	if option_button == null:
-		return
-	option_button.add_theme_stylebox_override("normal", _make_button_style(fill_color, BORDER_SOFT, true))
-	option_button.add_theme_stylebox_override("hover", _make_button_style(fill_color.lightened(0.03), BORDER_STRONG, true))
-	option_button.add_theme_stylebox_override("pressed", _make_button_style(fill_color.darkened(0.03), BORDER_STRONG, true))
-	option_button.add_theme_color_override("font_color", INK_DARK)
-	option_button.add_theme_font_size_override("font_size", 17)
 
 static func style_slider(slider: HSlider, accent: Color = ACCENT_TEAL) -> void:
 	if slider == null:
 		return
+
 	var groove: StyleBoxFlat = StyleBoxFlat.new()
-	groove.bg_color = Color("#DCE4E8")
+	groove.bg_color = Color("#3D5266")
 	groove.corner_radius_top_left = 6
 	groove.corner_radius_top_right = 6
 	groove.corner_radius_bottom_left = 6
 	groove.corner_radius_bottom_right = 6
+	groove.content_margin_top = 4.0      # ← épaisseur verticale
+	groove.content_margin_bottom = 4.0   # ← épaisseur verticale
+
 	var fill: StyleBoxFlat = StyleBoxFlat.new()
 	fill.bg_color = accent
 	fill.corner_radius_top_left = 6
 	fill.corner_radius_top_right = 6
 	fill.corner_radius_bottom_left = 6
 	fill.corner_radius_bottom_right = 6
+	fill.content_margin_top = 4.0
+	fill.content_margin_bottom = 4.0
 	var grabber: StyleBoxFlat = StyleBoxFlat.new()
-	grabber.bg_color = SURFACE_SOFT
+	grabber.bg_color = accent
 	grabber.border_color = accent.darkened(0.14)
 	grabber.border_width_left = 2
 	grabber.border_width_top = 2
@@ -134,7 +154,13 @@ static func style_slider(slider: HSlider, accent: Color = ACCENT_TEAL) -> void:
 	slider.add_theme_stylebox_override("grabber_area_highlight", fill)
 	slider.add_theme_stylebox_override("grabber", grabber)
 	slider.add_theme_stylebox_override("grabber_highlight", grabber)
-
+	slider.add_theme_color_override("grabber_color", accent)
+	slider.add_theme_color_override("grabber_color_highlight", accent.lightened(0.1))
+	slider.add_theme_icon_override("grabber", _make_circle_texture(accent, 9))
+	slider.add_theme_icon_override("grabber_highlight", _make_circle_texture(accent.lightened(0.1), 9))
+	slider.add_theme_icon_override("grabber_disabled", _make_circle_texture(INK_MUTED, 9))
+	slider.add_theme_constant_override("grabber_offset", 0)
+	
 static func style_item_list(item_list: ItemList) -> void:
 	if item_list == null:
 		return
@@ -169,7 +195,19 @@ static func style_spin_box(spin_box: SpinBox) -> void:
 
 static func style_toggle(button: BaseButton, accent: Color = ACCENT_TEAL) -> void:
 	style_button(button, accent, INK_DARK, true, true)
+	button.add_theme_color_override("font_color", INK_DARK)
+	button.add_theme_color_override("font_hover_color", INK_DARK)
 
+static func _make_circle_texture(color: Color, radius: int) -> ImageTexture:
+	var size := radius * 2 + 2
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var center := Vector2(radius, radius)
+	for x in range(size):
+		for y in range(size):
+			var dist := Vector2(x, y).distance_to(center)
+			img.set_pixel(x, y, color if dist <= radius else Color(0,0,0,0))
+	return ImageTexture.create_from_image(img)
+	
 static func style_dialog(dialog: Window) -> void:
 	if dialog == null:
 		return
