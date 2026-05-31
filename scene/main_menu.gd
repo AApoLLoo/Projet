@@ -101,13 +101,9 @@ func _set_menu_description(button: Button) -> void:
 		return
 	_menu_description_label.text = _menu_descriptions.get(button, "")
 
+# APRÈS
 func _on_start_pressed() -> void:
-	# Continuer la dernière sauvegarde si elle existe, sinon démarrer une nouvelle partie.
-	var existing_slots: Array[Dictionary] = SaveSystem.get_save_slots()
-	if existing_slots.is_empty():
-		SaveSystem.request_new_game()
-	else:
-		SaveSystem.request_load_game()  # Charge automatiquement le slot le plus récent
+	SaveSystem.request_new_game()
 	_change_scene(LEVEL_SCENE)
 
 func _on_load_pressed() -> void:
