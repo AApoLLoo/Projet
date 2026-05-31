@@ -31,6 +31,7 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var overview_failures_value: Label = %OverviewFailuresValue
 @onready var overview_co2_value: Label = %OverviewCO2Value
 @onready var overview_electricity_value: Label = %OverviewElectricityValue
+@onready var contracts_label: Label = %ContractsLabel
 
 @onready var btn_pause: Button = %BtnPause
 @onready var btn_x1: Button = %BtnX1
@@ -330,17 +331,15 @@ func _ready() -> void:
 			destroy_button.set_pressed(_building_manager.is_destroying)
 	
 func _on_contract_arrived(contract: Dictionary) -> void:
-	_show_hint_toast("📦 Contrat J%d : livrer %d %s → +%.0f €" % [
-		int(contract["day_issued"]),
-		int(contract["quantity"]),
-		String(contract["resource_label"]),
-		float(contract["reward"])
-	])
+	_update_contracts_display()
+	_show_hint_toast("📦 Nouveau contrat !")
 
 func _on_contract_completed(contract: Dictionary) -> void:
+	_update_contracts_display()
 	_show_hint_toast("✓ Contrat rempli ! +%.0f €" % float(contract["reward"]))
 
 func _on_contract_failed(contract: Dictionary) -> void:
+	_update_contracts_display()
 	_show_hint_toast("✗ Contrat échoué : -%.0f €" % float(contract["penalty"]))
 	
 func _show_hint_toast(message: String) -> void:
@@ -382,7 +381,10 @@ func _style_hud() -> void:
 	UITheme.style_label(money_label, "metric")
 	UITheme.style_label(co2_label, "body")
 	UITheme.style_label(build_menu_title, "caption")
-	day_label.add_theme_color_override("font_color", UITheme.INK_MUTED)
+	UITheme.style_label(contracts_label, "caption")
+	UITheme.style_label(contracts_label, "caption")
+	contracts_label.add_theme_color_override("font_color", UITheme.INK_DARK)
+	contracts_label.add_theme_font_size_override("font_size", 16)
 	resources_background.color = UITheme.SURFACE_GLASS
 	co2_background.color = UITheme.SURFACE_GLASS
 	top_hud_background.color = UITheme.SURFACE_GLASS
@@ -604,6 +606,21 @@ func _show_quick_save_toast() -> void:
 	tween.tween_property(toast, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(toast.queue_free)
 
+func _update_contracts_display() -> void:
+	if not ContractManager or contracts_label == null:
+		return
+	var contracts := ContractManager.get_active_contracts()
+	if contracts.is_empty():
+		contracts_label.text = ""
+		return
+	var parts: PackedStringArray = []
+	for c in contracts:
+		var delivered := int(c["delivered"])
+		var quantity := int(c["quantity"])
+		var label := String(c["resource_label"])
+		parts.append("📦 %s : %d/%d" % [label, delivered, quantity])
+	contracts_label.text = "Contrats : " + " | ".join(parts)
+	
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	if building_manager:
@@ -792,6 +809,7 @@ func _on_time_changed(hour: int, minute: int) -> void:
 func _on_day_changed(day: int) -> void:
 	_update_day_display(day)
 	_update_session_overview()
+	_update_contracts_display() 
 
 func _update_time_display(hour: int, minute: int) -> void:
 	# Formatage avec des zéros (ex: 08:05)
@@ -805,6 +823,7 @@ func _on_resources_updated() -> void:
 	_update_co2_display()
 	_update_session_overview()
 	_update_order_panel()
+	_update_contracts_display()
 
 func _update_money_display() -> void:
 	if money_label and GameManager:

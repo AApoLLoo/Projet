@@ -86,6 +86,10 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Vue usine"
 
+[node name="ContractsLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=125805602]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="MinimapContainer" type="MarginContainer" parent="." unique_id=987692439]
 anchors_preset = 3
 anchor_left = 1.0
