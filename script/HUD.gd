@@ -492,14 +492,20 @@ func _get_main_camera() -> Camera2D:
 	return current_camera
 
 func _get_minimap_world_rect() -> Rect2:
-	if _minimap_world_rect.size.x > 0.0 and _minimap_world_rect.size.y > 0.0:
-		return _minimap_world_rect
-
 	var current_scene: Node = get_tree().current_scene
 	if current_scene == null:
-		return Rect2()
+		return _minimap_world_rect
 
 	var floor_node: Node = current_scene.find_child("Floor", true, false)
+	if floor_node and floor_node.has_method("get_loaded_chunk_world_bounds"):
+		var chunk_world_rect_variant: Variant = floor_node.call("get_loaded_chunk_world_bounds")
+		if chunk_world_rect_variant is Rect2:
+			var chunk_world_rect: Rect2 = chunk_world_rect_variant
+			if chunk_world_rect.size.x > 0.0 and chunk_world_rect.size.y > 0.0:
+				_minimap_world_rect = chunk_world_rect
+				return _minimap_world_rect
+	if _minimap_world_rect.size.x > 0.0 and _minimap_world_rect.size.y > 0.0:
+		return _minimap_world_rect
 	if floor_node and floor_node.has_method("get_world_bounds"):
 		_minimap_world_rect = floor_node.call("get_world_bounds")
 		return _minimap_world_rect
