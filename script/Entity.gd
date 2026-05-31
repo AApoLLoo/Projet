@@ -86,17 +86,33 @@ func _exit_tree() -> void:
 
 # ─── Propriétés calculées ────────────────────────────────────────────────────
 
-# kW effectif : recipe.energy_delta × taux × (1 si actif, 0 sinon)
+# kW effectif, influencé linéairement par la gravité et la température
 func get_energy_delta() -> float:
 	if not _can_operate_now():
 		return 0.0
-	return current_recipe.get("energy_delta", 0.0) * production_rate
+	var base_energy: float = current_recipe.get("energy_delta", 0.0) * production_rate
+	var settings: Dictionary = SettingsManager.get_settings()
+	# Gravité : 0.1→30.0 → factor linéaire 0.5 (légère) à 2.0 (forte)
+	var gravity: float = SettingsManager._to_float(settings.get("physics_gravity", 9.8), 9.8)
+	var gravity_t: float = (gravity - 0.1) / (30.0 - 0.1)
+	var gravity_factor: float = lerpf(0.5, 2.0, gravity_t)
+	# Température : -50→150 → factor linéaire 2.0 (froid, chauffage) à 0.5 (chaud)
+	var temperature: float = SettingsManager._to_float(settings.get("physics_temperature", 20.0), 20.0)
+	var temp_t: float = (temperature - (-50.0)) / (150.0 - (-50.0))
+	var temp_factor: float = lerpf(2.0, 0.5, temp_t)
+	return base_energy * gravity_factor * temp_factor
 
-# g/min effectif
+# g/min effectif, influencé linéairement par la température
 func get_co2_rate() -> float:
 	if not _can_operate_now():
 		return 0.0
-	return current_recipe.get("co2_rate", 0.0) * production_rate
+	var base_co2: float = current_recipe.get("co2_rate", 0.0) * production_rate
+	var settings: Dictionary = SettingsManager.get_settings()
+	# Température : -50→150, défaut 20 → factor linéaire 0.5 (froid) à 2.0 (chaud)
+	var temperature: float = SettingsManager._to_float(settings.get("physics_temperature", 20.0), 20.0)
+	var temp_t: float = (temperature - (-50.0)) / (150.0 - (-50.0))
+	var temp_factor: float = lerpf(0.5, 2.0, temp_t)
+	return base_co2 * temp_factor
 
 # ─── Méthodes publiques ──────────────────────────────────────────────────────
 
@@ -257,7 +273,17 @@ func _get_cycle_duration() -> float:
 	if current_recipe.is_empty():
 		return 0.0
 	var base_duration: float = maxf(0.1, float(current_recipe.get("production_time", 1.0)))
-	return base_duration / maxf(production_rate, 0.01)
+	var settings: Dictionary = SettingsManager.get_settings()
+	# Gravité : 0.1→30.0, défaut 9.8 → factor linéaire 0.5 (rapide) à 2.0 (lent)
+	var gravity: float = SettingsManager._to_float(settings.get("physics_gravity", 9.8), 9.8)
+	var gravity_t: float = (gravity - 0.1) / (30.0 - 0.1)
+	var gravity_factor: float = lerpf(0.5, 2.0, gravity_t)
+	# Friction : 0.0→5.0, défaut 1.0 → factor linéaire 0.5 (glissant) à 2.0 (résistant)
+	var friction: float = SettingsManager._to_float(settings.get("physics_friction", 1.0), 1.0)
+	var friction_t: float = friction / 5.0
+	var friction_factor: float = lerpf(0.5, 2.0, friction_t)
+	var adjusted_duration: float = base_duration * gravity_factor * friction_factor
+	return adjusted_duration / maxf(production_rate, 0.01)
 
 func _run_production_cycle() -> bool:
 	var inputs: Dictionary = current_recipe.get("inputs", {})

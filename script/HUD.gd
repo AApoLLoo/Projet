@@ -643,29 +643,41 @@ func _update_co2_display() -> void:
 	if co2_label and GameManager:
 		co2_label.text = _format_rate_value(GameManager.co2_emissions, "g/min CO2")
 
+func _close_all_panels() -> void:
+	if session_overview_panel and session_overview_panel.visible:
+		session_overview_panel.hide()
+	if orders_panel and orders_panel.visible:
+		orders_panel.hide()
+	if build_menu_container and build_menu_container.visible:
+		if _building_manager:
+			_building_manager.stop_building()
+		build_menu_container.hide()
+
 func _toggle_session_overview() -> void:
 	if session_overview_panel == null:
 		return
-
-	if not session_overview_panel.visible:
+	var will_open: bool = not session_overview_panel.visible
+	_close_all_panels()
+	if will_open:
 		_update_session_overview()
-
-	session_overview_panel.visible = not session_overview_panel.visible
+		session_overview_panel.show()
 
 func _toggle_orders_panel() -> void:
 	if orders_panel == null:
 		return
-	_update_order_panel()
-	orders_panel.visible = not orders_panel.visible
+	var will_open: bool = not orders_panel.visible
+	_close_all_panels()
+	if will_open:
+		_update_order_panel()
+		orders_panel.show()
 
-# APRÈS
 func _toggle_build_menu() -> void:
 	if build_menu_container == null:
 		return
-	# Si on ferme le menu, on annule aussi le mode construction (supprime le fantôme)
-	if build_menu_container.visible and _building_manager:
-		_building_manager.stop_building()
-	build_menu_container.visible = not build_menu_container.visible
+	var will_open: bool = not build_menu_container.visible
+	_close_all_panels()
+	if will_open:
+		build_menu_container.show()
 	
 func _update_session_overview() -> void:
 	if session_overview_panel == null:
