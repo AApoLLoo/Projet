@@ -349,7 +349,81 @@ func _style_hud() -> void:
 	UITheme.style_card(orders_panel, false, true)
 	UITheme.style_card(session_overview_panel, false, true)
 	_style_order_panels()
+	_build_shortcut_bar()
 
+func _build_shortcut_bar() -> void:
+	var bar := PanelContainer.new()
+	bar.name = "ShortcutBar"
+	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	bar.anchor_top = 1.0
+	bar.anchor_bottom = 1.0
+	bar.offset_top = -44.0
+	bar.offset_bottom = 0.0
+	UITheme.style_card(bar, false, true, 0.82)
+
+	# CenterContainer force le centrage vertical réel
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bar.add_child(center)
+
+	var hbox := HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox.add_theme_constant_override("separation", 6)
+	center.add_child(hbox)
+
+	var shortcuts: Array = [
+		["Échap", "Menu Pause"],
+		["Q", "Construction"],
+		["Tab", "Logistique"],
+		["I", "Vue usine"],
+		["P", "Pause temps"],
+		["E", "Sauvegarde rapide"],
+	]
+
+	for i in shortcuts.size():
+		if i > 0:
+			var sep := Label.new()
+			sep.text = "·"
+			sep.add_theme_font_size_override("font_size", 16)
+			sep.add_theme_color_override("font_color", UITheme.BORDER_STRONG)
+			hbox.add_child(sep)
+
+		var entry: Array = shortcuts[i]
+
+		var key_panel := PanelContainer.new()
+		var key_style := StyleBoxFlat.new()
+		key_style.bg_color = UITheme.SURFACE_DARK
+		key_style.border_color = UITheme.ACCENT_GOLD
+		key_style.border_width_left = 1
+		key_style.border_width_top = 1
+		key_style.border_width_right = 1
+		key_style.border_width_bottom = 2
+		key_style.corner_radius_top_left = 5
+		key_style.corner_radius_top_right = 5
+		key_style.corner_radius_bottom_left = 5
+		key_style.corner_radius_bottom_right = 5
+		key_style.content_margin_left = 6.0
+		key_style.content_margin_right = 6.0
+		key_style.content_margin_top = 2.0
+		key_style.content_margin_bottom = 2.0
+		key_panel.add_theme_stylebox_override("panel", key_style)
+		hbox.add_child(key_panel)
+
+		var key_label := Label.new()
+		key_label.text = entry[0]
+		key_label.add_theme_font_size_override("font_size", 13)
+		key_label.add_theme_color_override("font_color", UITheme.ACCENT_GOLD)
+		key_panel.add_child(key_label)
+
+		var desc_label := Label.new()
+		desc_label.text = entry[1]
+		desc_label.add_theme_font_size_override("font_size", 14)
+		desc_label.add_theme_color_override("font_color", UITheme.INK_MUTED)
+		hbox.add_child(desc_label)
+
+	add_child(bar)
+	
+		
 func _style_order_panels() -> void:
 	for button in [
 		btn_order_mode_import,
@@ -420,19 +494,64 @@ func _style_order_panels() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		var key_event: InputEventKey = event
-		if key_event.pressed and not key_event.echo and key_event.is_action_pressed(ACTION_TOGGLE_ORDER_PANEL):
+		if not key_event.pressed or key_event.echo:
+			return
+		if key_event.is_action_pressed(ACTION_TOGGLE_ORDER_PANEL):
 			_toggle_orders_panel()
 			get_viewport().set_input_as_handled()
-			return
-		if key_event.pressed and not key_event.echo and key_event.is_action_pressed(ACTION_TOGGLE_BUILD_MENU):
+		elif key_event.is_action_pressed(ACTION_TOGGLE_BUILD_MENU):
 			_toggle_build_menu()
 			get_viewport().set_input_as_handled()
-			return
-		if key_event.pressed and not key_event.echo and key_event.is_action_pressed(ACTION_TOGGLE_SESSION_OVERVIEW):
+		elif key_event.is_action_pressed(ACTION_TOGGLE_SESSION_OVERVIEW):
 			_toggle_session_overview()
 			get_viewport().set_input_as_handled()
+		elif key_event.is_action_pressed(&"hud_toggle_pause"):   # ← nouveau
+			var new_speed: float = 0.0 if TimeManager.time_speed > 0.0 else 1.0
+			TimeManager.time_speed = new_speed
+			get_viewport().set_input_as_handled()
+		elif key_event.is_action_pressed(&"hud_quick_save"):
+			var level: Node = get_tree().current_scene
+			if level and level.has_method("quick_save"):
+				level.quick_save()
+				_show_quick_save_toast()
+			get_viewport().set_input_as_handled()
 
-# --- NOUVELLE FONCTION ---
+func _show_quick_save_toast() -> void:
+	var toast := PanelContainer.new()
+	toast.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	toast.offset_left = -220.0
+	toast.offset_top = -360.0
+	toast.offset_right = -10.0
+	toast.offset_bottom = -320.0
+	var style := StyleBoxFlat.new()
+	style.bg_color = UITheme.SURFACE_SOFT
+	style.border_color = UITheme.BORDER_STRONG
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	style.content_margin_left = 10.0
+	style.content_margin_right = 10.0
+	style.content_margin_top = 6.0
+	style.content_margin_bottom = 6.0
+	toast.add_theme_stylebox_override("panel", style)
+	add_child(toast)
+
+	var label := Label.new()
+	label.text = "✓ Partie sauvegardée"
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", UITheme.INK_DARK)
+	toast.add_child(label)
+
+	var tween := create_tween()
+	tween.tween_interval(1.5)
+	tween.tween_property(toast, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(toast.queue_free)
+
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	if building_manager:
@@ -1055,6 +1174,8 @@ func _ensure_input_actions() -> void:
 	_ensure_action_with_keys(ACTION_TOGGLE_ORDER_PANEL, [KEY_TAB])
 	_ensure_action_with_keys(ACTION_TOGGLE_SESSION_OVERVIEW, [KEY_I])
 	_ensure_action_with_keys(ACTION_TOGGLE_BUILD_MENU, [KEY_Q])
+	_ensure_action_with_keys(&"hud_quick_save", [KEY_E])        
+	_ensure_action_with_keys(&"hud_toggle_pause", [KEY_P])
 
 func _ensure_action_with_keys(action_name: StringName, keycodes: Array[int]) -> void:
 	if not InputMap.has_action(action_name):

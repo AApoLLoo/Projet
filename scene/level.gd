@@ -149,6 +149,9 @@ func _create_delivery_point_marker(marker_name: String, fill_color: Color, outli
 func _on_default_delivery_point_changed(_has_point: bool, _cell_pos: Vector2i, _world_pos: Vector2) -> void:
 	_refresh_delivery_point_marker()
 
+func quick_save() -> void:
+	_save_current_state()
+	
 func _refresh_delivery_point_marker() -> void:
 	if _delivery_point_marker == null:
 		return
