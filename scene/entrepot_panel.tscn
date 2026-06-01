@@ -1,9 +1,26 @@
 [gd_scene format=3 uid="uid://d038nj5y8uglu"]
 
-[ext_resource type="Script" uid="uid://3gf8rikqkqvw" path="res://script/EntrepotPanel.gd" id="1_g7rgc"]
+[ext_resource type="Script" uid="uid://3gf8rikqkqvw" path="res://script/WarehousePanel.gd" id="1_g7rgc"]
 
 [node name="EntrepotPanel" type="PanelContainer" unique_id=1027863301]
+offset_left = 329.0
+offset_top = 272.0
+offset_right = 456.0
+offset_bottom = 359.0
 script = ExtResource("1_g7rgc")
 
-[node name="Label" type="Label" parent="." unique_id=511923399]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=638026332]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer" unique_id=511923399]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="InventoryList" type="ItemList" parent="VBoxContainer" unique_id=944377686]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="VBoxContainer" unique_id=1760650470]
+unique_name_in_owner = true
 layout_mode = 2

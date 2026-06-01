@@ -84,6 +84,9 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var btn_clear_order_delivery_point: Button = %BtnClearOrderDeliveryPoint
 @onready var btn_submit_order: Button = %BtnSubmitOrder
 @onready var entrepot_panel = $EntrepotPanel # Chemin vers votre panneau dans le HUD
+var _warehouse_panel: PanelContainer = null
+
+
 # --- DICTIONNAIRE MIS À JOUR ---
 # --- DICTIONNAIRE MIS À JOUR AVEC DIRECTIONS ET VIRAGES ---
 var buildings_data = {
@@ -167,6 +170,20 @@ var _minimap_world_rect: Rect2 = Rect2()
 var _minimap_viewport_size: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
+	
+	# Remplace "res://scene/entity_panel.tscn" par ton vrai chemin
+	const ENTITY_PANEL_SCENE = preload("res://scene/entity_panel.tscn") 
+	# Remplace "res://scene/EntrepotPanel.tscn" par le chemin vers ta scène
+	const WAREHOUSE_PANEL_SCENE = preload("res://scene/entrepot_panel.tscn") 
+	
+	_entity_panel = ENTITY_PANEL_SCENE.instantiate()
+	add_child(_entity_panel)
+	_entity_panel.hide()
+	
+	_warehouse_panel = WAREHOUSE_PANEL_SCENE.instantiate()
+	add_child(_warehouse_panel)
+	_warehouse_panel.hide()
+	
 	
 	btn_build_entrepot.pressed.connect(func():
 		print("Clic sur ENTREPÔT !")
@@ -655,12 +672,29 @@ func _start_building_process(building_type: String) -> void:
 			_entity_panel.hide()
 
 func _on_entity_selected(entity) -> void:
-	if _entity_panel == null:
-		return
+	print("DEBUG: Signal de sélection reçu !") # <--- AJOUTE ÇA
+	
 	if entity == null:
-		_entity_panel.hide()
-	else:
-		_entity_panel.setup(entity)
+		print("DEBUG: Entité sélectionnée est NULL")
+		if _entity_panel: _entity_panel.hide()
+		if _warehouse_panel: _warehouse_panel.hide()
+		return
+
+	print("DEBUG: Type de l'entité : ", entity.get_script().get_path()) # <--- AJOUTE ÇA
+
+	# ... reste de ton code ...
+
+	# 3. Aiguillage : on choisit le bon panneau selon le type d'objet
+	if entity is WarehouseEntity:
+		# Si c'est un entrepôt, on utilise le WarehousePanel
+		if _warehouse_panel:
+			_warehouse_panel.setup(entity)
+			
+	elif entity is Entity: 
+		# Si c'est une usine/turbine (classe parente Entity)
+		# On utilise l'ancien panneau
+		if _entity_panel:
+			_entity_panel.setup(entity)
 
 func _process(_delta: float) -> void:
 	_update_minimap()
