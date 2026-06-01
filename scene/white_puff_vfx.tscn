@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://script/WhitePuffVfx.gd" id="1_whitepuffvfx"]
+
+[node name="WhitePuffVfx" type="Node2D"]
+z_index = 2
+script = ExtResource("1_whitepuffvfx")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+visible = false
+
+[node name="PuffTimer" type="Timer" parent="."]
+one_shot = true

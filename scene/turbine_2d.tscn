@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b8y65t6767qkw"]
 
 [ext_resource type="Script" path="res://script/TurbineEntity.gd" id="1_turbineentity"]
+[ext_resource type="PackedScene" path="res://scene/white_puff_vfx.tscn" id="2_whitepuffvfx"]
 [ext_resource type="Texture2D" uid="uid://cl1akoi1t5mdv" path="res://asset/Turbine Animation 0006.png" id="1_0cou2"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ktmlt"]
@@ -66,3 +67,11 @@ script = ExtResource("1_turbineentity")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1501720407]
 sprite_frames = SubResource("SpriteFrames_l10q4")
 autoplay = ""
+
+[node name="WhitePuffVfx" parent="." instance=ExtResource("2_whitepuffvfx")]
+position = Vector2(8, -18)
+scale = Vector2(0.16, 0.16)
+puff_interval = 1.55
+puff_interval_jitter = 0.3
+puff_offset_jitter = Vector2(4, 1.5)
+puff_scale_jitter = 0.05
