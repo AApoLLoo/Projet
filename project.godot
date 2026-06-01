@@ -28,6 +28,7 @@ GameManager="*res://script/GameManager.gd"
 RecipeDatabase="*res://script/RecipeDatabase.gd"
 EntityManager="*res://script/EntityManager.gd"
 MusicManager="*uid://b7e5u1a0uq5bo"
+ContractManager="*uid://d0pylwf1u5k1q"
 
 [input]
 

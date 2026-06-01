@@ -31,6 +31,7 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var overview_failures_value: Label = %OverviewFailuresValue
 @onready var overview_co2_value: Label = %OverviewCO2Value
 @onready var overview_electricity_value: Label = %OverviewElectricityValue
+@onready var contracts_label: Label = %ContractsLabel
 
 @onready var btn_pause: Button = %BtnPause
 @onready var btn_x1: Button = %BtnX1
@@ -47,7 +48,7 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var btn_build_factory: Button = %BtnBuildFactory 
 @onready var btn_build_belt: Button = %BtnBuildBelt       
 @onready var btn_build_turbine: Button = %BtnBuildTurbine 
-
+@onready var btn_build_entrepot: Button = %BtnEntrepot 
 ###BELT###
 @onready var menu_belt: HBoxContainer = $Menu_Belt
 @onready var curve_top: Button = $Menu_Belt/Curve_Top
@@ -82,7 +83,7 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var btn_choose_order_delivery_point: Button = %BtnChooseOrderDeliveryPoint
 @onready var btn_clear_order_delivery_point: Button = %BtnClearOrderDeliveryPoint
 @onready var btn_submit_order: Button = %BtnSubmitOrder
-
+@onready var entrepot_panel = $EntrepotPanel # Chemin vers votre panneau dans le HUD
 # --- DICTIONNAIRE MIS À JOUR ---
 # --- DICTIONNAIRE MIS À JOUR AVEC DIRECTIONS ET VIRAGES ---
 var buildings_data = {
@@ -137,6 +138,12 @@ var buildings_data = {
 		"texture": preload("res://asset/Curve_0004.png"),
 		"cost": 60.0,
 		"frames": 4
+	},
+	"entrepot":{
+		"scene": preload("res://scene/entrepot.tscn"),
+		"texture": preload("res://asset/image-removebg-preview.png"), # <- Remplacez par le chemin de votre image
+		"cost": 1000.0, # Ajustez le prix comme vous voulez
+		"frames": 1
 	}
 }
 @onready var minimap_camera: Camera2D = %MinimapCamera
@@ -160,10 +167,25 @@ var _minimap_world_rect: Rect2 = Rect2()
 var _minimap_viewport_size: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
+	
+	btn_build_entrepot.pressed.connect(func():
+		print("Clic sur ENTREPÔT !")
+		_start_building_process("entrepot")
+	)
 	_ensure_input_actions()
 	_style_hud()
 	if session_overview_panel:
 		session_overview_panel.hide()
+	if ContractManager:
+		if ContractManager.contract_arrived.is_connected(_on_contract_arrived):
+			ContractManager.contract_arrived.disconnect(_on_contract_arrived)
+		if ContractManager.contract_completed.is_connected(_on_contract_completed):
+			ContractManager.contract_completed.disconnect(_on_contract_completed)
+		if ContractManager.contract_failed.is_connected(_on_contract_failed):
+			ContractManager.contract_failed.disconnect(_on_contract_failed)
+		ContractManager.contract_arrived.connect(_on_contract_arrived)
+		ContractManager.contract_completed.connect(_on_contract_completed)
+		ContractManager.contract_failed.connect(_on_contract_failed)
 	if orders_panel:
 		orders_panel.hide()
 
@@ -324,16 +346,72 @@ func _ready() -> void:
 			)
 		if _building_manager:
 			destroy_button.set_pressed(_building_manager.is_destroying)
+		if _building_manager and _building_manager.has_signal("entrepot_inspected"):
+			_building_manager.entrepot_inspected.connect(_on_entrepot_inspected)
+	
+			entrepot_panel.hide()
+		
+func _on_entrepot_inspected(entrepot_instance):
+	entrepot_panel.setup(entrepot_instance)
+	entrepot_panel.show()
+	_update_contracts_display()
 
+	
+func _on_contract_arrived(contract: Dictionary) -> void:
+	_update_contracts_display()
+	_show_hint_toast("📦 Nouveau contrat !")
+
+func _on_contract_completed(contract: Dictionary) -> void:
+	_update_contracts_display()
+	_show_hint_toast("✓ Contrat rempli ! +%.0f €" % float(contract["reward"]))
+
+func _on_contract_failed(contract: Dictionary) -> void:
+	_update_contracts_display()
+	_show_hint_toast("✗ Contrat échoué : -%.0f €" % float(contract["penalty"]))
+	
+func _show_hint_toast(message: String) -> void:
+	var toast := PanelContainer.new()
+	toast.set_anchors_preset(Control.PRESET_CENTER)
+	toast.offset_left = -280.0
+	toast.offset_right = 280.0
+	toast.offset_top = 40.0
+	toast.offset_bottom = 80.0
+	var style := StyleBoxFlat.new()
+	style.bg_color = UITheme.ACCENT_GOLD
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	style.content_margin_left = 14.0
+	style.content_margin_right = 14.0
+	style.content_margin_top = 8.0
+	style.content_margin_bottom = 8.0
+	toast.add_theme_stylebox_override("panel", style)
+	add_child(toast)
+	var label := Label.new()
+	label.text = message
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", UITheme.INK_DARK)
+	toast.add_child(label)
+	var tween := create_tween()
+	tween.tween_interval(4.0)
+	tween.tween_property(toast, "modulate:a", 0.0, 0.8)
+	tween.tween_callback(toast.queue_free)
+	
 func _style_hud() -> void:
 	UITheme.style_label(day_label, "caption")
 	UITheme.style_label(time_label, "metric")
+	day_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	UITheme.style_label(resources_caption, "caption")
 	UITheme.style_label(co2_caption, "caption")
 	UITheme.style_label(money_label, "metric")
 	UITheme.style_label(co2_label, "body")
 	UITheme.style_label(build_menu_title, "caption")
-	day_label.add_theme_color_override("font_color", UITheme.INK_MUTED)
+	UITheme.style_label(contracts_label, "caption")
+	UITheme.style_label(contracts_label, "caption")
+	contracts_label.add_theme_color_override("font_color", UITheme.INK_DARK)
+	contracts_label.add_theme_font_size_override("font_size", 16)
 	resources_background.color = UITheme.SURFACE_GLASS
 	co2_background.color = UITheme.SURFACE_GLASS
 	top_hud_background.color = UITheme.SURFACE_GLASS
@@ -357,19 +435,22 @@ func _build_shortcut_bar() -> void:
 	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	bar.anchor_top = 1.0
 	bar.anchor_bottom = 1.0
-	bar.offset_top = -44.0
-	bar.offset_bottom = 0.0
-	UITheme.style_card(bar, false, true, 0.82)
-
-	# CenterContainer force le centrage vertical réel
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bar.add_child(center)
+	bar.offset_top = -32.0
+	bar.offset_bottom = -20.0
+	
+	var bar_style := StyleBoxFlat.new()
+	bar_style.bg_color = UITheme.SURFACE_GLASS
+	bar_style.bg_color.a = 0.82
+	bar_style.content_margin_left = 0.0
+	bar_style.content_margin_right = 0.0
+	bar_style.content_margin_top = 2.0    # ← marge haut réduite
+	bar_style.content_margin_bottom = 2.0 # ← marge bas réduite
+	bar.add_theme_stylebox_override("panel", bar_style)
 
 	var hbox := HBoxContainer.new()
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox.add_theme_constant_override("separation", 6)
-	center.add_child(hbox)
+	bar.add_child(hbox)
 
 	var shortcuts: Array = [
 		["Échap", "Menu Pause"],
@@ -552,6 +633,21 @@ func _show_quick_save_toast() -> void:
 	tween.tween_property(toast, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(toast.queue_free)
 
+func _update_contracts_display() -> void:
+	if not ContractManager or contracts_label == null:
+		return
+	var contracts := ContractManager.get_active_contracts()
+	if contracts.is_empty():
+		contracts_label.text = ""
+		return
+	var parts: PackedStringArray = []
+	for c in contracts:
+		var delivered := int(c["delivered"])
+		var quantity := int(c["quantity"])
+		var label := String(c["resource_label"])
+		parts.append("📦 %s : %d/%d" % [label, delivered, quantity])
+	contracts_label.text = "Contrats : " + " | ".join(parts)
+	
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	if building_manager:
@@ -740,6 +836,7 @@ func _on_time_changed(hour: int, minute: int) -> void:
 func _on_day_changed(day: int) -> void:
 	_update_day_display(day)
 	_update_session_overview()
+	_update_contracts_display() 
 
 func _update_time_display(hour: int, minute: int) -> void:
 	# Formatage avec des zéros (ex: 08:05)
@@ -749,10 +846,12 @@ func _update_day_display(day: int) -> void:
 	day_label.text = "Jour %d" % day
 
 func _on_resources_updated() -> void:
+	print("HUD : Signal resources_updated reçu ! Mise à jour de l'interface...")
 	_update_money_display()
 	_update_co2_display()
 	_update_session_overview()
 	_update_order_panel()
+	_update_contracts_display()
 
 func _update_money_display() -> void:
 	if money_label and GameManager:
@@ -1015,6 +1114,7 @@ func _on_choose_default_delivery_point_pressed() -> void:
 	_delivery_selection_context = "default"
 	orders_status_label.text = "Clique sur la carte pour definir le point de livraison par defaut."
 	_building_manager.start_delivery_point_selection()
+	orders_panel.hide()
 
 func _on_choose_order_delivery_point_pressed() -> void:
 	if _building_manager == null or not _building_manager.has_method("start_delivery_point_selection"):
@@ -1037,6 +1137,9 @@ func _on_submit_order_pressed() -> void:
 	var resource_id: String = _get_selected_resource_id()
 	if resource_id.is_empty():
 		orders_status_label.text = "Choisis une ressource a traiter."
+		return
+	if GameManager and not GameManager.has_default_delivery_point and not bool(_pending_order_delivery_point.get("has_point", false)):
+		_show_hint_toast("⚠ Définis un point de livraison avant de commander")
 		return
 	var quantity: int = maxi(1, int(order_quantity_spinbox.value))
 	var custom_point: Dictionary = _pending_order_delivery_point if bool(_pending_order_delivery_point.get("has_point", false)) else {}
@@ -1065,6 +1168,7 @@ func _on_delivery_point_selected(cell_pos: Vector2i, world_pos: Vector2) -> void
 		_:
 			orders_status_label.text = "Point de livraison selectionne."
 	_delivery_selection_context = ""
+	orders_panel.show()
 	_update_order_panel()
 
 func _on_delivery_point_selection_changed(enabled: bool) -> void:

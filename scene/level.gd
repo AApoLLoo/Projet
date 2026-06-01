@@ -42,6 +42,7 @@ func _ready() -> void:
 		dlg.popup_centered()
 
 	_apply_start_state()
+	ContractManager.reset()
 	_setup_delivery_point_marker()
 	if _preview_mode:
 		_disable_preview_interactions()

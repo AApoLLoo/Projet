@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://5nx80apmymd" path="res://script/HUD.gd" id="1_hud"]
 [ext_resource type="Script" uid="uid://cei88ve3rwm6c" path="res://script/MinimapOverlay.gd" id="2_minimap_overlay"]
-[ext_resource type="Script" uid="uid://bmymfsqky584y" path="res://scene/entrepot_panel.gd" id="3_pvgpj"]
 
 [node name="HUD" type="CanvasLayer" unique_id=745135006]
 script = ExtResource("1_hud")
@@ -86,10 +85,6 @@ text = "Logistique"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Vue usine"
-
-[node name="ContractsLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=125805602]
-unique_name_in_owner = true
-layout_mode = 2
 
 [node name="MinimapContainer" type="MarginContainer" parent="." unique_id=987692439]
 anchors_preset = 3
@@ -257,10 +252,6 @@ text = "Energie"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Production"
-
-[node name="BtnEntrepot" type="Button" parent="BuildMenuContainer" unique_id=540830721]
-unique_name_in_owner = true
-layout_mode = 2
 
 [node name="OrdersPanel" type="PanelContainer" parent="." unique_id=498211001]
 unique_name_in_owner = true
@@ -598,20 +589,3 @@ text = "🡭"
 [node name="Belt_left" type="Button" parent="Menu_Belt" unique_id=1980610375]
 layout_mode = 2
 text = "🡴"
-
-[node name="EntrepotPanel" type="PanelContainer" parent="." unique_id=1945030725]
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("3_pvgpj")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="EntrepotPanel" unique_id=1044425781]
-layout_mode = 2
-
-[node name="TitleLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=323975339]
-layout_mode = 2
-
-[node name="StockLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=1374727364]
-layout_mode = 2
-
-[node name="StatusLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=1679325191]
-layout_mode = 2

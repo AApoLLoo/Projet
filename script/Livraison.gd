@@ -47,14 +47,14 @@ const RESOURCE_CATALOG: Dictionary = {
 	"piece_base": {
 		"label": "Piece de base",
 		"import_unit_cost": 120.0,
-		"export_unit_value": 0.0,
+		"export_unit_value": 180.0,  
 		"can_import": true,
 		"can_export": true,
 	},
 	"piece_avancee": {
 		"label": "Piece avancee",
 		"import_unit_cost": 240.0,
-		"export_unit_value": 0.0,
+		"export_unit_value": 420.0,   
 		"can_import": true,
 		"can_export": true,
 	},
@@ -255,21 +255,41 @@ func _set_truck_unloading_state(truck_instance: Node2D, unloading: bool) -> void
 			anim.frame = 0
 
 # ─── MODIFIÉ : spawn des matériaux au point de livraison ───────────────────────
+# Dans Projet/script/Livraison.gd
+
 func _apply_delivery_payload(order: Dictionary) -> void:
 	if not GameManager:
 		return
+	
 	var job_type: String = String(order.get("job_type", JOB_IMPORT))
 	var resource_id: String = String(order.get("resource_id", ""))
-	if resource_id.is_empty():
-		return
-
-	# Export : on crédite juste le joueur, pas de spawn
+	var quantity: int = int(order.get("quantity", 0))
+	
+	# 1. Chercher l'entrepôt le plus proche du point de livraison
+	# On suppose que l'entrepôt est dans le groupe "entrepot"
+	var entrepot = get_tree().get_first_node_in_group("entrepot")
+	
 	if job_type == JOB_EXPORT:
-		GameManager.add_credits(float(order.get("total_cost", 0.0)))
+		# Export : On retire du stock via l'entrepôt (si possible) et on ajoute les crédits
+		if entrepot and entrepot.has_method("give_resources"):
+			if entrepot.give_resources(resource_id, quantity):
+				GameManager.add_credits(float(order.get("total_cost", 0.0)))
+			else:
+				push_error("Impossible de prendre les ressources de l'entrepôt")
 		return
 
-	# Import : on spawne un matériau par unité commandée au point de livraison
+	# Import : On spawne les matériaux au point de livraison ET on ajoute au stock via l'entrepôt
 	if materiau_scene:
+		# ... (votre logique de spawn de matériaux existante) ...
+		# (Exemple: mat.global_position = base_pos ...)
+		pass 
+	
+	# Au lieu d'ajouter directement via GameManager, on passe par l'entrepôt
+	if entrepot and entrepot.has_method("receive_resources"):
+		entrepot.receive_resources(resource_id, quantity)
+	else:
+		# Fallback si pas d'entrepôt trouvé
+		GameManager.add_resource_stock({resource_id: quantity})
 		var delivery_point: Dictionary = order.get("delivery_point", {})
 		var base_pos: Vector2 = Vector2(
 			float(delivery_point.get("world_x", 0.0)),
