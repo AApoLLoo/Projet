@@ -91,13 +91,15 @@ var buildings_data = {
 		"scene": preload("res://scene/factory.tscn"),
 		"texture": preload("res://asset/IndustrialTile_14.png"),
 		"cost": 200.0,
-		"frames": 1
+		"frames": 1,
+		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"turbine": {
 		"scene": preload("res://scene/turbine_2d.tscn"),
 		"texture": preload("res://asset/Turbine Animation base.png"),
 		"cost": 500.0,
-		"frames": 1
+		"frames": 1,
+		"footprint_offsets": [Vector2i.ZERO, Vector2i(1, 0)]
 	},
 	
 	# --- TAPIS DROITS (Exemples de directions si vous séparez les scènes) ---
@@ -105,13 +107,15 @@ var buildings_data = {
 		"scene": preload("res://scene/ASSET/belt/beltmid.tscn"), # À adapter si vous créez une scène par direction
 		"texture": preload("res://asset/belt-midNO.png"),
 		"cost": 50.0,
-		"frames": 4
+		"frames": 4,
+		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"belt_left": {
 		"scene": preload("res://scene/ASSET/belt/beltleft.tscn"), 
 		"texture": preload("res://asset/belt-mid.png"),
 		"cost": 50.0,
-		"frames": 4
+		"frames": 4,
+		"footprint_offsets": [Vector2i.ZERO]
 	},
 	
 	# --- VIRAGES / COURBES (Curves 1 à 4 basées sur vos assets) ---
@@ -119,31 +123,36 @@ var buildings_data = {
 		"scene": preload("res://scene/ASSET/beltcurvetop.tscn"), # Votre scène existante !
 		"texture": preload("res://asset/Curve_0001.png"),   # Texture correspondante
 		"cost": 60.0,
-		"frames": 4 # Mettez le nombre de frames d'animation si elles sont animées
+		"frames": 4, # Mettez le nombre de frames d'animation si elles sont animées
+		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"curve_down": {
 		"scene": preload("res://scene/ASSET/belt/curvedown.tscn"), # À créer sur le modèle de beltcurvetop
 		"texture": preload("res://asset/Curve_0002.png"),
 		"cost": 60.0,
-		"frames": 4
+		"frames": 4,
+		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"curve_left": {
 		"scene": preload("res://scene/ASSET/belt/curveleft.tscn"),
 		"texture": preload("res://asset/Curve_0003.png"),
 		"cost": 60.0,
-		"frames": 4
+		"frames": 4,
+		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"curve_right": {
 		"scene": preload("res://scene/ASSET/belt/curveright.tscn"),
 		"texture": preload("res://asset/Curve_0004.png"),
 		"cost": 60.0,
-		"frames": 4
+		"frames": 4,
+		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"entrepot":{
 		"scene": preload("res://scene/entrepot.tscn"),
 		"texture": preload("res://asset/image-removebg-preview.png"), # <- Remplacez par le chemin de votre image
 		"cost": 1000.0, # Ajustez le prix comme vous voulez
-		"frames": 1
+		"frames": 1,
+		"footprint_offsets": [Vector2i.ZERO]
 	}
 }
 @onready var minimap_camera: Camera2D = %MinimapCamera
@@ -649,7 +658,7 @@ func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	if building_manager:
 		var data = buildings_data[building_type]
-		building_manager.start_building(data["scene"], data["cost"], data["texture"], data.get("frames", 1))
+		building_manager.start_building(data["scene"], data["cost"], data["texture"], data.get("frames", 1), data.get("footprint_offsets", [Vector2i.ZERO]))
 		# Masquer le panneau entité quand on entre en mode construction
 		if _entity_panel:
 			_entity_panel.hide()
