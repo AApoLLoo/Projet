@@ -307,6 +307,10 @@ func _ready() -> void:
 	_style_button(btn_build_belt, Color.html("#3D6F8E"))
 	_style_button(btn_build_turbine, Color.html("#4F8F5B"))
 	_style_button(btn_build_factory, Color.html("#A66A3F"))
+	
+	btn_build_entrepot.text = "Entrepôt"
+	btn_build_entrepot.custom_minimum_size = Vector2(200.0, 32.0)
+	_style_button(btn_build_entrepot, Color.html("#69558C"))
 
 	# --- BOUTON D'ANNULATION DU DERNIER BATIMENT (créé dynamiquement) ---
 	var undo_button: Button = Button.new()
