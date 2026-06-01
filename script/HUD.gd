@@ -45,7 +45,6 @@ const ORDER_MODE_EXPORT: String = "export"
 # --- NOUVEAUX BOUTONS DE CONSTRUCTION ---
 @onready var btn_toggle_build_menu: Button = %BtnToggleBuildMenu # Le bouton "Construction" principal
 @onready var build_menu_container: VBoxContainer = %BuildMenuContainer # Le conteneur (menu déroulant)
-@onready var build_menu_title: Label = $BuildMenuContainer/BuildMenuTitle
 
 @onready var btn_build_factory: Button = %BtnBuildFactory 
 @onready var btn_build_belt: Button = %BtnBuildBelt       
@@ -194,6 +193,8 @@ func _ready() -> void:
 	)
 	_ensure_input_actions()
 	_style_hud()
+	build_menu_container.offset_top = -350.0
+	build_menu_container.offset_bottom = -40.0
 	if session_overview_panel:
 		session_overview_panel.hide()
 	if ContractManager:
@@ -425,7 +426,6 @@ func _style_hud() -> void:
 	UITheme.style_label(co2_caption, "caption")
 	UITheme.style_label(money_label, "metric")
 	UITheme.style_label(co2_label, "body")
-	UITheme.style_label(build_menu_title, "caption")
 	UITheme.style_label(contracts_label, "caption")
 	UITheme.style_label(contracts_label, "caption")
 	contracts_label.add_theme_color_override("font_color", UITheme.INK_DARK)

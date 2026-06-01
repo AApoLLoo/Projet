@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://5nx80apmymd" path="res://script/HUD.gd" id="1_hud"]
 [ext_resource type="Script" uid="uid://cei88ve3rwm6c" path="res://script/MinimapOverlay.gd" id="2_minimap_overlay"]
-[ext_resource type="Script" path="res://scene/entrepot_panel.gd" id="3_pvgpj"]
 
 [node name="HUD" type="CanvasLayer" unique_id=745135006]
 script = ExtResource("1_hud")
@@ -249,7 +248,6 @@ theme_override_constants/separation = 8
 
 [node name="BuildMenuTitle" type="Label" parent="BuildMenuContainer" unique_id=919372114]
 layout_mode = 2
-text = "Construction"
 
 [node name="BtnBuildBelt" type="Button" parent="BuildMenuContainer" unique_id=559379114]
 unique_name_in_owner = true
