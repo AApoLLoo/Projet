@@ -1,7 +1,8 @@
 [gd_scene format=3 uid="uid://bnit1gqnd4kqp"]
 
 [ext_resource type="Script" uid="uid://5nx80apmymd" path="res://script/HUD.gd" id="1_hud"]
-[ext_resource type="Script" path="res://script/MinimapOverlay.gd" id="2_minimap_overlay"]
+[ext_resource type="Script" uid="uid://cei88ve3rwm6c" path="res://script/MinimapOverlay.gd" id="2_minimap_overlay"]
+[ext_resource type="Script" uid="uid://bmymfsqky584y" path="res://scene/entrepot_panel.gd" id="3_pvgpj"]
 
 [node name="HUD" type="CanvasLayer" unique_id=745135006]
 script = ExtResource("1_hud")
@@ -48,8 +49,8 @@ horizontal_alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=750338239]
 layout_mode = 2
-alignment = 1
 theme_override_constants/separation = 8
+alignment = 1
 
 [node name="BtnPause" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1163007535]
 unique_name_in_owner = true
@@ -119,11 +120,9 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="MinimapContainer/MarginContainer/MinimapSurface" unique_id=215455807]
-anchors_preset = 15
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 0.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -131,10 +130,10 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="MinimapContainer/MarginContainer/MinimapSurface/SubViewportContainer" unique_id=700621053]
 unique_name_in_owner = true
-transparent_bg = true
 disable_3d = true
+transparent_bg = true
 handle_input_locally = false
-size = Vector2i(292, 292)
+size = Vector2i(268, 268)
 render_target_update_mode = 4
 
 [node name="MinimapCamera" type="Camera2D" parent="MinimapContainer/MarginContainer/MinimapSurface/SubViewportContainer/SubViewport" unique_id=1370892464]
@@ -147,8 +146,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 0.0
-offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
@@ -257,6 +254,10 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Production"
 
+[node name="BtnEntrepot" type="Button" parent="BuildMenuContainer" unique_id=540830721]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="OrdersPanel" type="PanelContainer" parent="." unique_id=498211001]
 unique_name_in_owner = true
 visible = false
@@ -278,8 +279,8 @@ theme_override_constants/separation = 8
 
 [node name="TitleLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211004]
 layout_mode = 2
-text = "Commandes de ressources"
 theme_override_font_sizes/font_size = 18
+text = "Commandes de ressources"
 
 [node name="ModeRow" type="HBoxContainer" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211027]
 layout_mode = 2
@@ -298,14 +299,14 @@ text = "Export"
 [node name="InventorySummaryLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211005]
 unique_name_in_owner = true
 layout_mode = 2
-autowrap_mode = 3
 text = "Stock vide"
+autowrap_mode = 3
 
 [node name="OrderGrid" type="GridContainer" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211006]
 layout_mode = 2
-columns = 2
 theme_override_constants/h_separation = 12
 theme_override_constants/v_separation = 6
+columns = 2
 
 [node name="ResourceLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211007]
 layout_mode = 2
@@ -324,7 +325,6 @@ unique_name_in_owner = true
 layout_mode = 2
 min_value = 1.0
 max_value = 500.0
-step = 1.0
 value = 10.0
 
 [node name="UnitCostLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211011]
@@ -414,8 +414,8 @@ text = "Effacer point"
 [node name="OrdersStatusLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211025]
 unique_name_in_owner = true
 layout_mode = 2
-autowrap_mode = 3
 text = "Aucune commande en cours."
+autowrap_mode = 3
 
 [node name="ExportHistoryTitle" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211032]
 unique_name_in_owner = true
@@ -425,8 +425,8 @@ text = "Derniers gains d'export"
 [node name="ExportHistoryLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211033]
 unique_name_in_owner = true
 layout_mode = 2
-autowrap_mode = 3
 text = "Aucun export termine."
+autowrap_mode = 3
 
 [node name="BtnSubmitOrder" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211026]
 unique_name_in_owner = true
@@ -594,3 +594,20 @@ text = "🡭"
 [node name="Belt_left" type="Button" parent="Menu_Belt" unique_id=1980610375]
 layout_mode = 2
 text = "🡴"
+
+[node name="EntrepotPanel" type="PanelContainer" parent="." unique_id=1945030725]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("3_pvgpj")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="EntrepotPanel" unique_id=1044425781]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=323975339]
+layout_mode = 2
+
+[node name="StockLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=1374727364]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=1679325191]
+layout_mode = 2

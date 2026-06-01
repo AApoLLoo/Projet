@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://bhvhrj3d528ep"]
+
+[ext_resource type="Script" uid="uid://jeemsia675a1" path="res://script/Entrepot.gd" id="1_fm58h"]
+[ext_resource type="Texture2D" uid="uid://dviby67r2qbp" path="res://asset/image-removebg-preview.png" id="1_i3tf3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fm58h"]
+atlas = ExtResource("1_i3tf3")
+region = Rect2(0, 0, 132, 186)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_fc11h"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fm58h")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="entrepot" type="Node2D" unique_id=1621756400 groups=["entrepot"]]
+script = ExtResource("1_fm58h")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=496936600]
+z_index = 1
+y_sort_enabled = true
+sprite_frames = SubResource("SpriteFrames_fc11h")
+autoplay = "default"
