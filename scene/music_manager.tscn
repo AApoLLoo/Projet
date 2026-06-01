@@ -2,11 +2,13 @@
 
 [ext_resource type="Script" uid="uid://bbglbq2q655bh" path="res://scene/music_manager.gd" id="1_bjrqh"]
 [ext_resource type="AudioStream" uid="uid://dsu8s14c4oetj" path="res://asset/un-baile-inolvidable.mp3" id="1_lexfc"]
+[ext_resource type="AudioStream" uid="uid://b8ma3sso5tbxi" path="res://asset/café-con-ron.mp3" id="3_1hng1"]
+[ext_resource type="AudioStream" uid="uid://gecsymn5yie5" path="res://asset/nuevayol.mp3" id="4_8x1lu"]
 
 [node name="MusicManager" type="Node" unique_id=1716961507]
 script = ExtResource("1_bjrqh")
+tracks = Array[AudioStream]([ExtResource("1_lexfc"), ExtResource("4_8x1lu"), ExtResource("3_1hng1")])
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=899176274]
-stream = ExtResource("1_lexfc")
 autoplay = true
 bus = &"Music"

@@ -20,6 +20,8 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var co2_background: ColorRect = $CO2Container/ColorRect
 @onready var resources_caption: Label = $ResourcesContainer/MarginContainer/VBoxContainer/Caption
 @onready var co2_caption: Label = $CO2Container/MarginContainer/VBoxContainer/Caption
+@onready var btn_music_pause: Button = %BtnMusicPause
+@onready var btn_music_next: Button = %BtnMusicNext
 
 @onready var session_overview_panel: PanelContainer = %SessionOverviewPanel
 @onready var overview_day_value: Label = %OverviewDayValue
@@ -176,7 +178,13 @@ var _minimap_world_rect: Rect2 = Rect2()
 var _minimap_viewport_size: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
-	
+	btn_music_pause.text = "⏸"
+	btn_music_next.text = "⏯"
+	btn_music_pause.pressed.connect(func():
+		MusicManager.toggle_pause()
+		btn_music_pause.text = "▶️" if MusicManager.is_paused() else "⏸"
+	)
+	btn_music_next.pressed.connect(func(): MusicManager.next_track())
 	btn_build_entrepot.pressed.connect(func():
 		print("Clic sur ENTREPÔT !")
 		_start_building_process("entrepot")
@@ -424,6 +432,8 @@ func _style_hud() -> void:
 	for button in [btn_build_belt, btn_build_turbine, btn_build_factory]:
 		button.custom_minimum_size = Vector2(200.0, 32.0)
 	for button in [curve_top, curve_down, curve_right, curve_left, belt_droit, belt_left]:
+		UITheme.style_button(button, Color("#E9EEF1"), UITheme.INK_DARK, false, true)
+	for button in [btn_pause, btn_x1, btn_x2, btn_x4, btn_music_pause, btn_music_next]:
 		UITheme.style_button(button, Color("#E9EEF1"), UITheme.INK_DARK, false, true)
 	UITheme.style_card(orders_panel, false, true)
 	UITheme.style_card(session_overview_panel, false, true)
