@@ -402,7 +402,7 @@ func _style_hud() -> void:
 	for button in [btn_toggle_build_menu, btn_toggle_orders, btn_toggle_session_overview]:
 		UITheme.style_button(button, UITheme.ACCENT_GOLD, UITheme.INK_DARK, true, true)
 	for button in [btn_build_belt, btn_build_turbine, btn_build_factory]:
-		button.custom_minimum_size = Vector2(305.0, 44.0)
+		button.custom_minimum_size = Vector2(200.0, 32.0)
 	for button in [curve_top, curve_down, curve_right, curve_left, belt_droit, belt_left]:
 		UITheme.style_button(button, Color("#E9EEF1"), UITheme.INK_DARK, false, true)
 	UITheme.style_card(orders_panel, false, true)
@@ -850,6 +850,7 @@ func _close_all_panels() -> void:
 		if _building_manager:
 			_building_manager.stop_building()
 		build_menu_container.hide()
+		menu_belt.hide()  
 
 func _toggle_session_overview() -> void:
 	if session_overview_panel == null:
@@ -876,6 +877,8 @@ func _toggle_build_menu() -> void:
 	_close_all_panels()
 	if will_open:
 		build_menu_container.show()
+	else:
+		menu_belt.hide()  
 	
 func _update_session_overview() -> void:
 	if session_overview_panel == null:
@@ -1094,7 +1097,7 @@ func _on_choose_default_delivery_point_pressed() -> void:
 	_delivery_selection_context = "default"
 	orders_status_label.text = "Clique sur la carte pour definir le point de livraison par defaut."
 	_building_manager.start_delivery_point_selection()
-	orders_panel.hide()
+	orders_panel.hide()  # ← déjà présent
 
 func _on_choose_order_delivery_point_pressed() -> void:
 	if _building_manager == null or not _building_manager.has_method("start_delivery_point_selection"):
@@ -1103,6 +1106,7 @@ func _on_choose_order_delivery_point_pressed() -> void:
 	_delivery_selection_context = "order"
 	orders_status_label.text = "Clique sur la carte pour definir la destination de cette commande." if _order_mode == ORDER_MODE_IMPORT else "Clique sur la carte pour definir la destination de cet export."
 	_building_manager.start_delivery_point_selection()
+	orders_panel.hide()  # ← AJOUTE cette ligne
 
 func _on_clear_order_delivery_point_pressed() -> void:
 	_pending_order_delivery_point.clear()
@@ -1133,6 +1137,7 @@ func _on_submit_order_pressed() -> void:
 		order_delivery_preview_changed.emit({})
 		orders_status_label.text = "Commande envoyee. Le camion arrive des que possible." if _order_mode == ORDER_MODE_IMPORT else "Contrat d'export lance. Paiement a l'arrivee du camion."
 		_update_order_panel()
+		orders_panel.hide() 
 
 func _on_delivery_point_selected(cell_pos: Vector2i, world_pos: Vector2) -> void:
 	var point_state: Dictionary = _make_delivery_point_state(cell_pos, world_pos)
