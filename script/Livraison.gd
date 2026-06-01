@@ -285,7 +285,6 @@ func _apply_delivery_payload(order: Dictionary) -> void:
 			float(delivery_point.get("world_x", 0.0)),
 			float(delivery_point.get("world_y", 0.0))
 		)
-		var quantity: int = int(order.get("quantity", 0))
 		for i in quantity:
 			var mat = materiau_scene.instantiate()
 			# Décale légèrement chaque colis pour éviter la superposition
