@@ -590,6 +590,14 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _show_quick_save_toast() -> void:
+	_show_toast("✓ Partie sauvegardée")
+
+func _show_hint_toast(message: String) -> void:
+	_show_toast(message, UITheme.ACCENT_GOLD)
+
+func _show_toast(message: String, border_color: Color = UITheme.BORDER_STRONG) -> void:
+	if message.is_empty():
+		return
 	var toast := PanelContainer.new()
 	toast.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	toast.offset_left = -220.0
@@ -598,7 +606,7 @@ func _show_quick_save_toast() -> void:
 	toast.offset_bottom = -320.0
 	var style := StyleBoxFlat.new()
 	style.bg_color = UITheme.SURFACE_SOFT
-	style.border_color = UITheme.BORDER_STRONG
+	style.border_color = border_color
 	style.border_width_left = 1
 	style.border_width_top = 1
 	style.border_width_right = 1
@@ -615,7 +623,7 @@ func _show_quick_save_toast() -> void:
 	add_child(toast)
 
 	var label := Label.new()
-	label.text = "✓ Partie sauvegardée"
+	label.text = message
 	label.add_theme_font_size_override("font_size", 14)
 	label.add_theme_color_override("font_color", UITheme.INK_DARK)
 	toast.add_child(label)
@@ -628,17 +636,29 @@ func _show_quick_save_toast() -> void:
 func _update_contracts_display() -> void:
 	if not ContractManager or contracts_label == null:
 		return
-	var contracts := ContractManager.get_active_contracts()
+	var contracts: Array[Dictionary] = ContractManager.get_active_contracts()
 	if contracts.is_empty():
 		contracts_label.text = ""
 		return
 	var parts: PackedStringArray = []
 	for c in contracts:
 		var delivered := int(c["delivered"])
-		var quantity := int(c["quantity"])
+		var contract_quantity := int(c["quantity"])
 		var label := String(c["resource_label"])
-		parts.append("📦 %s : %d/%d" % [label, delivered, quantity])
+		parts.append("📦 %s : %d/%d" % [label, delivered, contract_quantity])
 	contracts_label.text = "Contrats : " + " | ".join(parts)
+
+func _on_contract_arrived(contract: Dictionary) -> void:
+	_update_contracts_display()
+	_show_hint_toast("Nouveau contrat : %s x%d" % [contract.get("resource_label", "Ressource"), int(contract.get("quantity", 0))])
+
+func _on_contract_completed(contract: Dictionary) -> void:
+	_update_contracts_display()
+	_show_hint_toast("Contrat termine : %s x%d" % [contract.get("resource_label", "Ressource"), int(contract.get("quantity", 0))])
+
+func _on_contract_failed(contract: Dictionary) -> void:
+	_update_contracts_display()
+	_show_hint_toast("Contrat echoue : %s x%d" % [contract.get("resource_label", "Ressource"), int(contract.get("quantity", 0))])
 	
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
@@ -972,7 +992,7 @@ func _update_order_panel() -> void:
 		return
 
 	var resource_id: String = _get_selected_resource_id()
-	var quantity: int = maxi(1, int(order_quantity_spinbox.value)) if order_quantity_spinbox else 1
+	var selected_quantity: int = maxi(1, int(order_quantity_spinbox.value)) if order_quantity_spinbox else 1
 	var unit_cost: float = 0.0
 	if _delivery_manager and _delivery_manager.has_method("get_unit_cost"):
 		unit_cost = _delivery_manager.get_unit_cost(resource_id, _order_mode)
@@ -989,7 +1009,7 @@ func _update_order_panel() -> void:
 	btn_order_mode_import.disabled = _order_mode == ORDER_MODE_IMPORT
 	btn_order_mode_export.disabled = _order_mode == ORDER_MODE_EXPORT
 	order_unit_cost_value.text = _format_money_value(unit_cost)
-	order_total_cost_value.text = _format_money_value(unit_cost * float(quantity))
+	order_total_cost_value.text = _format_money_value(unit_cost * float(selected_quantity))
 	if _order_mode == ORDER_MODE_EXPORT:
 		estimated_cost_value.text = _format_estimated_cost_value(resource_id)
 		order_margin_value.text = _format_margin_value(resource_id)
@@ -1137,13 +1157,13 @@ func _on_submit_order_pressed() -> void:
 	if GameManager and not GameManager.has_default_delivery_point and not bool(_pending_order_delivery_point.get("has_point", false)):
 		_show_hint_toast("⚠ Définis un point de livraison avant de commander")
 		return
-	var quantity: int = maxi(1, int(order_quantity_spinbox.value))
+	var requested_quantity: int = maxi(1, int(order_quantity_spinbox.value))
 	var custom_point: Dictionary = _pending_order_delivery_point if bool(_pending_order_delivery_point.get("has_point", false)) else {}
 	var submit_succeeded: bool = false
 	if _order_mode == ORDER_MODE_EXPORT and _delivery_manager.has_method("submit_export"):
-		submit_succeeded = _delivery_manager.submit_export(resource_id, quantity, custom_point)
+		submit_succeeded = _delivery_manager.submit_export(resource_id, requested_quantity, custom_point)
 	elif _order_mode == ORDER_MODE_IMPORT and _delivery_manager.has_method("submit_order"):
-		submit_succeeded = _delivery_manager.submit_order(resource_id, quantity, custom_point)
+		submit_succeeded = _delivery_manager.submit_order(resource_id, requested_quantity, custom_point)
 	if submit_succeeded:
 		_pending_order_delivery_point.clear()
 		order_delivery_preview_changed.emit({})
