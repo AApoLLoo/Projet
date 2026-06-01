@@ -10,6 +10,7 @@ const CONTRACT_TEMPLATES: Array[Dictionary] = [
 ]
 
 var active_contracts: Array[Dictionary] = []
+var _last_generated_day: int = -1
 var _day_connected: bool = false
 
 func _ready() -> void:
@@ -24,6 +25,11 @@ func _on_new_day(day: int) -> void:
 	_generate_contract(day)
 
 func _generate_contract(day: int) -> void:
+	if day == _last_generated_day:
+		return
+
+	_last_generated_day = day
+
 	for template in CONTRACT_TEMPLATES:
 		# Multiplicateur qui augmente avec les jours
 		var difficulty: float = 1.0 + (day - 1) * 0.15  # +15% par jour
@@ -91,6 +97,7 @@ func _check_expired_contracts(current_day: int) -> void:
 
 func reset() -> void:
 	active_contracts.clear()
+	_last_generated_day = -1
 	
 func get_active_contracts() -> Array[Dictionary]:
 	return active_contracts.duplicate(true)
