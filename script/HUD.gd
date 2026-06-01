@@ -346,58 +346,7 @@ func _ready() -> void:
 			)
 		if _building_manager:
 			destroy_button.set_pressed(_building_manager.is_destroying)
-		if _building_manager and _building_manager.has_signal("entrepot_inspected"):
-			_building_manager.entrepot_inspected.connect(_on_entrepot_inspected)
-	
-			entrepot_panel.hide()
-		
-func _on_entrepot_inspected(entrepot_instance):
-	entrepot_panel.setup(entrepot_instance)
-	entrepot_panel.show()
-	_update_contracts_display()
 
-	
-func _on_contract_arrived(contract: Dictionary) -> void:
-	_update_contracts_display()
-	_show_hint_toast("📦 Nouveau contrat !")
-
-func _on_contract_completed(contract: Dictionary) -> void:
-	_update_contracts_display()
-	_show_hint_toast("✓ Contrat rempli ! +%.0f €" % float(contract["reward"]))
-
-func _on_contract_failed(contract: Dictionary) -> void:
-	_update_contracts_display()
-	_show_hint_toast("✗ Contrat échoué : -%.0f €" % float(contract["penalty"]))
-	
-func _show_hint_toast(message: String) -> void:
-	var toast := PanelContainer.new()
-	toast.set_anchors_preset(Control.PRESET_CENTER)
-	toast.offset_left = -280.0
-	toast.offset_right = 280.0
-	toast.offset_top = 40.0
-	toast.offset_bottom = 80.0
-	var style := StyleBoxFlat.new()
-	style.bg_color = UITheme.ACCENT_GOLD
-	style.corner_radius_top_left = 8
-	style.corner_radius_top_right = 8
-	style.corner_radius_bottom_left = 8
-	style.corner_radius_bottom_right = 8
-	style.content_margin_left = 14.0
-	style.content_margin_right = 14.0
-	style.content_margin_top = 8.0
-	style.content_margin_bottom = 8.0
-	toast.add_theme_stylebox_override("panel", style)
-	add_child(toast)
-	var label := Label.new()
-	label.text = message
-	label.add_theme_font_size_override("font_size", 14)
-	label.add_theme_color_override("font_color", UITheme.INK_DARK)
-	toast.add_child(label)
-	var tween := create_tween()
-	tween.tween_interval(4.0)
-	tween.tween_property(toast, "modulate:a", 0.0, 0.8)
-	tween.tween_callback(toast.queue_free)
-	
 func _style_hud() -> void:
 	UITheme.style_label(day_label, "caption")
 	UITheme.style_label(time_label, "metric")
