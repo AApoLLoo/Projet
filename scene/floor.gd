@@ -131,6 +131,64 @@ func get_world_bounds() -> Rect2:
 		Vector2(grid_width_value * cell_size_value, grid_height_value * cell_size_value)
 	)
 
+func get_loaded_chunk_world_bounds() -> Rect2:
+	if _loaded_chunks.is_empty():
+		return Rect2()
+
+	var min_chunk_x: int = 2147483647
+	var max_chunk_x: int = -2147483647
+	var min_chunk_y: int = 2147483647
+	var max_chunk_y: int = -2147483647
+
+	for chunk_key in _loaded_chunks.keys():
+		if not (chunk_key is Vector2i):
+			continue
+		var chunk: Vector2i = chunk_key
+		min_chunk_x = mini(min_chunk_x, chunk.x)
+		max_chunk_x = maxi(max_chunk_x, chunk.x)
+		min_chunk_y = mini(min_chunk_y, chunk.y)
+		max_chunk_y = maxi(max_chunk_y, chunk.y)
+
+	if min_chunk_x > max_chunk_x or min_chunk_y > max_chunk_y:
+		return Rect2()
+
+	var min_cell: Vector2i = Vector2i(min_chunk_x * chunk_size, min_chunk_y * chunk_size)
+	var max_cell: Vector2i = Vector2i(
+		(max_chunk_x + 1) * chunk_size - 1,
+		(max_chunk_y + 1) * chunk_size - 1
+	)
+	return _get_world_bounds_for_cells(min_cell, max_cell)
+
+func _get_world_bounds_for_cells(min_cell: Vector2i, max_cell: Vector2i) -> Rect2:
+	var top_left: Vector2 = _cell_to_world(min_cell)
+	var top_right: Vector2 = _cell_to_world(Vector2i(max_cell.x, min_cell.y))
+	var bottom_left: Vector2 = _cell_to_world(Vector2i(min_cell.x, max_cell.y))
+	var bottom_right: Vector2 = _cell_to_world(max_cell)
+	var world_min: Vector2 = Vector2(
+		minf(minf(top_left.x, top_right.x), minf(bottom_left.x, bottom_right.x)),
+		minf(minf(top_left.y, top_right.y), minf(bottom_left.y, bottom_right.y))
+	)
+	var world_max: Vector2 = Vector2(
+		maxf(maxf(top_left.x, top_right.x), maxf(bottom_left.x, bottom_right.x)),
+		maxf(maxf(top_left.y, top_right.y), maxf(bottom_left.y, bottom_right.y))
+	)
+	var cell_half_extents: Vector2 = _get_cell_half_extents()
+	return Rect2(world_min - cell_half_extents, (world_max - world_min) + cell_half_extents * 2.0)
+
+func _cell_to_world(cell: Vector2i) -> Vector2:
+	return to_global(map_to_local(cell))
+
+func _get_cell_half_extents() -> Vector2:
+	var origin: Vector2 = map_to_local(Vector2i.ZERO)
+	var step_x: Vector2 = map_to_local(Vector2i.RIGHT) - origin
+	var step_y: Vector2 = map_to_local(Vector2i.DOWN) - origin
+	var diagonal_a: Vector2 = (step_x + step_y) * 0.5
+	var diagonal_b: Vector2 = (step_x - step_y) * 0.5
+	return Vector2(
+		maxf(maxf(absf(diagonal_a.x), absf(diagonal_b.x)), 1.0),
+		maxf(maxf(absf(diagonal_a.y), absf(diagonal_b.y)), 1.0)
+	)
+
 func _to_int(value: Variant, fallback: int) -> int:
 	if value is int:
 		return int(value)

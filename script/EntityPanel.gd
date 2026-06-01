@@ -6,10 +6,15 @@ extends PanelContainer
 # ─────────────────────────────────────────────────────────────────────────────
 
 @onready var entity_name_label: Label       = %EntityNameLabel
+@onready var recipe_label: Label            = $MarginContainer/VBoxContainer/RecipeLabel
 @onready var recipe_selector: OptionButton  = %RecipeSelector
+@onready var input_label: Label             = $MarginContainer/VBoxContainer/RecipeDetailsBox/InputBox/InputLabel
 @onready var input_list: ItemList           = %InputList
+@onready var output_label: Label            = $MarginContainer/VBoxContainer/RecipeDetailsBox/OutputBox/OutputLabel
 @onready var output_list: ItemList          = %OutputList
+@onready var rate_title_label: Label        = $MarginContainer/VBoxContainer/RateLabel_Title
 @onready var rate_slider: HSlider           = %RateSlider
+@onready var rate_box: HBoxContainer        = $MarginContainer/VBoxContainer/RateBox
 @onready var rate_label: Label              = %RateLabel
 @onready var energy_label: Label            = %EnergyLabel
 @onready var co2_label: Label               = %Co2Label
@@ -70,15 +75,17 @@ func setup(entity: Entity) -> void:
 
 	# Nom de l'entité
 	entity_name_label.text = _display_name(entity.entity_type)
+	_apply_entity_mode()
 
 	# Peupler le sélecteur de recettes
 	recipe_selector.clear()
-	var recipes := RecipeDatabase.get_recipes(entity.entity_type)
-	for i in recipes.size():
-		recipe_selector.add_item(recipes[i]["name"], i)
-		# Pré-sélectionner la recette courante
-		if recipes[i]["id"] == entity.current_recipe.get("id", ""):
-			recipe_selector.select(i)
+	if not _is_conveyor_entity(entity):
+		var recipes := RecipeDatabase.get_recipes(entity.entity_type)
+		for i in recipes.size():
+			recipe_selector.add_item(recipes[i]["name"], i)
+			# Pré-sélectionner la recette courante
+			if recipes[i]["id"] == entity.current_recipe.get("id", ""):
+				recipe_selector.select(i)
 
 	# Taux de production
 	rate_slider.set_block_signals(true)
@@ -131,12 +138,16 @@ func _on_active_toggled(pressed: bool) -> void:
 	current_entity.is_active = pressed
 
 func _on_entity_updated(_entity: Entity) -> void:
+	_refresh_recipe_details()
 	_refresh_stats()
 
 # ─── Rafraîchissement ─────────────────────────────────────────────────────────
 
 func _refresh_recipe_details() -> void:
 	if current_entity == null:
+		return
+	if _is_conveyor_entity(current_entity):
+		_refresh_conveyor_details(current_entity as ConveyorEntity)
 		return
 	var recipe := current_entity.current_recipe
 
@@ -205,6 +216,33 @@ func _on_game_resources_updated() -> void:
 	_refresh_stats()
 
 # ─── Utilitaire ───────────────────────────────────────────────────────────────
+
+func _apply_entity_mode() -> void:
+	var is_conveyor: bool = _is_conveyor_entity(current_entity)
+	recipe_label.visible = not is_conveyor
+	recipe_selector.visible = not is_conveyor
+	rate_title_label.visible = not is_conveyor
+	rate_box.visible = not is_conveyor
+	input_label.text = "Entree" if is_conveyor else "Entrees"
+	output_label.text = "Sortie" if is_conveyor else "Sorties"
+
+func _refresh_conveyor_details(conveyor: ConveyorEntity) -> void:
+	input_list.clear()
+	input_list.add_item("Connexion: %s" % ("oui" if conveyor.has_input_connection() else "non"))
+	input_list.add_item("Offset: %s" % str(conveyor.input_offset))
+	input_list.add_item("Capacite: %d/%d" % [conveyor.carried_items.size(), conveyor.max_carried_items])
+
+	output_list.clear()
+	output_list.add_item("Connexion: %s" % ("oui" if conveyor.has_output_connection() else "non"))
+	if conveyor.carried_items.is_empty():
+		output_list.add_item("Charge: (aucune)")
+	else:
+		output_list.add_item("Items: %d" % conveyor.carried_items.size())
+		output_list.add_item("Tete: %s x%d" % [conveyor.carried_resource, conveyor.carried_amount])
+		output_list.add_item("Progression: %d%%" % roundi(conveyor.travel_progress * 100.0))
+
+func _is_conveyor_entity(entity: Entity) -> bool:
+	return entity is ConveyorEntity
 
 func _display_name(entity_type: String) -> String:
 	match entity_type:

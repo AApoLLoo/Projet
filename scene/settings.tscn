@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://11txqaql3m1y"]
 
-[ext_resource type="Script" path="res://scene/settings.gd" id="1_dx8vg"]
+[ext_resource type="Script" uid="uid://5rarjs7dv5wp" path="res://scene/settings.gd" id="1_dx8vg"]
 
-[node name="Settings" type="Control"]
+[node name="Settings" type="Control" unique_id=216779603]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_dx8vg")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=1133744243]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.08, 0.13, 0.16, 1)
 
-[node name="WarmGlow" type="ColorRect" parent="."]
+[node name="WarmGlow" type="ColorRect" parent="." unique_id=1783909839]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -28,7 +28,7 @@ offset_bottom = 220.0
 grow_horizontal = 2
 color = Color(0.89, 0.7, 0.35, 0.18)
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1431951502]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -36,200 +36,191 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
-layout_mode = 2
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer" unique_id=1553773042]
 custom_minimum_size = Vector2(920, 640)
+layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer" unique_id=990183212]
 layout_mode = 2
 theme_override_constants/margin_left = 30
 theme_override_constants/margin_top = 28
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 28
 
-[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer" unique_id=811976629]
 layout_mode = 2
 theme_override_constants/separation = 22
 
-[node name="Header" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content"]
+[node name="Header" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content" unique_id=727305188]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Eyebrow" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header"]
+[node name="Eyebrow" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header" unique_id=1507092630]
 layout_mode = 2
 text = "CONFIGURATION"
 
-[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header"]
+[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header" unique_id=1257799159]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "Reglages de session"
 
-[node name="Subtitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header"]
+[node name="Subtitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header" unique_id=30520919]
 layout_mode = 2
 text = "Ajuste l'affichage et l'audio depuis une seule vue, puis reviens instantanement au menu ou a la partie."
 autowrap_mode = 3
 
-[node name="Body" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content"]
+[node name="Body" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content" unique_id=266712229]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="DisplayCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body"]
+[node name="DisplayCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body" unique_id=160689616]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard"]
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard" unique_id=713920143]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 18
 
-[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer"]
+[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer" unique_id=1865201607]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="DisplayTitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content"]
+[node name="DisplayTitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content" unique_id=2088620966]
 layout_mode = 2
 text = "Affichage"
 
-[node name="DisplaySubtitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content"]
+[node name="DisplaySubtitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content" unique_id=856531276]
 layout_mode = 2
 text = "Controle la fenetre, la resolution et le confort de lecture."
 autowrap_mode = 3
 
-[node name="ResolutionLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content"]
+[node name="ResolutionLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content" unique_id=2139025654]
 layout_mode = 2
 text = "Resolution"
 
-[node name="ResolutionOption" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content"]
+[node name="ResolutionOption" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content" unique_id=1353305766]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="FullscreenCheck" type="CheckBox" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content"]
+[node name="FullscreenCheck" type="CheckBox" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content" unique_id=255735175]
 layout_mode = 2
 text = "Plein ecran"
 
-[node name="DisplayHint" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content"]
+[node name="DisplayHint" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/DisplayCard/MarginContainer/Content" unique_id=1845374852]
 layout_mode = 2
 text = "Les options de fenetre peuvent etre desactivees dans la vue integree de l'editeur."
 autowrap_mode = 3
 
-[node name="AudioCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body"]
+[node name="AudioCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body" unique_id=1728383377]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard"]
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard" unique_id=1283714220]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 18
 
-[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer"]
+[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer" unique_id=1987197624]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="AudioTitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content"]
+[node name="AudioTitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content" unique_id=1809905429]
 layout_mode = 2
 text = "Audio"
 
-[node name="AudioSubtitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content"]
+[node name="AudioSubtitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content" unique_id=504529561]
 layout_mode = 2
 text = "Equilibre l'ambiance, la musique et les effets pour garder les infos utiles au premier plan."
 autowrap_mode = 3
 
-[node name="MasterLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content"]
+[node name="MasterLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content" unique_id=1418288848]
 layout_mode = 2
 text = "Volume global"
 
-[node name="MasterRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content"]
+[node name="MasterRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content" unique_id=434009282]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="MasterSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MasterRow"]
+[node name="MasterSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MasterRow" unique_id=1865370055]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 0.0
-max_value = 100.0
-step = 1.0
 value = 80.0
 
-[node name="MasterValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MasterRow"]
-layout_mode = 2
+[node name="MasterValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MasterRow" unique_id=1673412750]
 custom_minimum_size = Vector2(54, 0)
+layout_mode = 2
 text = "80%"
 horizontal_alignment = 2
 
-[node name="MusicLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content"]
+[node name="MusicLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content" unique_id=228371853]
 layout_mode = 2
 text = "Volume musique"
 
-[node name="MusicRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content"]
+[node name="MusicRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content" unique_id=1032455049]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="MusicSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MusicRow"]
+[node name="MusicSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MusicRow" unique_id=1674271097]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 0.0
-max_value = 100.0
-step = 1.0
 value = 80.0
 
-[node name="MusicValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MusicRow"]
-layout_mode = 2
+[node name="MusicValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MusicRow" unique_id=687106006]
 custom_minimum_size = Vector2(54, 0)
+layout_mode = 2
 text = "80%"
 horizontal_alignment = 2
 
-[node name="SfxLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content"]
+[node name="SfxLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content" unique_id=758221566]
 layout_mode = 2
 text = "Volume effets"
 
-[node name="SfxRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content"]
+[node name="SfxRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content" unique_id=1194356013]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="SfxSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/SfxRow"]
+[node name="SfxSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/SfxRow" unique_id=411250960]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 0.0
-max_value = 100.0
-step = 1.0
 value = 80.0
 
-[node name="SfxValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/SfxRow"]
-layout_mode = 2
+[node name="SfxValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/SfxRow" unique_id=371119755]
 custom_minimum_size = Vector2(54, 0)
+layout_mode = 2
 text = "80%"
 horizontal_alignment = 2
 
-[node name="Buttons" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content"]
+[node name="Buttons" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content" unique_id=2125975687]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="ApplyButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/Content/Buttons"]
+[node name="ApplyButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/Content/Buttons" unique_id=550495503]
 custom_minimum_size = Vector2(150, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Appliquer"
 
-[node name="ResetButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/Content/Buttons"]
+[node name="ResetButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/Content/Buttons" unique_id=96935843]
 custom_minimum_size = Vector2(150, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Par defaut"
 
-[node name="BackButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/Content/Buttons"]
+[node name="BackButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/Content/Buttons" unique_id=1349922546]
 custom_minimum_size = Vector2(150, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Retour"
 
-[node name="FooterLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content"]
+[node name="FooterLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content" unique_id=1008319496]
 layout_mode = 2
 text = "Esc ou Retour ferme cet ecran et restaure le flux precedent."
 horizontal_alignment = 1
 
-[node name="MessageDialog" type="AcceptDialog" parent="."]
+[node name="MessageDialog" type="AcceptDialog" parent="." unique_id=994449832]
 title = "Information"

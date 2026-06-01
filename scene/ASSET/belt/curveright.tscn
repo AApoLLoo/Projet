@@ -42,8 +42,8 @@ animations = [{
 [node name="curveright" type="Node2D" unique_id=1712766572]
 script = ExtResource("1_conveyorentity")
 conveyor_kind = "curve_right"
-input_offset = Vector2i(0, -1)
-output_offset = Vector2i(1, 0)
+input_offset = Vector2i(-1, -1)
+output_offset = Vector2i(1, -1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1659799696]
 position = Vector2(53.000008, 15.999998)

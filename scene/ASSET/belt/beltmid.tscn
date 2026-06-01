@@ -43,8 +43,8 @@ animations = [{
 y_sort_enabled = true
 script = ExtResource("1_conveyorentity")
 conveyor_kind = "belt_right"
-input_offset = Vector2i(-1, 0)
-output_offset = Vector2i(1, 0)
+input_offset = Vector2i(-1, 1)
+output_offset = Vector2i(1, -1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=489065791]
 y_sort_enabled = true

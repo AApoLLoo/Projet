@@ -42,6 +42,7 @@ func _ready() -> void:
 		dlg.popup_centered()
 
 	_apply_start_state()
+	ContractManager.reset()
 	_setup_delivery_point_marker()
 	if _preview_mode:
 		_disable_preview_interactions()
@@ -149,6 +150,9 @@ func _create_delivery_point_marker(marker_name: String, fill_color: Color, outli
 func _on_default_delivery_point_changed(_has_point: bool, _cell_pos: Vector2i, _world_pos: Vector2) -> void:
 	_refresh_delivery_point_marker()
 
+func quick_save() -> void:
+	_save_current_state()
+	
 func _refresh_delivery_point_marker() -> void:
 	if _delivery_point_marker == null:
 		return
@@ -302,6 +306,8 @@ func _apply_start_state() -> void:
 				push_warning("Restauration partielle des batiments: %d/%d" % [int(restored_count), entities_data.size()])
 		else:
 			push_warning("BuildingManager introuvable pendant la restauration des batiments.")
+
+	_restore_ground_materials(start_state.get("ground_materials", []))
 
 	# Forcer la mise à jour de l'UI
 	var hour: int = int(TimeManager.current_time)
@@ -617,7 +623,47 @@ func _collect_floor_state() -> Dictionary:
 	if floor_script and floor_script.has_method("get_generation_state"):
 		var state_result: Variant = floor_script.call("get_generation_state")
 		floor_state = _to_dictionary(state_result)
+	floor_state["ground_materials"] = _collect_ground_materials()
 	return floor_state
+
+func _collect_ground_materials() -> Array[Dictionary]:
+	var serialized_materials: Array[Dictionary] = []
+	for node in get_tree().get_nodes_in_group("ground_materials"):
+		if node == null or not is_instance_valid(node):
+			continue
+		if not node.has_method("serialize"):
+			continue
+		var material_data: Variant = node.call("serialize")
+		if material_data is Dictionary:
+			serialized_materials.append(material_data)
+	return serialized_materials
+
+func _restore_ground_materials(materials_data: Array) -> void:
+	for node in get_tree().get_nodes_in_group("ground_materials"):
+		if node != null and is_instance_valid(node):
+			node.queue_free()
+
+	if materials_data.is_empty():
+		return
+
+	var delivery_manager: Node = get_node_or_null("DeliveryManager")
+	if delivery_manager == null:
+		push_warning("DeliveryManager introuvable pendant la restauration des materiaux au sol.")
+		return
+
+	var material_scene: PackedScene = delivery_manager.get("materiau_scene") as PackedScene
+	if material_scene == null:
+		push_warning("Scene de materiau introuvable pendant la restauration des materiaux au sol.")
+		return
+
+	for material_variant in materials_data:
+		if not (material_variant is Dictionary):
+			continue
+		var material_data: Dictionary = material_variant
+		var material_instance: Node = material_scene.instantiate()
+		add_child(material_instance)
+		if material_instance.has_method("deserialize"):
+			material_instance.call("deserialize", material_data)
 
 func _collect_camera_position() -> Vector2:
 	var camera_position: Vector2 = _camera.global_position if _camera else Vector2.ZERO

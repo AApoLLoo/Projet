@@ -47,14 +47,14 @@ const RESOURCE_CATALOG: Dictionary = {
 	"piece_base": {
 		"label": "Piece de base",
 		"import_unit_cost": 120.0,
-		"export_unit_value": 0.0,
+		"export_unit_value": 180.0,  
 		"can_import": true,
 		"can_export": true,
 	},
 	"piece_avancee": {
 		"label": "Piece avancee",
 		"import_unit_cost": 240.0,
-		"export_unit_value": 0.0,
+		"export_unit_value": 420.0,   
 		"can_import": true,
 		"can_export": true,
 	},
@@ -290,6 +290,24 @@ func _apply_delivery_payload(order: Dictionary) -> void:
 	else:
 		# Fallback si pas d'entrepôt trouvé
 		GameManager.add_resource_stock({resource_id: quantity})
+		var delivery_point: Dictionary = order.get("delivery_point", {})
+		var base_pos: Vector2 = Vector2(
+			float(delivery_point.get("world_x", 0.0)),
+			float(delivery_point.get("world_y", 0.0))
+		)
+		var quantity: int = int(order.get("quantity", 0))
+		for i in quantity:
+			var mat = materiau_scene.instantiate()
+			# Décale légèrement chaque colis pour éviter la superposition
+			mat.global_position = base_pos + Vector2((i % 5) * 40, (i / 5) * 40)
+			# Passe le type de ressource au matériau pour qu'il adapte son apparence
+			if mat.has_method("set_resource"):
+				mat.call("set_resource", resource_id, 1)
+			else:
+				mat.destination = resource_id
+			get_tree().current_scene.add_child(mat)
+	else:
+		push_warning("Livraison: materiau_scene non assignée, les matériaux ne spawneront pas.")
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _finish_delivery(order: Dictionary) -> void:

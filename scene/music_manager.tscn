@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://b7e5u1a0uq5bo"]
+
+[ext_resource type="Script" uid="uid://bbglbq2q655bh" path="res://scene/music_manager.gd" id="1_bjrqh"]
+[ext_resource type="AudioStream" uid="uid://dsu8s14c4oetj" path="res://asset/un-baile-inolvidable.mp3" id="1_lexfc"]
+
+[node name="MusicManager" type="Node" unique_id=1716961507]
+script = ExtResource("1_bjrqh")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=899176274]
+stream = ExtResource("1_lexfc")
+autoplay = true
+bus = &"Music"
