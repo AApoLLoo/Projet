@@ -308,7 +308,8 @@ func _ready() -> void:
 	# --- BOUTON D'ANNULATION DU DERNIER BATIMENT (créé dynamiquement) ---
 	var undo_button: Button = Button.new()
 	undo_button.name = "BtnUndoBuild"
-	undo_button.text = "Annuler dernier bâtiment (50%)"
+	undo_button.text = "Annuler (50%)"
+	undo_button.custom_minimum_size = Vector2(200.0, 32.0)
 	_style_button(undo_button, Color.html("#8A6D2E"))
 	undo_button.visible = false
 	# Positionnement simple : en bas du menu de construction si présent, sinon en haut à gauche
@@ -338,6 +339,7 @@ func _ready() -> void:
 		var destroy_button: Button = Button.new()
 		destroy_button.name = "BtnDestroyMode"
 		destroy_button.text = "Mode destruction"
+		destroy_button.custom_minimum_size = Vector2(200.0, 32.0)
 		_style_button(destroy_button, Color.html("#8A3A3A"))
 		destroy_button.toggle_mode = true
 		destroy_button.set_pressed(false)
