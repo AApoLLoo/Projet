@@ -1,17 +1,16 @@
-# Entrepot.gd
-extends Node2D # Ou Node2D, selon votre structure
+extends Entity 
+class_name WarehouseEntity
+
+var inventory: Dictionary = {} 
+
+# NE PAS REDÉCLARER LE SIGNAL ICI, IL EST DÉJÀ DANS ENTITY
+# signal entity_updated(entity)  <-- SUPPRIME CETTE LIGNE
 
 func _ready():
-	add_to_group("entrepot") # Permet de le trouver facilement via get_tree()
+	add_to_group("entrepot")
 
-func receive_resources(resource_id: String, quantity: int):
-	# Appel vers GameManager pour mettre à jour le stock global
-	GameManager.add_resource_stock({resource_id: quantity})
-	print("Entrepôt : %d de %s reçu." % [quantity, resource_id])
-
-func give_resources(resource_id: String, quantity: int) -> bool:
-	# Vérifie si le stock est suffisant dans le GameManager
-	if GameManager.has_resources({resource_id: quantity}):
-		GameManager.consume_resources({resource_id: quantity})
-		return true
-	return false
+func add_resource(item_name: String, amount: int):
+	inventory[item_name] = inventory.get(item_name, 0) + amount
+	
+	# Tu utilises directement le signal hérité de Entity
+	entity_updated.emit(self)
