@@ -592,9 +592,6 @@ func _input(event: InputEvent) -> void:
 func _show_quick_save_toast() -> void:
 	_show_toast("✓ Partie sauvegardée")
 
-func _show_hint_toast(message: String) -> void:
-	_show_toast(message, UITheme.ACCENT_GOLD)
-
 func _show_toast(message: String, border_color: Color = UITheme.BORDER_STRONG) -> void:
 	if message.is_empty():
 		return
@@ -647,18 +644,6 @@ func _update_contracts_display() -> void:
 		var label := String(c["resource_label"])
 		parts.append("📦 %s : %d/%d" % [label, delivered, contract_quantity])
 	contracts_label.text = "Contrats : " + " | ".join(parts)
-
-func _on_contract_arrived(contract: Dictionary) -> void:
-	_update_contracts_display()
-	_show_hint_toast("Nouveau contrat : %s x%d" % [contract.get("resource_label", "Ressource"), int(contract.get("quantity", 0))])
-
-func _on_contract_completed(contract: Dictionary) -> void:
-	_update_contracts_display()
-	_show_hint_toast("Contrat termine : %s x%d" % [contract.get("resource_label", "Ressource"), int(contract.get("quantity", 0))])
-
-func _on_contract_failed(contract: Dictionary) -> void:
-	_update_contracts_display()
-	_show_hint_toast("Contrat echoue : %s x%d" % [contract.get("resource_label", "Ressource"), int(contract.get("quantity", 0))])
 	
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
