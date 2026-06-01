@@ -97,7 +97,7 @@ var buildings_data = {
 		"scene": preload("res://scene/turbine_2d.tscn"),
 		"texture": preload("res://asset/Turbine Animation base.png"),
 		"cost": 500.0,
-		"frames": 6
+		"frames": 1
 	},
 	
 	# --- TAPIS DROITS (Exemples de directions si vous séparez les scènes) ---

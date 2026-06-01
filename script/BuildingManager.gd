@@ -1,5 +1,7 @@
 extends Node2D
 
+const ENTITY_HITBOX_COLLISION_MASK: int = Entity.HITBOX_COLLISION_LAYER
+
 # Correspondance entity_type → scène pour la restauration des sauvegardes
 const _ENTITY_SCENES: Dictionary = {
 	"turbine": preload("res://scene/turbine_2d.tscn"),
@@ -369,6 +371,10 @@ func _try_destroy_at_mouse() -> void:
 
 func _try_select_entity_at_mouse() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
+	var hitbox_entity: Entity = _find_entity_from_hitbox(mouse_pos)
+	if hitbox_entity != null:
+		entity_selected.emit(hitbox_entity)
+		return
 	
 	# --- MODIFICATION ICI : Calcul de position isométrique ---
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
@@ -384,6 +390,24 @@ func _try_select_entity_at_mouse() -> void:
 		entity_selected.emit(inst)
 	else:
 		entity_selected.emit(null)
+
+func _find_entity_from_hitbox(world_pos: Vector2) -> Entity:
+	var world_2d: World2D = get_world_2d()
+	if world_2d == null:
+		return null
+	var query := PhysicsPointQueryParameters2D.new()
+	query.position = world_pos
+	query.collide_with_areas = true
+	query.collide_with_bodies = false
+	query.collision_mask = ENTITY_HITBOX_COLLISION_MASK
+	var hits: Array[Dictionary] = world_2d.direct_space_state.intersect_point(query, 8)
+	for hit in hits:
+		var collider: Variant = hit.get("collider")
+		if collider is Area2D:
+			var parent: Node = (collider as Area2D).get_parent()
+			if parent is Entity:
+				return parent
+	return null
 
 func _try_pickup_conveyor_item_at_mouse() -> bool:
 	var mouse_pos: Vector2 = get_global_mouse_position()
