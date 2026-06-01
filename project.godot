@@ -15,6 +15,10 @@ run/main_scene="uid://ylhh3mcm4cy3"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[audio]
+
+buses/default_bus_layout="uid://cxy78p7r2vo68"
+
 [autoload]
 
 SaveSystem="*res://script/SaveSystem.gd"
@@ -23,6 +27,8 @@ TimeManager="*res://script/TimeManager.gd"
 GameManager="*res://script/GameManager.gd"
 RecipeDatabase="*res://script/RecipeDatabase.gd"
 EntityManager="*res://script/EntityManager.gd"
+MusicManager="*uid://b7e5u1a0uq5bo"
+ContractManager="*res://script/ContractManager.gd"
 
 [input]
 

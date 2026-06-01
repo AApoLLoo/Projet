@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://ylhh3mcm4cy3"]
 
+[ext_resource type="Texture2D" uid="uid://bbekbm0x5yqxl" path="res://asset/image_accueil.png" id="2_hxu56"]
 [ext_resource type="Script" uid="uid://bhw80blb4onvx" path="res://scene/main_menu.gd" id="2_wkc40"]
 
 [node name="MainMenu" type="Control" unique_id=461237088]
@@ -19,6 +20,21 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.04, 0.09, 0.12, 0.64)
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1017960876]
+modulate = Color(1, 1, 1, 0.47058824)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -146.0
+offset_right = 260.0
+offset_bottom = 146.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_hxu56")
 
 [node name="MenuBounds" type="MarginContainer" parent="." unique_id=185541002]
 layout_mode = 1

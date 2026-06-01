@@ -1,24 +1,26 @@
 [gd_scene format=3 uid="uid://bnit1gqnd4kqp"]
 
 [ext_resource type="Script" uid="uid://5nx80apmymd" path="res://script/HUD.gd" id="1_hud"]
-[ext_resource type="Script" uid="uid://cei88ve3rwm6c" uid="uid://cei88ve3rwm6c" path="res://script/MinimapOverlay.gd" id="2_minimap_overlay"]
-[ext_resource type="Script" uid="uid://bmymfsqky584y" path="res://scene/entrepot_panel.gd" id="3_pvgpj"]
+[ext_resource type="Script" uid="uid://cei88ve3rwm6c" path="res://script/MinimapOverlay.gd" id="2_minimap_overlay"]
 
 [node name="HUD" type="CanvasLayer" unique_id=745135006]
 script = ExtResource("1_hud")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1306118218]
-anchors_preset = 1
-anchor_left = 1.0
+anchors_preset = 0
+anchor_left = 0.0
 anchor_right = 1.0
-offset_left = -540.0
-offset_top = 18.0
-offset_bottom = 132.0
-grow_horizontal = 0
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 48.0
+grow_horizontal = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
 
 [node name="ColorRect" type="ColorRect" parent="MarginContainer" unique_id=1880473724]
 layout_mode = 2
@@ -26,31 +28,29 @@ color = Color(0.96, 0.94, 0.89, 0.84)
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer" unique_id=284299318]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/MarginContainer" unique_id=623881334]
 layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="DayLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=927971570]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Jour 1"
-horizontal_alignment = 1
-
-[node name="TimeLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=1234150913]
-unique_name_in_owner = true
-layout_mode = 2
-text = "08:00"
-horizontal_alignment = 1
+theme_override_constants/separation = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=750338239]
 layout_mode = 2
 theme_override_constants/separation = 8
-alignment = 1
+
+[node name="DayLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=927971570]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Jour 1"
+
+[node name="TimeLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1234150913]
+unique_name_in_owner = true
+layout_mode = 2
+text = "08:00"
+size_flags_horizontal = 3
 
 [node name="BtnPause" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1163007535]
 unique_name_in_owner = true
@@ -86,10 +86,6 @@ text = "Logistique"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Vue usine"
-
-[node name="ContractsLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=125805602]
-unique_name_in_owner = true
-layout_mode = 2
 
 [node name="MinimapContainer" type="MarginContainer" parent="." unique_id=987692439]
 anchors_preset = 3
@@ -257,10 +253,6 @@ text = "Energie"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Production"
-
-[node name="BtnEntrepot" type="Button" parent="BuildMenuContainer" unique_id=540830721]
-unique_name_in_owner = true
-layout_mode = 2
 
 [node name="OrdersPanel" type="PanelContainer" parent="." unique_id=498211001]
 unique_name_in_owner = true
@@ -598,20 +590,3 @@ text = "🡭"
 [node name="Belt_left" type="Button" parent="Menu_Belt" unique_id=1980610375]
 layout_mode = 2
 text = "🡴"
-
-[node name="EntrepotPanel" type="PanelContainer" parent="." unique_id=1945030725]
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("3_pvgpj")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="EntrepotPanel" unique_id=1044425781]
-layout_mode = 2
-
-[node name="TitleLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=323975339]
-layout_mode = 2
-
-[node name="StockLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=1374727364]
-layout_mode = 2
-
-[node name="StatusLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=1679325191]
-layout_mode = 2

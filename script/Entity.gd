@@ -1,6 +1,8 @@
 extends Node2D
 class_name Entity
 
+const HITBOX_COLLISION_LAYER: int = 1 << 3
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Entity – Classe de base pour tous les bâtiments interactifs.
 # Étendre cette classe dans TurbineEntity.gd, FactoryEntity.gd, etc.
@@ -41,6 +43,7 @@ var is_active: bool = false :
 		EntityManager.recalculate_totals()
 
 var _production_timer: float = 0.0
+var _hitbox_area: Area2D = null
 
 # ─── Signaux ─────────────────────────────────────────────────────────────────
 
@@ -55,6 +58,7 @@ signal entity_updated(entity: Entity)
 func _ready() -> void:
 	entity_id = _generate_id()
 	set_process(true)
+	_ensure_hitbox()
 	# La sous-classe appelle super._ready() puis définit entity_type et
 	# charge ses recettes avant d'appeler _post_ready().
 	_post_ready()
@@ -81,22 +85,110 @@ func _post_ready() -> void:
 		current_recipe = available[0]
 	EntityManager.register_entity(self)
 
+func get_hitbox_area() -> Area2D:
+	if _hitbox_area == null or not is_instance_valid(_hitbox_area):
+		_hitbox_area = get_node_or_null("HitboxArea") as Area2D
+	return _hitbox_area
+
 func _exit_tree() -> void:
 	EntityManager.unregister_entity(entity_id, self)
 
+func _ensure_hitbox() -> void:
+	var hitbox_area: Area2D = get_hitbox_area()
+	if hitbox_area == null:
+		hitbox_area = Area2D.new()
+		hitbox_area.name = "HitboxArea"
+		hitbox_area.input_pickable = true
+		hitbox_area.collision_layer = HITBOX_COLLISION_LAYER
+		hitbox_area.collision_mask = 0
+		add_child(hitbox_area)
+		_hitbox_area = hitbox_area
+	else:
+		hitbox_area.input_pickable = true
+		hitbox_area.collision_layer = HITBOX_COLLISION_LAYER
+		hitbox_area.collision_mask = 0
+
+	var collision_shape: CollisionShape2D = hitbox_area.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if collision_shape == null:
+		collision_shape = CollisionShape2D.new()
+		collision_shape.name = "CollisionShape2D"
+		hitbox_area.add_child(collision_shape)
+
+	var shape_rect: Rect2 = _compute_hitbox_rect()
+	var rectangle_shape: RectangleShape2D = collision_shape.shape as RectangleShape2D
+	if rectangle_shape == null:
+		rectangle_shape = RectangleShape2D.new()
+		collision_shape.shape = rectangle_shape
+	rectangle_shape.size = shape_rect.size
+	hitbox_area.position = shape_rect.position + shape_rect.size * 0.5
+
+func _compute_hitbox_rect() -> Rect2:
+	var visual_node: Node = _find_visual_node_for_hitbox()
+	if visual_node is Sprite2D:
+		return _compute_sprite_hitbox_rect(visual_node as Sprite2D)
+	if visual_node is AnimatedSprite2D:
+		return _compute_animated_sprite_hitbox_rect(visual_node as AnimatedSprite2D)
+	return Rect2(Vector2(-16.0, -16.0), Vector2(32.0, 32.0))
+
+func _find_visual_node_for_hitbox() -> Node:
+	for child in get_children():
+		if child is Sprite2D or child is AnimatedSprite2D:
+			return child
+	return null
+
+func _compute_sprite_hitbox_rect(sprite: Sprite2D) -> Rect2:
+	if sprite == null or sprite.texture == null:
+		return Rect2(Vector2(-16.0, -16.0), Vector2(32.0, 32.0))
+	var frame_width: float = sprite.texture.get_width() / maxf(1.0, float(sprite.hframes))
+	var frame_height: float = sprite.texture.get_height() / maxf(1.0, float(sprite.vframes))
+	var size: Vector2 = Vector2(frame_width, frame_height) * sprite.scale.abs()
+	var top_left: Vector2 = sprite.position
+	if sprite.centered:
+		top_left -= size * 0.5
+	return Rect2(top_left, size)
+
+func _compute_animated_sprite_hitbox_rect(sprite: AnimatedSprite2D) -> Rect2:
+	if sprite == null or sprite.sprite_frames == null:
+		return Rect2(Vector2(-16.0, -16.0), Vector2(32.0, 32.0))
+	var animation_name: StringName = sprite.animation if not sprite.animation.is_empty() else &"default"
+	var texture: Texture2D = sprite.sprite_frames.get_frame_texture(animation_name, 0)
+	if texture == null:
+		return Rect2(Vector2(-16.0, -16.0), Vector2(32.0, 32.0))
+	var size: Vector2 = texture.get_size() * sprite.scale.abs()
+	var top_left: Vector2 = sprite.position
+	if sprite.centered:
+		top_left -= size * 0.5
+	return Rect2(top_left, size)
+
 # ─── Propriétés calculées ────────────────────────────────────────────────────
 
-# kW effectif : recipe.energy_delta × taux × (1 si actif, 0 sinon)
+# kW effectif, influencé linéairement par la gravité et la température
 func get_energy_delta() -> float:
 	if not _can_operate_now():
 		return 0.0
-	return current_recipe.get("energy_delta", 0.0) * production_rate
+	var base_energy: float = current_recipe.get("energy_delta", 0.0) * production_rate
+	var settings: Dictionary = SettingsManager.get_settings()
+	# Gravité : 0.1→30.0 → factor linéaire 0.5 (légère) à 2.0 (forte)
+	var gravity: float = SettingsManager._to_float(settings.get("physics_gravity", 9.8), 9.8)
+	var gravity_t: float = (gravity - 0.1) / (30.0 - 0.1)
+	var gravity_factor: float = lerpf(0.5, 2.0, gravity_t)
+	# Température : -50→150 → factor linéaire 2.0 (froid, chauffage) à 0.5 (chaud)
+	var temperature: float = SettingsManager._to_float(settings.get("physics_temperature", 20.0), 20.0)
+	var temp_t: float = (temperature - (-50.0)) / (150.0 - (-50.0))
+	var temp_factor: float = lerpf(2.0, 0.5, temp_t)
+	return base_energy * gravity_factor * temp_factor
 
-# g/min effectif
+# g/min effectif, influencé linéairement par la température
 func get_co2_rate() -> float:
 	if not _can_operate_now():
 		return 0.0
-	return current_recipe.get("co2_rate", 0.0) * production_rate
+	var base_co2: float = current_recipe.get("co2_rate", 0.0) * production_rate
+	var settings: Dictionary = SettingsManager.get_settings()
+	# Température : -50→150, défaut 20 → factor linéaire 0.5 (froid) à 2.0 (chaud)
+	var temperature: float = SettingsManager._to_float(settings.get("physics_temperature", 20.0), 20.0)
+	var temp_t: float = (temperature - (-50.0)) / (150.0 - (-50.0))
+	var temp_factor: float = lerpf(0.5, 2.0, temp_t)
+	return base_co2 * temp_factor
 
 # ─── Méthodes publiques ──────────────────────────────────────────────────────
 
@@ -257,7 +349,17 @@ func _get_cycle_duration() -> float:
 	if current_recipe.is_empty():
 		return 0.0
 	var base_duration: float = maxf(0.1, float(current_recipe.get("production_time", 1.0)))
-	return base_duration / maxf(production_rate, 0.01)
+	var settings: Dictionary = SettingsManager.get_settings()
+	# Gravité : 0.1→30.0, défaut 9.8 → factor linéaire 0.5 (rapide) à 2.0 (lent)
+	var gravity: float = SettingsManager._to_float(settings.get("physics_gravity", 9.8), 9.8)
+	var gravity_t: float = (gravity - 0.1) / (30.0 - 0.1)
+	var gravity_factor: float = lerpf(0.5, 2.0, gravity_t)
+	# Friction : 0.0→5.0, défaut 1.0 → factor linéaire 0.5 (glissant) à 2.0 (résistant)
+	var friction: float = SettingsManager._to_float(settings.get("physics_friction", 1.0), 1.0)
+	var friction_t: float = friction / 5.0
+	var friction_factor: float = lerpf(0.5, 2.0, friction_t)
+	var adjusted_duration: float = base_duration * gravity_factor * friction_factor
+	return adjusted_duration / maxf(production_rate, 0.01)
 
 func _run_production_cycle() -> bool:
 	var inputs: Dictionary = current_recipe.get("inputs", {})

@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://d038nj5y8uglu"]
+
+[ext_resource type="Script" uid="uid://3gf8rikqkqvw" path="res://script/EntrepotPanel.gd" id="1_g7rgc"]
+
+[node name="EntrepotPanel" type="PanelContainer" unique_id=1027863301]
+script = ExtResource("1_g7rgc")
+
+[node name="Label" type="Label" parent="." unique_id=511923399]
+layout_mode = 2

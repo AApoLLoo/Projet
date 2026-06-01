@@ -36,19 +36,27 @@ func _ready() -> void:
 	_style_buttons()
 	_style_panels()
 	_style_text()
+	_menu_title.text = "FACTORY MANAGER"
+	_menu_title.add_theme_font_size_override("font_size", 42)
+	_menu_title.add_theme_color_override("font_color", UITheme.INK_DARK)
 	_configure_menu_descriptions()
 	_update_responsive_layout()
 	_connect_actions()
+	_menu_description_label.custom_minimum_size = Vector2(0, 105)
+	_menu_description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	for btn in [_start_button, _load_button, _lab_button, _tutorial_button,
+				_settings_button, _achievements_button, _quit_button]:
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 
 func _style_buttons() -> void:
-	_apply_button_style(_start_button, UITheme.ACCENT_TEAL, UITheme.TEXT_LIGHT)
-	_apply_button_style(_load_button, UITheme.ACCENT_GOLD, UITheme.INK_DARK)
-	_apply_button_style(_lab_button, UITheme.ACCENT_SKY, UITheme.TEXT_LIGHT)
-	_apply_button_style(_tutorial_button, Color("#E7C46A"), UITheme.INK_DARK)
-	_apply_button_style(_settings_button, Color("#E9EEF1"), UITheme.INK_DARK)
-	_apply_button_style(_achievements_button, Color("#E9EEF1"), UITheme.INK_DARK)
-	_apply_button_style(_quit_button, UITheme.ACCENT_RED, UITheme.TEXT_LIGHT)
-
+	_apply_button_style(_start_button,        Color("#4FA39A"), UITheme.TEXT_LIGHT)  # teal
+	_apply_button_style(_load_button,         Color("#6E95C4"), UITheme.TEXT_LIGHT)  # bleu
+	_apply_button_style(_lab_button,          Color("#8B7EC8"), UITheme.TEXT_LIGHT)  # violet
+	_apply_button_style(_tutorial_button, Color("#E8A87C"), UITheme.TEXT_LIGHT)  # orange doux	
+	_apply_button_style(_settings_button,     Color("#7AAB8A"), UITheme.TEXT_LIGHT)  # vert sauge
+	_apply_button_style(_achievements_button, Color("#C4956E"), UITheme.TEXT_LIGHT)  # brun chaud
+	_apply_button_style(_quit_button,         Color("#C86B57"), UITheme.TEXT_LIGHT)  # rouge
+	
 func _update_physics_panel() -> void:
 	if _bottom_left_label:
 		var settings: Dictionary = SettingsManager.get_settings()

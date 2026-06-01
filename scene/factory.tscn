@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://b4y7f2nsinxh2"]
+[gd_scene load_steps=4 format=3 uid="uid://b4y7f2nsinxh2"]
 
 [ext_resource type="Script" path="res://script/FactoryEntity.gd" id="1_factoryentity"]
+[ext_resource type="PackedScene" path="res://scene/white_puff_vfx.tscn" id="2_whitepuffvfx"]
 [ext_resource type="Texture2D" uid="uid://31twxhbxjm57" path="res://asset/IndustrialTile_14.png" id="1_52rbu"]
 
 [node name="Factory" type="Node2D" unique_id=935672183]
@@ -9,3 +10,11 @@ script = ExtResource("1_factoryentity")
 
 [node name="Tuile" type="Sprite2D" parent="." unique_id=1945434516]
 texture = ExtResource("1_52rbu")
+
+[node name="WhitePuffVfx" parent="." instance=ExtResource("2_whitepuffvfx")]
+position = Vector2(0, -24)
+scale = Vector2(0.18, 0.18)
+puff_interval = 1.3
+puff_interval_jitter = 0.25
+puff_offset_jitter = Vector2(3, 1.5)
+puff_scale_jitter = 0.05
