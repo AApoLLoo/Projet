@@ -48,7 +48,7 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var btn_build_factory: Button = %BtnBuildFactory 
 @onready var btn_build_belt: Button = %BtnBuildBelt       
 @onready var btn_build_turbine: Button = %BtnBuildTurbine 
-
+@onready var btn_build_entrepot: Button = %BtnEntrepot 
 ###BELT###
 @onready var menu_belt: HBoxContainer = $Menu_Belt
 @onready var curve_top: Button = $Menu_Belt/Curve_Top
@@ -83,7 +83,7 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var btn_choose_order_delivery_point: Button = %BtnChooseOrderDeliveryPoint
 @onready var btn_clear_order_delivery_point: Button = %BtnClearOrderDeliveryPoint
 @onready var btn_submit_order: Button = %BtnSubmitOrder
-
+@onready var entrepot_panel = $EntrepotPanel # Chemin vers votre panneau dans le HUD
 # --- DICTIONNAIRE MIS À JOUR ---
 # --- DICTIONNAIRE MIS À JOUR AVEC DIRECTIONS ET VIRAGES ---
 var buildings_data = {
@@ -138,6 +138,12 @@ var buildings_data = {
 		"texture": preload("res://asset/Curve_0004.png"),
 		"cost": 60.0,
 		"frames": 4
+	},
+	"entrepot":{
+		"scene": preload("res://scene/entrepot.tscn"),
+		"texture": preload("res://asset/image-removebg-preview.png"), # <- Remplacez par le chemin de votre image
+		"cost": 1000.0, # Ajustez le prix comme vous voulez
+		"frames": 1
 	}
 }
 @onready var minimap_camera: Camera2D = %MinimapCamera
@@ -161,6 +167,11 @@ var _minimap_world_rect: Rect2 = Rect2()
 var _minimap_viewport_size: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
+	
+	btn_build_entrepot.pressed.connect(func():
+		print("Clic sur ENTREPÔT !")
+		_start_building_process("entrepot")
+	)
 	_ensure_input_actions()
 	_style_hud()
 	if session_overview_panel:
@@ -827,6 +838,7 @@ func _update_day_display(day: int) -> void:
 	day_label.text = "Jour %d" % day
 
 func _on_resources_updated() -> void:
+	print("HUD : Signal resources_updated reçu ! Mise à jour de l'interface...")
 	_update_money_display()
 	_update_co2_display()
 	_update_session_overview()
@@ -1097,7 +1109,7 @@ func _on_choose_default_delivery_point_pressed() -> void:
 	_delivery_selection_context = "default"
 	orders_status_label.text = "Clique sur la carte pour definir le point de livraison par defaut."
 	_building_manager.start_delivery_point_selection()
-	orders_panel.hide()  # ← déjà présent
+	orders_panel.hide()
 
 func _on_choose_order_delivery_point_pressed() -> void:
 	if _building_manager == null or not _building_manager.has_method("start_delivery_point_selection"):

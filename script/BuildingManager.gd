@@ -9,7 +9,8 @@ const _ENTITY_SCENES: Dictionary = {
 	"curve_top": preload("res://scene/ASSET/beltcurvetop.tscn"),
 	"curve_down": preload("res://scene/ASSET/belt/curvedown.tscn"),
 	"curve_left": preload("res://scene/ASSET/belt/curveleft.tscn"),
-	"curve_right": preload("res://scene/ASSET/belt/curveright.tscn")
+	"curve_right": preload("res://scene/ASSET/belt/curveright.tscn"),
+	"entrepot": preload("res://scene/entrepot.tscn"),
 }
 
 # --- MODIFICATION ICI : Ajout du lien vers le TileMap Isométrique ---
@@ -33,7 +34,7 @@ signal entity_selected(entity)
 signal delivery_point_selected(cell_pos, world_pos)
 signal delivery_point_hovered(cell_pos, world_pos)
 signal delivery_point_selection_changed(enabled)
-
+signal entrepot_inspected(entrepot_instance)
 var is_destroying: bool = false
 var is_selecting_delivery_point: bool = false
 
@@ -150,7 +151,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		_try_place_building()
 		print("JE POSE LE BATIMENT !")
 		get_viewport().set_input_as_handled()
-
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+		var mouse_pos = get_global_mouse_position()
+		var cell_pos = get_grid_pos(mouse_pos)
+		
+		if occupied_cells.has(cell_pos):
+			var inst = occupied_cells[cell_pos].get("instance")
+			if is_instance_valid(inst) and inst.is_in_group("entrepot"):
+				entrepot_inspected.emit(inst)
+				get_viewport().set_input_as_handled()
 func _process(_delta: float) -> void:
 	if is_selecting_delivery_point:
 		_update_delivery_point_hover_preview()
@@ -160,9 +169,20 @@ func _process(_delta: float) -> void:
 func _update_delivery_point_hover_preview() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
+	
 	if cell_pos == _last_delivery_hover_cell:
 		return
-	_last_delivery_hover_cell = cell_pos
+	_last_delivery_hover_cell = cell_pos	
+	
+	# Feedback : Est-ce que la souris survole un entrepôt ?
+	var is_hovering_entrepot = false
+	if occupied_cells.has(cell_pos):
+		var inst = occupied_cells[cell_pos].get("instance")
+		if is_instance_valid(inst) and inst.is_in_group("entrepot"):
+			is_hovering_entrepot = true
+	
+	# Vous pouvez ici changer la couleur de votre preview ou curseur
+	# si is_hovering_entrepot est vrai
 	delivery_point_hovered.emit(cell_pos, get_world_pos(cell_pos))
 
 func _update_preview() -> void:
@@ -297,9 +317,23 @@ func is_delivery_point_selection_active() -> bool:
 func _select_delivery_point_at_mouse() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
-	var world_pos: Vector2 = get_world_pos(cell_pos)
-	delivery_point_selected.emit(cell_pos, world_pos)
-	stop_delivery_point_selection()
+	
+	# Vérification : Y a-t-il un bâtiment à cette position ?
+	if not occupied_cells.has(cell_pos):
+		print("Erreur : Aucun bâtiment ici.")
+		return
+
+	var data = occupied_cells[cell_pos]
+	var inst = data.get("instance")
+
+	# Vérification : Est-ce que cet objet est un entrepôt ?
+	# (On suppose que votre scène entrepot.tscn est dans le groupe "entrepot")
+	if is_instance_valid(inst) and inst.is_in_group("entrepot"):
+		var world_pos: Vector2 = get_world_pos(cell_pos)
+		delivery_point_selected.emit(cell_pos, world_pos)
+		stop_delivery_point_selection()
+	else:
+		print("Ce bâtiment n'est pas un entrepôt !")
 
 
 func _try_destroy_at_mouse() -> void:

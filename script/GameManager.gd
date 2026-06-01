@@ -82,6 +82,7 @@ func add_resource_stock(resources: Dictionary, should_emit: bool = true) -> void
 		if ContractManager:
 			ContractManager.try_fulfill_contracts(String(resource_id), amount)
 	_emit_resource_signals(should_emit)
+	resources_updated.emit()
 
 func has_resources(required_resources: Dictionary, multiplier: float = 1.0) -> bool:
 	for resource_id in required_resources.keys():

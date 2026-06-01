@@ -257,6 +257,10 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Production"
 
+[node name="BtnEntrepot" type="Button" parent="BuildMenuContainer" unique_id=540830721]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="OrdersPanel" type="PanelContainer" parent="." unique_id=498211001]
 unique_name_in_owner = true
 visible = false
@@ -593,3 +597,20 @@ text = "🡭"
 [node name="Belt_left" type="Button" parent="Menu_Belt" unique_id=1980610375]
 layout_mode = 2
 text = "🡴"
+
+[node name="EntrepotPanel" type="PanelContainer" parent="." unique_id=1945030725]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("3_pvgpj")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="EntrepotPanel" unique_id=1044425781]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=323975339]
+layout_mode = 2
+
+[node name="StockLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=1374727364]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="EntrepotPanel/VBoxContainer" unique_id=1679325191]
+layout_mode = 2
