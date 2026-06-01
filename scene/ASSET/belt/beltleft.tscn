@@ -1,7 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://ds3pp37c56env"]
+[gd_scene format=3 uid="uid://ds3pp37c56env"]
 
-[ext_resource type="Script" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
 [ext_resource type="Texture2D" uid="uid://pv15tlalwcff" path="res://asset/belt-mid.png" id="1_7er7n"]
+[ext_resource type="Script" uid="uid://dwlkmwtnf317r" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ymtvf"]
 atlas = ExtResource("1_7er7n")
