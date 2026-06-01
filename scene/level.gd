@@ -40,12 +40,13 @@ func _ready() -> void:
 		dlg.dialog_text = err_msg
 		get_tree().get_root().add_child(dlg)
 		dlg.popup_centered()
+	
+		if ContractManager and ContractManager.has_method("reset"):
+			ContractManager.reset()
+		else:
+			push_warning("ContractManager autoload unavailable; contracts reset skipped.")
 
 	_apply_start_state()
-	if ContractManager and ContractManager.has_method("reset"):
-		ContractManager.reset()
-	else:
-		push_warning("ContractManager autoload unavailable; contracts reset skipped.")
 	_setup_delivery_point_marker()
 	if _preview_mode:
 		_disable_preview_interactions()

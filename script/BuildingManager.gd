@@ -1,5 +1,7 @@
 extends Node2D
 
+const ENTITY_HITBOX_COLLISION_MASK: int = Entity.HITBOX_COLLISION_LAYER
+
 # Correspondance entity_type → scène pour la restauration des sauvegardes
 const _ENTITY_SCENES: Dictionary = {
 	"turbine": preload("res://scene/turbine_2d.tscn"),
@@ -22,6 +24,7 @@ const _ENTITY_SCENES: Dictionary = {
 
 var factory_scene: PackedScene
 var factory_cost: float = 0.0
+var _current_build_footprint_offsets: Array[Vector2i] = [Vector2i.ZERO]
 var is_building: bool = false
 var preview_sprite: Sprite2D
 var occupied_cells: Dictionary = {} # maps Vector2i -> {"instance": Node2D, "cost": float}
@@ -71,7 +74,7 @@ func get_world_pos(cell_pos: Vector2i) -> Vector2:
 		return Vector2(cell_pos.x * cell_size + cell_size / 2.0, cell_pos.y * cell_size + cell_size / 2.0)
 # ----------------------------------------
 
-func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1) -> void:
+func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1, footprint_offsets: Array = [Vector2i.ZERO]) -> void:
 	if is_selecting_delivery_point:
 		stop_delivery_point_selection()
 
@@ -81,6 +84,7 @@ func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_
 
 	factory_scene = scene
 	factory_cost = cost
+	_current_build_footprint_offsets = _normalize_footprint_offsets(footprint_offsets)
 	preview_sprite.texture = texture
 	
 	# Découpe l'image animée
@@ -97,6 +101,7 @@ func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_
 func stop_building() -> void:
 	is_building = false
 	preview_sprite.visible = false
+	_current_build_footprint_offsets = [Vector2i.ZERO]
 
 func _unhandled_input(event: InputEvent) -> void:
 	if is_selecting_delivery_point:
@@ -226,25 +231,22 @@ func _try_place_building() -> void:
 			factory_instance.cell_position = cell_pos
 			factory_instance.build_cost = factory_cost
 
-		# Enregistrement de la case comme étant occupée (après création de l'instance)
-		occupied_cells[cell_pos] = {
-			"instance": factory_instance,
-			"cost": factory_cost,
-			
-}
+		var occupied_by_build: Array[Vector2i] = _get_occupied_cells_for_build(cell_pos, _current_build_footprint_offsets)
+		_register_occupied_cells(factory_instance, occupied_by_build, cell_pos, factory_cost)
 
 		# Sauvegarde du dernier bâtiment placé pour permettre annulation/remboursement
 		_last_built = {
 			"cell_pos": cell_pos,
+			"occupied_cells": occupied_by_build.duplicate(),
 			"instance": factory_instance,
 			"cost": factory_cost,
 		}
 		last_build_state_changed.emit(true)
 
 func _can_build(cell_pos: Vector2i) -> bool:
-	# 1. Vérification si une usine est déjà présente
-	if occupied_cells.has(cell_pos):
-		return false
+	for occupied_cell in _get_occupied_cells_for_build(cell_pos, _current_build_footprint_offsets):
+		if occupied_cells.has(occupied_cell):
+			return false
 	# 2. Vérification des fonds disponibles
 	if GameManager.credits < factory_cost:
 		return false
@@ -259,14 +261,13 @@ func undo_last_build() -> void:
 		return
 
 	var inst = _last_built.get("instance")
-	var cell = _last_built.get("cell_pos")
+	var occupied_for_build: Array = _last_built.get("occupied_cells", [])
 	var cost = float(_last_built.get("cost", 0.0))
 
 	if is_instance_valid(inst):
 		inst.queue_free()
 
-	if cell:
-		occupied_cells.erase(cell)
+	_clear_occupied_cells_for_instance(inst, occupied_for_build)
 
 	# Remboursement de 50%
 	GameManager.add_credits(cost * 0.5)
@@ -354,14 +355,14 @@ func _try_destroy_at_mouse() -> void:
 	if is_instance_valid(inst):
 		inst.queue_free()
 
-	occupied_cells.erase(cell_pos)
+	_clear_occupied_cells_for_instance(inst)
 
 	# Remboursement de 50%
 	GameManager.add_credits(cost * 0.5)
 	GameManager.remove_construction_co2(co2_cost)
 
 	# Si on avait enregistré ce bâtiment comme dernier construit, on le nettoie
-	if _last_built.size() > 0 and _last_built.get("cell_pos") == cell_pos:
+	if _last_built.size() > 0 and _last_built.get("instance") == inst:
 		_last_built.clear()
 		last_build_state_changed.emit(false)
 	# Fermer le panneau entité si c'est elle qui vient d'être détruite
@@ -369,6 +370,10 @@ func _try_destroy_at_mouse() -> void:
 
 func _try_select_entity_at_mouse() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
+	var hitbox_entity: Entity = _find_entity_from_hitbox(mouse_pos)
+	if hitbox_entity != null:
+		entity_selected.emit(hitbox_entity)
+		return
 	
 	# --- MODIFICATION ICI : Calcul de position isométrique ---
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
@@ -384,6 +389,24 @@ func _try_select_entity_at_mouse() -> void:
 		entity_selected.emit(inst)
 	else:
 		entity_selected.emit(null)
+
+func _find_entity_from_hitbox(world_pos: Vector2) -> Entity:
+	var world_2d: World2D = get_world_2d()
+	if world_2d == null:
+		return null
+	var query := PhysicsPointQueryParameters2D.new()
+	query.position = world_pos
+	query.collide_with_areas = true
+	query.collide_with_bodies = false
+	query.collision_mask = ENTITY_HITBOX_COLLISION_MASK
+	var hits: Array[Dictionary] = world_2d.direct_space_state.intersect_point(query, 8)
+	for hit in hits:
+		var collider: Variant = hit.get("collider")
+		if collider is Area2D:
+			var parent: Node = (collider as Area2D).get_parent()
+			if parent is Entity:
+				return parent
+	return null
 
 func _try_pickup_conveyor_item_at_mouse() -> bool:
 	var mouse_pos: Vector2 = get_global_mouse_position()
@@ -430,11 +453,13 @@ func _restore_single_entity(data: Dictionary) -> int:
 	var cell_x: int = int(data.get("cell_x", 0))
 	var cell_y: int = int(data.get("cell_y", 0))
 	var cell_pos := Vector2i(cell_x, cell_y)
+	var footprint_offsets: Array[Vector2i] = _get_default_footprint_offsets(entity_type)
+	var occupied_for_build: Array[Vector2i] = _get_occupied_cells_for_build(cell_pos, footprint_offsets)
 
-	# Ne pas écraser une case déjà occupée
-	if occupied_cells.has(cell_pos):
-		push_warning("Case deja occupee pendant la restauration: %s" % cell_pos)
-		return 0
+	for occupied_cell in occupied_for_build:
+		if occupied_cells.has(occupied_cell):
+			push_warning("Case deja occupee pendant la restauration: %s" % occupied_cell)
+			return 0
 
 	var scene: PackedScene = _ENTITY_SCENES[entity_type]
 	var instance: Node2D = scene.instantiate()
@@ -449,7 +474,7 @@ func _restore_single_entity(data: Dictionary) -> int:
 	# ---------------------------------------------------------
 
 	var cost: float = float(data.get("build_cost", 0.0))
-	occupied_cells[cell_pos] = {"instance": instance, "cost": cost}
+	_register_occupied_cells(instance, occupied_for_build, cell_pos, cost)
 
 	# Restaurer l'état de l'entité (recette, taux, actif…)
 	if instance is Entity:
@@ -470,3 +495,50 @@ func _configure_instance_visuals(instance: Node2D) -> void:
 			child.region_enabled = false
 		#elif child is AnimatedSprite2D:
 			#child.centered = true
+
+func _normalize_footprint_offsets(footprint_offsets: Array) -> Array[Vector2i]:
+	var normalized: Array[Vector2i] = []
+	for footprint_offset in footprint_offsets:
+		if footprint_offset is Vector2i:
+			normalized.append(footprint_offset)
+	if normalized.is_empty():
+		normalized.append(Vector2i.ZERO)
+	return normalized
+
+func _get_occupied_cells_for_build(anchor_cell: Vector2i, footprint_offsets: Array[Vector2i]) -> Array[Vector2i]:
+	var occupied_for_build: Array[Vector2i] = []
+	for footprint_offset in footprint_offsets:
+		occupied_for_build.append(anchor_cell + footprint_offset)
+	return occupied_for_build
+
+func _register_occupied_cells(instance: Node2D, occupied_for_build: Array[Vector2i], anchor_cell: Vector2i, cost: float) -> void:
+	for occupied_cell in occupied_for_build:
+		occupied_cells[occupied_cell] = {
+			"instance": instance,
+			"cost": cost,
+			"anchor_cell": anchor_cell,
+			"occupied_cells": occupied_for_build.duplicate(),
+		}
+
+func _clear_occupied_cells_for_instance(instance: Variant, occupied_for_build: Array = []) -> void:
+	if not is_instance_valid(instance):
+		return
+	if occupied_for_build is Array and not occupied_for_build.is_empty():
+		for occupied_cell_variant in occupied_for_build:
+			if occupied_cell_variant is Vector2i and occupied_cells.get(occupied_cell_variant, {}).get("instance") == instance:
+				occupied_cells.erase(occupied_cell_variant)
+		return
+	var cells_to_clear: Array[Vector2i] = []
+	for occupied_cell in occupied_cells.keys():
+		var cell_data: Dictionary = occupied_cells.get(occupied_cell, {})
+		if cell_data.get("instance") == instance:
+			cells_to_clear.append(occupied_cell)
+	for occupied_cell in cells_to_clear:
+		occupied_cells.erase(occupied_cell)
+
+func _get_default_footprint_offsets(entity_type: String) -> Array[Vector2i]:
+	match entity_type:
+		"turbine":
+			return [Vector2i.ZERO, Vector2i(1, 0)]
+		_:
+			return [Vector2i.ZERO]
