@@ -166,6 +166,12 @@ func _ready() -> void:
 	if session_overview_panel:
 		session_overview_panel.hide()
 	if ContractManager:
+		if ContractManager.contract_arrived.is_connected(_on_contract_arrived):
+			ContractManager.contract_arrived.disconnect(_on_contract_arrived)
+		if ContractManager.contract_completed.is_connected(_on_contract_completed):
+			ContractManager.contract_completed.disconnect(_on_contract_completed)
+		if ContractManager.contract_failed.is_connected(_on_contract_failed):
+			ContractManager.contract_failed.disconnect(_on_contract_failed)
 		ContractManager.contract_arrived.connect(_on_contract_arrived)
 		ContractManager.contract_completed.connect(_on_contract_completed)
 		ContractManager.contract_failed.connect(_on_contract_failed)
@@ -329,6 +335,8 @@ func _ready() -> void:
 			)
 		if _building_manager:
 			destroy_button.set_pressed(_building_manager.is_destroying)
+	_update_contracts_display()
+
 	
 func _on_contract_arrived(contract: Dictionary) -> void:
 	_update_contracts_display()
