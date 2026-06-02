@@ -51,3 +51,4 @@ scale = Vector2(0.984375, 0.98437506)
 sprite_frames = SubResource("SpriteFrames_pjtlh")
 autoplay = "default"
 frame_progress = 0.36304194
+offset = Vector2(-1, 1)

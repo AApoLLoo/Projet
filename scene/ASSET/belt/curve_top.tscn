@@ -1,37 +1,37 @@
 [gd_scene format=3 uid="uid://dk2v0mr1fc7a7"]
 
-[ext_resource type="Texture2D" uid="uid://cyjcncgjijm2l" path="res://asset/Curve_0001.png" id="1_yn0mw"]
+[ext_resource type="Texture2D" uid="uid://d2vywgm42mkmw" path="res://asset/convoyer/Corners/Curve_0001.png" id="1_ee0ve"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_5kcfa"]
-atlas = ExtResource("1_yn0mw")
-region = Rect2(0, 0, 172, 90)
+[sub_resource type="AtlasTexture" id="AtlasTexture_6exns"]
+atlas = ExtResource("1_ee0ve")
+region = Rect2(0, 0, 172, 171)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ccxfj"]
-atlas = ExtResource("1_yn0mw")
-region = Rect2(172, 0, 172, 90)
+[sub_resource type="AtlasTexture" id="AtlasTexture_7fjmj"]
+atlas = ExtResource("1_ee0ve")
+region = Rect2(172, 0, 172, 171)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_wk3gb"]
-atlas = ExtResource("1_yn0mw")
-region = Rect2(344, 0, 172, 90)
+[sub_resource type="AtlasTexture" id="AtlasTexture_qo26p"]
+atlas = ExtResource("1_ee0ve")
+region = Rect2(344, 0, 172, 171)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_pnnnu"]
-atlas = ExtResource("1_yn0mw")
-region = Rect2(516, 0, 172, 90)
+[sub_resource type="AtlasTexture" id="AtlasTexture_gvk1l"]
+atlas = ExtResource("1_ee0ve")
+region = Rect2(516, 0, 172, 171)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_k4cve"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_5kcfa")
+"texture": SubResource("AtlasTexture_6exns")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ccxfj")
+"texture": SubResource("AtlasTexture_7fjmj")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_wk3gb")
+"texture": SubResource("AtlasTexture_qo26p")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_pnnnu")
+"texture": SubResource("AtlasTexture_gvk1l")
 }],
 "loop": true,
 "name": &"default",
@@ -41,7 +41,7 @@ animations = [{
 [node name="CurveTop" type="Node2D" unique_id=165831448]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=554087036]
-position = Vector2(107, 45)
+scale = Vector2(0.1, 0.1)
 sprite_frames = SubResource("SpriteFrames_k4cve")
 frame_progress = 0.808285
 offset = Vector2(15, 0)
