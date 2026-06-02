@@ -1,38 +1,38 @@
-[gd_scene load_steps=2 format=3 uid="uid://d3hg0gffbxbn"]
+[gd_scene format=3 uid="uid://d3hg0gffbxbn"]
 
-[ext_resource type="Script" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
-[ext_resource type="Texture2D" uid="uid://cavcjwdxrksis" path="res://asset/Curve_0004.png" id="1_n6eop"]
+[ext_resource type="Script" uid="uid://dwlkmwtnf317r" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
+[ext_resource type="Texture2D" uid="uid://cmly562pfqm5c" path="res://asset/convoyer/Corners/Curve_0004.png" id="2_e0lgy"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ye32w"]
-atlas = ExtResource("1_n6eop")
+[sub_resource type="AtlasTexture" id="AtlasTexture_xnt2x"]
+atlas = ExtResource("2_e0lgy")
 region = Rect2(0, 0, 172, 171)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ftxep"]
-atlas = ExtResource("1_n6eop")
+[sub_resource type="AtlasTexture" id="AtlasTexture_5ksss"]
+atlas = ExtResource("2_e0lgy")
 region = Rect2(172, 0, 172, 171)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_jsx4j"]
-atlas = ExtResource("1_n6eop")
+[sub_resource type="AtlasTexture" id="AtlasTexture_nk546"]
+atlas = ExtResource("2_e0lgy")
 region = Rect2(344, 0, 172, 171)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_vgkxy"]
-atlas = ExtResource("1_n6eop")
+[sub_resource type="AtlasTexture" id="AtlasTexture_bbgy7"]
+atlas = ExtResource("2_e0lgy")
 region = Rect2(516, 0, 172, 171)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_3e41q"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ye32w")
+"texture": SubResource("AtlasTexture_xnt2x")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ftxep")
+"texture": SubResource("AtlasTexture_5ksss")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_jsx4j")
+"texture": SubResource("AtlasTexture_nk546")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_vgkxy")
+"texture": SubResource("AtlasTexture_bbgy7")
 }],
 "loop": true,
 "name": &"default",
@@ -46,8 +46,9 @@ input_offset = Vector2i(-1, -1)
 output_offset = Vector2i(1, -1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1659799696]
-position = Vector2(53.000008, 15.999998)
-scale = Vector2(1.4476744, 1.3538011)
+position = Vector2(-0.9999999, 2.0000002)
+scale = Vector2(1, 0.935)
 sprite_frames = SubResource("SpriteFrames_3e41q")
 autoplay = "default"
 frame_progress = 0.82305723
+offset = Vector2(-8, -20)
