@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://csxi4y85behxc"]
 
-[ext_resource type="Script" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
 [ext_resource type="Texture2D" uid="uid://cyjcncgjijm2l" path="res://asset/Curve_0001.png" id="1_cb071"]
+[ext_resource type="Script" uid="uid://dwlkmwtnf317r" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cpbmy"]
 atlas = ExtResource("1_cb071")
@@ -46,8 +46,8 @@ input_offset = Vector2i(-1, 1)
 output_offset = Vector2i(-1, -1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1749146392]
-position = Vector2(-5.7499914, 23.624996)
-scale = Vector2(1.5552325, 1.3961986)
+position = Vector2(-11, 5)
+scale = Vector2(1.002, 0.9)
 sprite_frames = SubResource("SpriteFrames_ka00q")
 autoplay = "default"
 frame_progress = 0.9833631
