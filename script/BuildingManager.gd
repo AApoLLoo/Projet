@@ -37,6 +37,7 @@ signal entity_selected(entity)
 signal delivery_point_selected(cell_pos, world_pos)
 signal delivery_point_hovered(cell_pos, world_pos)
 signal delivery_point_selection_changed(enabled)
+signal delivery_point_error(message: String)
 signal entrepot_inspected(entrepot_instance)
 var is_destroying: bool = false
 var is_selecting_delivery_point: bool = false
@@ -319,22 +320,19 @@ func _select_delivery_point_at_mouse() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
 	
-	# Vérification : Y a-t-il un bâtiment à cette position ?
 	if not occupied_cells.has(cell_pos):
-		print("Erreur : Aucun bâtiment ici.")
+		delivery_point_error.emit("⚠ Pose ce point sur un entrepôt !")
 		return
 
 	var data = occupied_cells[cell_pos]
 	var inst = data.get("instance")
 
-	# Vérification : Est-ce que cet objet est un entrepôt ?
-	# (On suppose que votre scène entrepot.tscn est dans le groupe "entrepot")
 	if is_instance_valid(inst) and inst.is_in_group("entrepot"):
 		var world_pos: Vector2 = get_world_pos(cell_pos)
 		delivery_point_selected.emit(cell_pos, world_pos)
 		stop_delivery_point_selection()
 	else:
-		print("Ce bâtiment n'est pas un entrepôt !")
+		delivery_point_error.emit("⚠ Ce bâtiment n'est pas un entrepôt ! Place le point sur un entrepôt.")
 
 
 func _try_destroy_at_mouse() -> void:

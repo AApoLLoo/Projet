@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bnit1gqnd4kqp"]
+[gd_scene format=3 uid="uid://sq53v1i5wkrl"]
 
 [ext_resource type="Script" uid="uid://5nx80apmymd" path="res://script/HUD.gd" id="1_hud"]
 [ext_resource type="Script" uid="uid://cei88ve3rwm6c" path="res://script/MinimapOverlay.gd" id="2_minimap_overlay"]
@@ -85,14 +85,6 @@ text = "Logistique"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Vue usine"
-
-[node name="BtnMusicPause" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=579136061]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="BtnMusicNext" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1187443057]
-unique_name_in_owner = true
-layout_mode = 2
 
 [node name="ContractsLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=125805602]
 unique_name_in_owner = true

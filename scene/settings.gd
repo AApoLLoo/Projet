@@ -22,6 +22,8 @@ const LEVEL_SCENE: String = "res://scene/level.tscn"
 @onready var _apply_button: Button = $CenterContainer/PanelContainer/MarginContainer/Content/Buttons/ApplyButton
 @onready var _reset_button: Button = $CenterContainer/PanelContainer/MarginContainer/Content/Buttons/ResetButton
 @onready var _back_button: Button = $CenterContainer/PanelContainer/MarginContainer/Content/Buttons/BackButton
+@onready var _btn_music_pause: Button = $CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MusicControlRow/BtnMusicPause
+@onready var _btn_music_next: Button = $CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MusicControlRow/BtnMusicNext
 @onready var _message_dialog: AcceptDialog = $MessageDialog
 
 var _window_controls_supported: bool = true
@@ -32,6 +34,8 @@ func _ready() -> void:
 	_load_from_settings_manager()
 	_configure_window_controls_state()
 	_connect_signals()
+	_btn_music_pause.text = "▶️" if MusicManager.is_paused() else "⏸"
+	_btn_music_next.text = "⏭"
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -61,6 +65,8 @@ func _connect_signals() -> void:
 	_apply_button.pressed.connect(_on_apply_pressed)
 	_reset_button.pressed.connect(_on_reset_pressed)
 	_back_button.pressed.connect(_on_back_pressed)
+	_btn_music_pause.pressed.connect(_on_music_pause_pressed)
+	_btn_music_next.pressed.connect(func(): MusicManager.next_track())	
 
 func _on_volume_slider_changed(_value: float) -> void:
 	_update_volume_labels()
@@ -126,6 +132,8 @@ func _style_screen() -> void:
 	UITheme.style_card(_audio_card, false, false)
 	UITheme.style_option_button(_resolution_option)
 	UITheme.style_checkbox(_fullscreen_check)
+	UITheme.style_button(_btn_music_pause, UITheme.ACCENT_SKY, UITheme.TEXT_LIGHT)
+	UITheme.style_button(_btn_music_next, UITheme.ACCENT_SKY, UITheme.TEXT_LIGHT)
 	UITheme.style_slider(_master_slider, UITheme.ACCENT_TEAL)
 	UITheme.style_slider(_music_slider, UITheme.ACCENT_SKY)
 	UITheme.style_slider(_sfx_slider, UITheme.ACCENT_GOLD)
@@ -158,6 +166,10 @@ func _style_screen() -> void:
 	if dialog_ok_button:
 		UITheme.style_button(dialog_ok_button, UITheme.ACCENT_TEAL, UITheme.TEXT_LIGHT, false, true)
 
+func _on_music_pause_pressed() -> void:
+	MusicManager.toggle_pause()
+	_btn_music_pause.text = "▶️" if MusicManager.is_paused() else "⏸"
+	
 func _to_int(value: Variant, fallback: int) -> int:
 	if value is int:
 		return int(value)
