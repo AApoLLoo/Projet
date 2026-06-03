@@ -76,7 +76,9 @@ func _input(event):
 				dragging = false
 				z_index = 0
 				if not _try_drop_at_current_position():
-					global_position = _drag_origin
+					# Pas de cible valide : reste au sol là où on a lâché
+					_drag_origin = global_position
+					z_index = 0
 
 func _try_drop_at_current_position() -> bool:
 	if destination.is_empty() or quantity <= 0:

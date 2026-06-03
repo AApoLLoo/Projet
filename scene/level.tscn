@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://dokhhfob5h6be" path="res://scene/level.gd" id="4_q3wyj"]
 [ext_resource type="Script" uid="uid://bx6id27enx61e" path="res://script/DayNightCycle.gd" id="5_ukt71"]
 [ext_resource type="Script" uid="uid://d2gs4e03solck" path="res://scene/floor.gd" id="7_aw33w"]
-[ext_resource type="PackedScene" uid="uid://bnit1gqnd4kqp" path="res://scene/hud.tscn" id="7_bddx0"]
+[ext_resource type="PackedScene" uid="uid://sq53v1i5wkrl" path="res://scene/hud.tscn" id="7_bddx0"]
 [ext_resource type="Texture2D" uid="uid://bptn8q5sk28r5" path="res://asset/Tuiles_stan.png" id="7_u2b8d"]
 [ext_resource type="Texture2D" uid="uid://bu3nlmkv3m4nx" path="res://asset/Preview Tile-0001.png" id="9_aw33w"]
 [ext_resource type="Script" uid="uid://cmxii0gy46uyc" path="res://script/Livraison.gd" id="10_oxop7"]

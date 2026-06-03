@@ -23,6 +23,10 @@ func _ready() -> void:
 			TimeManager.day_changed.disconnect(_on_new_day)
 		TimeManager.day_changed.connect(_on_new_day)
 		_day_connected = true
+	# Génère un contrat dès le démarrage (jour 1)
+	await get_tree().process_frame
+	var start_day: int = TimeManager.current_day if TimeManager else 1
+	_generate_contract(start_day)
 
 func _on_new_day(day: int) -> void:
 	_check_expired_contracts(day)
@@ -98,13 +102,52 @@ func try_fulfill_contracts(resource_id: String, amount: int) -> int:
 func _complete_contract(contract: Dictionary) -> void:
 	contract["completed"] = true
 	completed_streak += 1
-	# Bonus de streak : +5% par contrat consécutif réussi (max +50%)
 	var streak_bonus: float = minf(float(completed_streak - 1) * 0.05, 0.50)
 	var final_reward: float = float(contract["reward"]) * (1.0 + streak_bonus)
 	if GameManager:
 		GameManager.add_credits(final_reward)
 	contract_completed.emit(contract.duplicate(true))
+	# Retirer immédiatement le contrat terminé de la liste
+	active_contracts = active_contracts.filter(func(c):
+		return not bool(c["completed"])
+	)
+	# Génère immédiatement un contrat de remplacement
+	var current_day: int = TimeManager.current_day if TimeManager else 1
+	_generate_single_contract(current_day)
 
+func _generate_single_contract(day: int) -> void:
+	var templates_to_use: Array = CONTRACT_TEMPLATES.duplicate()
+	templates_to_use.shuffle()
+	# Éviter de générer un doublon d'une ressource déjà en contrat actif
+	var active_ids: Array = active_contracts.map(func(c): return c["resource_id"])
+	for template in templates_to_use:
+		if active_ids.has(template["resource_id"]):
+			continue
+		var difficulty: float = 1.0 + (day - 1) * 0.15
+		var qty_min: int = int(ceil(float(template["qty_min"]) * difficulty))
+		var qty_max: int = int(ceil(float(template["qty_max"]) * difficulty))
+		var quantity: int = randi_range(qty_min, qty_max)
+		var resource_id: String = String(template["resource_id"])
+		var unit_value: float = _get_unit_value(resource_id)
+		var reward: float = snappedf(unit_value * float(quantity) * float(template["bonus_factor"]), 1.0)
+		var deadline_days: int = int(template.get("deadline_days", 2))
+		var contract: Dictionary = {
+			"id": "contract_%d_%d" % [day, randi()],
+			"day_issued": day,
+			"day_deadline": day + deadline_days,
+			"resource_id": resource_id,
+			"resource_label": String(template["label"]),
+			"quantity": quantity,
+			"delivered": 0,
+			"reward": reward,
+			"penalty": float(template["penalty"]),
+			"completed": false,
+			"failed": false,
+		}
+		active_contracts.append(contract)
+		contract_arrived.emit(contract.duplicate(true))
+		return
+	
 func _check_expired_contracts(current_day: int) -> void:
 	for contract in active_contracts:
 		if bool(contract["completed"]) or bool(contract["failed"]):
@@ -124,6 +167,14 @@ func reset() -> void:
 	active_contracts.clear()
 	_last_generated_day = -1
 	completed_streak = 0
+
+func start_new_game() -> void:
+	active_contracts.clear()
+	_last_generated_day = -1
+	completed_streak = 0
+	await get_tree().process_frame
+	var start_day: int = TimeManager.current_day if TimeManager else 1
+	_generate_contract(start_day)
 
 func get_active_contracts() -> Array[Dictionary]:
 	return active_contracts.duplicate(true)

@@ -257,13 +257,13 @@ func has_last_build() -> bool:
 	return _last_built.size() > 0
 
 func undo_last_build() -> void:
-	# Annule le dernier bâtiment placé et rembourse la moitié du coût
 	if not has_last_build():
 		return
 
 	var inst = _last_built.get("instance")
 	var occupied_for_build: Array = _last_built.get("occupied_cells", [])
-	var cost = float(_last_built.get("cost", 0.0))
+	var cost: float = float(str(_last_built.get("cost", 0.0)))
+	var co2_cost: float = float(str(_last_built.get("co2_cost", 0.0)))
 
 	if is_instance_valid(inst):
 		inst.queue_free()
@@ -273,7 +273,6 @@ func undo_last_build() -> void:
 	# Remboursement de 50% du coût crédits
 	GameManager.add_credits(cost * 0.5)
 	# Remboursement de la totalité du CO2 de construction
-	var co2_cost = float(_last_built.get("co2_cost", 0.0))
 	if co2_cost > 0.0:
 		GameManager.remove_construction_co2(co2_cost)
 
@@ -286,10 +285,10 @@ func start_destroying() -> void:
 	if is_selecting_delivery_point:
 		stop_delivery_point_selection()
 	is_destroying = true
-	# S'assurer de quitter le mode construction si actif
 	if is_building:
 		stop_building()
 	destroy_mode_changed.emit(true)
+
 
 func stop_destroying() -> void:
 	is_destroying = false
@@ -322,20 +321,32 @@ func is_delivery_point_selection_active() -> bool:
 func _select_delivery_point_at_mouse() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
-	
-	if not occupied_cells.has(cell_pos):
-		delivery_point_error.emit("⚠ Pose ce point sur un entrepôt !")
-		return
 
-	var data = occupied_cells[cell_pos]
-	var inst = data.get("instance")
+	# Cherche un entrepôt sur la cellule cliquée
+	var entrepot_inst = null
+	if occupied_cells.has(cell_pos):
+		var data = occupied_cells[cell_pos]
+		var inst = data.get("instance")
+		if is_instance_valid(inst) and inst.is_in_group("entrepot"):
+			entrepot_inst = inst
 
-	if is_instance_valid(inst) and inst.is_in_group("entrepot"):
-		var world_pos: Vector2 = get_world_pos(cell_pos)
-		delivery_point_selected.emit(cell_pos, world_pos)
+	# Fallback : cherche dans toutes les cellules occupées par un entrepôt
+	if entrepot_inst == null:
+		for key in occupied_cells.keys():
+			var data = occupied_cells[key]
+			var inst = data.get("instance")
+			if is_instance_valid(inst) and inst.is_in_group("entrepot"):
+				entrepot_inst = inst
+				break
+
+	if entrepot_inst != null:
+		# Snapper le point au centre exact de l'entrepôt, peu importe où on clique
+		var snap_pos: Vector2 = entrepot_inst.global_position
+		var snap_cell: Vector2i = get_grid_pos(snap_pos)
+		delivery_point_selected.emit(snap_cell, snap_pos)
 		stop_delivery_point_selection()
 	else:
-		delivery_point_error.emit("⚠ Ce bâtiment n'est pas un entrepôt ! Place le point sur un entrepôt.")
+		delivery_point_error.emit("⚠ Aucun entrepôt sur la carte ! Pose d'abord un entrepôt.")
 
 
 func _try_destroy_at_mouse() -> void:

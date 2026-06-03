@@ -48,14 +48,14 @@ const RESOURCE_CATALOG: Dictionary = {
 		"label": "Piece de base",
 		"import_unit_cost": 120.0,
 		"export_unit_value": 180.0,  
-		"can_import": true,
+		"can_import": false,
 		"can_export": true,
 	},
 	"piece_avancee": {
 		"label": "Piece avancee",
 		"import_unit_cost": 240.0,
 		"export_unit_value": 420.0,   
-		"can_import": true,
+		"can_import": false,
 		"can_export": true,
 	},
 }
@@ -243,10 +243,17 @@ func _set_truck_unloading_state(truck_instance: Node2D, unloading: bool) -> void
 	var bar: ProgressBar = truck_instance.get_node_or_null("Truck/loadingbar") as ProgressBar
 	var anim: AnimatedSprite2D = truck_instance.get_node_or_null("Truck") as AnimatedSprite2D
 	if bar:
-		bar.visible = unloading
 		if unloading:
+			bar.value = 0
+			bar.max_value = 100
 			bar.show()
 			bar.z_index = 100
+			# Anime la barre de 0 à 100 sur toute la durée du déchargement
+			var bar_tween: Tween = create_tween()
+			bar_tween.tween_property(bar, "value", 100.0, unload_time)
+		else:
+			bar.hide()
+			bar.value = 0
 	if anim:
 		if unloading:
 			anim.play("default")
@@ -278,25 +285,13 @@ func _apply_delivery_payload(order: Dictionary) -> void:
 				push_error("Impossible de prendre les ressources de l'entrepôt")
 		return
 
-	# Import : On spawne les matériaux au point de livraison ET on ajoute au stock via l'entrepôt
-	if materiau_scene:
-		var delivery_point: Dictionary = order.get("delivery_point", {})
-		var base_pos: Vector2 = Vector2(
-			float(delivery_point.get("world_x", 0.0)),
-			float(delivery_point.get("world_y", 0.0))
-		)
-		for i in quantity:
-			var mat = materiau_scene.instantiate()
-			# Décale légèrement chaque colis pour éviter la superposition
-			mat.global_position = base_pos + Vector2((i % 5) * 40, (i / 5) * 40)
-			# Passe le type de ressource au matériau pour qu'il adapte son apparence
-			mat.destination = resource_id
-			get_tree().current_scene.add_child(mat)
+	# Import : Stocker directement dans l'entrepôt (pas de spawn physique)
+	var entrepot_node = get_tree().get_first_node_in_group("entrepot")
+	if entrepot_node and entrepot_node.has_method("deposit_input"):
+		entrepot_node.deposit_input(resource_id, quantity)
 	else:
-		push_warning("Livraison: materiau_scene non assignée, les matériaux ne spawneront pas.")
-
-	# Ajoute quand même au stock GameManager
-	GameManager.add_resource_stock({resource_id: int(order.get("quantity", 0))})
+		push_warning("Livraison: aucun entrepôt trouvé, ajout direct au stock.")
+		GameManager.add_resource_stock({resource_id: quantity})
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _finish_delivery(order: Dictionary) -> void:

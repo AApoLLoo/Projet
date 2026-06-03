@@ -41,8 +41,8 @@ func _ready() -> void:
 		get_tree().get_root().add_child(dlg)
 		dlg.popup_centered()
 	
-		if ContractManager and ContractManager.has_method("reset"):
-			ContractManager.reset()
+		if ContractManager:
+			ContractManager.start_new_game()
 		else:
 			push_warning("ContractManager autoload unavailable; contracts reset skipped.")
 
@@ -312,6 +312,10 @@ func _apply_start_state() -> void:
 			push_warning("BuildingManager introuvable pendant la restauration des batiments.")
 
 	_restore_ground_materials(start_state.get("ground_materials", []))
+
+	# Réinitialiser les contrats et en générer un nouveau
+	if ContractManager:
+		ContractManager.start_new_game()
 
 	# Forcer la mise à jour de l'UI
 	var hour: int = int(TimeManager.current_time)

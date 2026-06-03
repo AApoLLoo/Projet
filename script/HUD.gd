@@ -207,9 +207,6 @@ func _ready() -> void:
 	TimeManager.time_changed.connect(_on_time_changed)
 	TimeManager.day_changed.connect(_on_day_changed)
 	
-	# --- CORRECTION 1 : Indentation corrigée ici ---
-	
-	
 	# Exemple pour les tapis droits
 	belt_droit.pressed.connect(func():
 		_start_building_process("belt_right")
@@ -249,6 +246,8 @@ func _ready() -> void:
 	# --- PANNEAU ENTITÉ ---
 	_entity_panel = ENTITY_PANEL_SCENE.instantiate()
 	add_child(_entity_panel)
+	_warehouse_panel = preload("res://scene/entrepot_panel.tscn").instantiate()
+	add_child(_warehouse_panel)
 	
 	# Boutons de contrôle du temps
 	btn_pause.pressed.connect(func(): TimeManager.time_speed = 0.0)
@@ -264,6 +263,8 @@ func _ready() -> void:
 	var minute: int = int((TimeManager.current_time - hour) * 60)
 	_update_time_display(hour, minute)
 	_update_session_overview()
+
+	# --- CORRECTION CRITIQUE : _bind_runtime_managers() AVANT les connexions qui en dépendent ---
 	_bind_runtime_managers()
 	_setup_minimap()
 	_setup_order_panel()
@@ -279,9 +280,7 @@ func _ready() -> void:
 		_start_building_process("factory")
 	)
 	
-	# --- CORRECTION 2 : Connexion directe et propre ---
 	btn_build_belt.pressed.connect(_on_menu_belt_pressed)
-	# --------------------------------------------------
 	
 	btn_build_turbine.pressed.connect(func():
 		_start_building_process("turbine")
@@ -302,7 +301,6 @@ func _ready() -> void:
 	undo_button.custom_minimum_size = Vector2(200.0, 32.0)
 	_style_button(undo_button, Color.html("#8A6D2E"))
 	undo_button.visible = false
-	# Positionnement simple : en bas du menu de construction si présent, sinon en haut à gauche
 	if build_menu_container:
 		build_menu_container.add_child(undo_button)
 	else:
@@ -312,18 +310,13 @@ func _ready() -> void:
 	undo_button.pressed.connect(_on_undo_build_pressed)
 
 	# Connexion au BuildingManager pour synchroniser la visibilité
+	# NOTE : _building_manager est maintenant disponible car _bind_runtime_managers() a été appelé plus haut
 	if _building_manager:
-		# Si le BuildingManager offre un signal, on l'écoute
 		if _building_manager.has_signal("last_build_state_changed"):
 			_building_manager.last_build_state_changed.connect(func(available):
 				undo_button.visible = available
 			)
-		# Set initial visibility si nécessaire
 		undo_button.visible = _building_manager.has_method("has_last_build") and _building_manager.has_last_build()
-
-		# Connecter la sélection d'entité
-		if _building_manager.has_signal("entity_selected") and not _building_manager.entity_selected.is_connected(_on_entity_selected):
-			_building_manager.entity_selected.connect(_on_entity_selected)
 
 		# --- BOUTON MODE DESTRUCTION (toggle) ---
 		var destroy_button: Button = Button.new()
@@ -338,7 +331,6 @@ func _ready() -> void:
 		else:
 			add_child(destroy_button)
 
-		# Quand l'utilisateur bascule le bouton, on demande au BuildingManager de démarrer/arrêter
 		destroy_button.toggled.connect(func(pressed):
 			var bm = get_tree().current_scene.find_child("BuildingManager", true, false)
 			if bm:
@@ -348,13 +340,12 @@ func _ready() -> void:
 					bm.stop_destroying()
 		)
 
-		# Synchroniser l'état du bouton avec le BuildingManager
-		if _building_manager and _building_manager.has_signal("destroy_mode_changed"):
+		if _building_manager.has_signal("destroy_mode_changed"):
 			_building_manager.destroy_mode_changed.connect(func(enabled):
 				destroy_button.set_pressed(enabled)
 			)
-		if _building_manager:
-			destroy_button.set_pressed(_building_manager.is_destroying)
+		destroy_button.set_pressed(_building_manager.is_destroying)
+
 	_update_contracts_display()
 
 	
@@ -448,8 +439,8 @@ func _build_shortcut_bar() -> void:
 	bar_style.bg_color.a = 0.82
 	bar_style.content_margin_left = 0.0
 	bar_style.content_margin_right = 0.0
-	bar_style.content_margin_top = 2.0    # ← marge haut réduite
-	bar_style.content_margin_bottom = 2.0 # ← marge bas réduite
+	bar_style.content_margin_top = 2.0
+	bar_style.content_margin_bottom = 2.0
 	bar.add_theme_stylebox_override("panel", bar_style)
 
 	var hbox := HBoxContainer.new()
@@ -591,7 +582,7 @@ func _input(event: InputEvent) -> void:
 		elif key_event.is_action_pressed(ACTION_TOGGLE_SESSION_OVERVIEW):
 			_toggle_session_overview()
 			get_viewport().set_input_as_handled()
-		elif key_event.is_action_pressed(&"hud_toggle_pause"):   # ← nouveau
+		elif key_event.is_action_pressed(&"hud_toggle_pause"):
 			var new_speed: float = 0.0 if TimeManager.time_speed > 0.0 else 1.0
 			TimeManager.time_speed = new_speed
 			get_viewport().set_input_as_handled()
@@ -648,8 +639,10 @@ func _update_contracts_display() -> void:
 		return
 	var contracts: Array[Dictionary] = ContractManager.get_active_contracts()
 	if contracts.is_empty():
-		contracts_label.text = "Aucun contrat actif"
+		contracts_label.text = ""
+		contracts_label.hide()
 		return
+	contracts_label.show()
 	var parts: PackedStringArray = []
 	var current_day: int = TimeManager.current_day if TimeManager else 1
 	for c in contracts:
@@ -670,29 +663,27 @@ func _start_building_process(building_type: String) -> void:
 	if building_manager:
 		var data = buildings_data[building_type]
 		building_manager.start_building(data["scene"], data["cost"], data["texture"], data.get("frames", 1), data.get("footprint_offsets", [Vector2i.ZERO]))
-		# Masquer le panneau entité quand on entre en mode construction
+		# Masquer les panneaux entité quand on entre en mode construction
 		if _entity_panel:
 			_entity_panel.hide()
+		if _warehouse_panel:
+			_warehouse_panel.hide()
 
+# --- CORRECTION : aiguillage correct entre les deux panneaux ---
 func _on_entity_selected(entity) -> void:
 	if entity == null:
 		if _entity_panel: _entity_panel.hide()
 		if _warehouse_panel: _warehouse_panel.hide()
 		return
 
-	# ... reste de ton code ...
-
-	# 3. Aiguillage : on choisit le bon panneau selon le type d'objet
 	if entity is WarehouseEntity:
-		# Si c'est un entrepôt, on utilise le WarehousePanel
-		if _warehouse_panel:
-			_warehouse_panel.setup(entity)
-			
-	elif entity is Entity: 
-		# Si c'est une usine/turbine (classe parente Entity)
-		# On utilise l'ancien panneau
-		if _entity_panel:
-			_entity_panel.setup(entity)
+		# C'est un entrepôt : on cache l'entity panel et on ouvre le warehouse panel
+		if _entity_panel: _entity_panel.hide()
+		if _warehouse_panel: _warehouse_panel.setup(entity)
+	elif entity is Entity:
+		# C'est une usine/turbine/tapis : on cache le warehouse panel et on ouvre l'entity panel
+		if _warehouse_panel: _warehouse_panel.hide()
+		if _entity_panel: _entity_panel.setup(entity)
 
 func _process(_delta: float) -> void:
 	_update_minimap()
@@ -868,7 +859,6 @@ func _on_day_changed(day: int) -> void:
 	_update_contracts_display() 
 
 func _update_time_display(hour: int, minute: int) -> void:
-	# Formatage avec des zéros (ex: 08:05)
 	time_label.text = "%02d:%02d" % [hour, minute]
 
 func _update_day_display(day: int) -> void:
@@ -971,12 +961,17 @@ func _bind_runtime_managers() -> void:
 	_building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	_delivery_manager = get_tree().current_scene.find_child("DeliveryManager", true, false)
 
-	if _building_manager and _building_manager.has_signal("delivery_point_selected") and not _building_manager.delivery_point_selected.is_connected(_on_delivery_point_selected):
-		_building_manager.delivery_point_selected.connect(_on_delivery_point_selected)
-	if _building_manager and _building_manager.has_signal("delivery_point_error") and not _building_manager.delivery_point_error.is_connected(_on_delivery_point_error):
-		_building_manager.delivery_point_error.connect(_on_delivery_point_error)
-	if _building_manager and _building_manager.has_signal("delivery_point_selection_changed") and not _building_manager.delivery_point_selection_changed.is_connected(_on_delivery_point_selection_changed):
-		_building_manager.delivery_point_selection_changed.connect(_on_delivery_point_selection_changed)
+	if _building_manager:
+		if _building_manager.has_signal("delivery_point_selected") and not _building_manager.delivery_point_selected.is_connected(_on_delivery_point_selected):
+			_building_manager.delivery_point_selected.connect(_on_delivery_point_selected)
+		if _building_manager.has_signal("delivery_point_error") and not _building_manager.delivery_point_error.is_connected(_on_delivery_point_error):
+			_building_manager.delivery_point_error.connect(_on_delivery_point_error)
+		if _building_manager.has_signal("delivery_point_selection_changed") and not _building_manager.delivery_point_selection_changed.is_connected(_on_delivery_point_selection_changed):
+			_building_manager.delivery_point_selection_changed.connect(_on_delivery_point_selection_changed)
+		# --- CORRECTION CRITIQUE : connexion du signal entity_selected ici, après que _building_manager est défini ---
+		if _building_manager.has_signal("entity_selected") and not _building_manager.entity_selected.is_connected(_on_entity_selected):
+			_building_manager.entity_selected.connect(_on_entity_selected)
+
 	if _delivery_manager:
 		if _delivery_manager.has_signal("order_submitted") and not _delivery_manager.order_submitted.is_connected(_on_order_submitted):
 			_delivery_manager.order_submitted.connect(_on_order_submitted)
@@ -1160,7 +1155,7 @@ func _on_choose_order_delivery_point_pressed() -> void:
 	_delivery_selection_context = "order"
 	orders_status_label.text = "Clique sur la carte pour definir la destination de cette commande." if _order_mode == ORDER_MODE_IMPORT else "Clique sur la carte pour definir la destination de cet export."
 	_building_manager.start_delivery_point_selection()
-	orders_panel.hide()  # ← AJOUTE cette ligne
+	orders_panel.hide()
 
 func _on_clear_order_delivery_point_pressed() -> void:
 	_pending_order_delivery_point.clear()
@@ -1340,14 +1335,11 @@ func _has_physical_key(events: Array[InputEvent], keycode: int) -> bool:
 				return true
 	return false
 
-# --- NOUVELLE FONCTION POUR LE SOUS-MENU DES TAPIS ---
 func _on_menu_belt_pressed() -> void:
-	# Si le menu des tapis est visible, on le cache. Sinon, on l'affiche.
 	if menu_belt.visible:
 		menu_belt.hide()
 	else:
 		menu_belt.show()
-
 
 func _on_undo_build_pressed() -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
