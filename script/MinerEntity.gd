@@ -1,20 +1,19 @@
 extends Entity
-class_name TurbineEntity
+class_name MinerEntity
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TurbineEntity – Entité turbine.
-# Gère l'animation (AnimatedSprite2D) en fonction de is_active.
+# MinerEntity – Bâtiment d'extraction de ressources brutes.
+# Produit automatiquement des ressources dans son output_buffer.
+# Un tapis placé en sortie récupère ces ressources et les achemine.
 # ─────────────────────────────────────────────────────────────────────────────
 
 @onready var _anim_sprite: AnimatedSprite2D = _find_anim_sprite()
-@onready var _white_puff_vfx: WhitePuffVfx = _find_white_puff_vfx()
 
 func _ready() -> void:
-	entity_type = "turbine"
+	entity_type = "miner"
 	super._ready()
-	# Démarre automatiquement à la pose ; désactivé si restauré depuis une sauvegarde
-	if not is_active:
-		is_active = true
+	# Le mineur démarre automatiquement dès le placement
+	is_active = true
 
 func _on_active_changed(active: bool) -> void:
 	if _anim_sprite == null:
@@ -25,20 +24,18 @@ func _on_active_changed(active: bool) -> void:
 		else:
 			_anim_sprite.stop()
 			_anim_sprite.frame = 0
-	if _white_puff_vfx == null:
-		_white_puff_vfx = _find_white_puff_vfx()
-	if _white_puff_vfx != null:
-		_white_puff_vfx.set_emitting(active)
 
-# Cherche l'AnimatedSprite2D parmi les enfants (fonctionne même si le nom change)
 func _find_anim_sprite() -> AnimatedSprite2D:
 	for child in get_children():
 		if child is AnimatedSprite2D:
 			return child
 	return null
 
-func _find_white_puff_vfx() -> WhitePuffVfx:
-	for child in get_children():
-		if child is WhitePuffVfx:
-			return child
-	return null
+func get_status_text() -> String:
+	if not is_active:
+		return "Arret"
+	if current_recipe.is_empty():
+		return "Aucune ressource"
+	if not _has_output_capacity_for_recipe():
+		return "Buffer plein"
+	return "Extraction"

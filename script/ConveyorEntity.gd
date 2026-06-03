@@ -63,6 +63,24 @@ func _process(delta: float) -> void:
 		_try_pull_from_input()
 
 	_update_item_markers()
+	_update_connection_color()
+
+# Colore le tapis selon son état de connexion :
+#   Blanc  = connecté des deux côtés (entrée ET sortie)
+#   Orange = connecté d'un seul côté (départ ou fin de chaîne)
+#   Gris   = isolé (aucune connexion)
+func _update_connection_color() -> void:
+	var anim_sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if anim_sprite == null:
+		return
+	var has_in: bool = has_input_connection()
+	var has_out: bool = has_output_connection()
+	if has_in and has_out:
+		anim_sprite.modulate = Color.WHITE
+	elif has_in or has_out:
+		anim_sprite.modulate = Color(1.0, 0.75, 0.2)
+	else:
+		anim_sprite.modulate = Color(0.55, 0.55, 0.55)
 
 func get_status_text() -> String:
 	if not is_active:
@@ -269,6 +287,10 @@ func _find_upstream_entity(preferred_cell: Vector2i) -> Entity:
 			var neighbor_conveyor: ConveyorEntity = neighbor
 			if neighbor_conveyor.is_output_target(cell_position):
 				return neighbor_conveyor
+		else:
+			# Bâtiment non-tapis adjacent : valide comme source si pas du côté sortie
+			if cell_position + offset != cell_position + output_offset:
+				return neighbor
 	return null
 
 func _find_downstream_entity(preferred_cell: Vector2i) -> Entity:
@@ -284,6 +306,10 @@ func _find_downstream_entity(preferred_cell: Vector2i) -> Entity:
 			var neighbor_conveyor: ConveyorEntity = neighbor
 			if neighbor_conveyor.expects_input_from(cell_position):
 				return neighbor_conveyor
+		else:
+			# Bâtiment non-tapis adjacent : valide comme destination si pas du côté entrée
+			if cell_position + offset != cell_position + input_offset:
+				return neighbor
 	return null
 
 func _choose_upstream_resource(upstream_entity: Entity) -> String:

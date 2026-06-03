@@ -11,6 +11,9 @@ class_name FactoryEntity
 func _ready() -> void:
 	entity_type = "factory"
 	super._ready()
+	# Démarre automatiquement à la pose ; désactivé si restauré depuis une sauvegarde
+	if not is_active:
+		is_active = true
 
 func _on_active_changed(active: bool) -> void:
 	if _white_puff_vfx == null:

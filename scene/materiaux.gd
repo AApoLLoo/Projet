@@ -117,5 +117,9 @@ func _try_drop_at_current_position() -> bool:
 		return false
 	if target_entity.deposit_input(destination, quantity) != quantity:
 		return false
+	# Afficher le panneau de l'entité après dépôt (comme l'entrepôt)
+	var hud: Node = get_tree().current_scene.get_node_or_null("HUD")
+	if hud and hud.has_method("open_entity_panel"):
+		hud.open_entity_panel(target_entity)
 	queue_free()
 	return true

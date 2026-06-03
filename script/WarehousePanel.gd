@@ -84,7 +84,7 @@ func _refresh_ui(_ignored = null) -> void:
 func _on_item_clicked(index: int, _at_position: Vector2, mouse_button_index: int) -> void:
 	if mouse_button_index != MOUSE_BUTTON_LEFT:
 		return
-	var resource_id: String = String(inventory_list.get_item_metadata(index))
+	var resource_id: String = str(inventory_list.get_item_metadata(index))
 	if resource_id.is_empty():
 		return
 	if not GameManager or GameManager.get_resource_stock(resource_id) <= 0:
