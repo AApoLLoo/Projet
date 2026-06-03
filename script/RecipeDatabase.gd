@@ -55,6 +55,33 @@ var recipes: Dictionary = {
 			"co2_rate": 2.0
 		},
 		{
+			"id": "fonte_metal",
+			"name": "Fonte de métal",
+			"inputs": { "charbon": 1, "matiere_brute": 3 },
+			"outputs": { "metal": 2 },
+			"production_time": 8.0,
+			"energy_delta": 80.0,
+			"co2_rate": 6.0
+		},
+		{
+			"id": "raffinage_gaz",
+			"name": "Raffinage de gaz",
+			"inputs": { "matiere_brute": 4 },
+			"outputs": { "gaz": 2 },
+			"production_time": 12.0,
+			"energy_delta": 60.0,
+			"co2_rate": 3.0
+		},
+		{
+			"id": "charbon_compresse",
+			"name": "Charbon compressé",
+			"inputs": { "charbon": 3 },
+			"outputs": { "charbon": 4 },
+			"production_time": 6.0,
+			"energy_delta": 30.0,
+			"co2_rate": 1.5
+		},
+		{
 			"id": "piece_avancee",
 			"name": "Pièce avancée",
 			"inputs": { "piece_base": 2, "metal": 1 },

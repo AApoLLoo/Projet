@@ -1,0 +1,598 @@
+[gd_scene format=3 uid="uid://sq53v1i5wkrl"]
+
+[ext_resource type="Script" uid="uid://5nx80apmymd" path="res://script/HUD.gd" id="1_hud"]
+[ext_resource type="Script" uid="uid://cei88ve3rwm6c" path="res://script/MinimapOverlay.gd" id="2_minimap_overlay"]
+
+[node name="HUD" type="CanvasLayer" unique_id=745135006]
+script = ExtResource("1_hud")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1306118218]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -540.0
+offset_top = 18.0
+offset_bottom = 132.0
+grow_horizontal = 0
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer" unique_id=1880473724]
+layout_mode = 2
+color = Color(0.96, 0.94, 0.89, 0.84)
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer" unique_id=284299318]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/MarginContainer" unique_id=623881334]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DayLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=927971570]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Jour 1"
+horizontal_alignment = 1
+
+[node name="TimeLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=1234150913]
+unique_name_in_owner = true
+layout_mode = 2
+text = "08:00"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=750338239]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="BtnPause" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1163007535]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Pause"
+
+[node name="BtnX1" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1807012503]
+unique_name_in_owner = true
+layout_mode = 2
+text = "1x"
+
+[node name="BtnX2" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=150539462]
+unique_name_in_owner = true
+layout_mode = 2
+text = "2x"
+
+[node name="BtnX4" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=2063867302]
+unique_name_in_owner = true
+layout_mode = 2
+text = "4x"
+
+[node name="BtnToggleBuildMenu" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1987654321]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Construire"
+
+[node name="BtnToggleOrders" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1987654322]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Logistique"
+
+[node name="BtnToggleSessionOverview" type="Button" parent="MarginContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1987654323]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Vue usine"
+
+[node name="ContractsLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=125805602]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="MinimapContainer" type="MarginContainer" parent="." unique_id=987692439]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -320.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="ColorRect" type="ColorRect" parent="MinimapContainer" unique_id=1436890118]
+layout_mode = 2
+color = Color(0.96, 0.94, 0.89, 0.84)
+
+[node name="MarginContainer" type="MarginContainer" parent="MinimapContainer" unique_id=52854281]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="MinimapSurface" type="Control" parent="MinimapContainer/MarginContainer" unique_id=215455806]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="MinimapContainer/MarginContainer/MinimapSurface" unique_id=215455807]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="MinimapContainer/MarginContainer/MinimapSurface/SubViewportContainer" unique_id=700621053]
+unique_name_in_owner = true
+disable_3d = true
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(268, 268)
+render_target_update_mode = 4
+
+[node name="MinimapCamera" type="Camera2D" parent="MinimapContainer/MarginContainer/MinimapSurface/SubViewportContainer/SubViewport" unique_id=1370892464]
+unique_name_in_owner = true
+zoom = Vector2(0.05, 0.05)
+
+[node name="MinimapOverlay" type="Control" parent="MinimapContainer/MarginContainer/MinimapSurface" unique_id=215455808]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("2_minimap_overlay")
+
+[node name="ResourcesContainer" type="MarginContainer" parent="." unique_id=590475848]
+offset_left = 18.0
+offset_top = 18.0
+offset_right = 248.0
+offset_bottom = 100.0
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="ColorRect" type="ColorRect" parent="ResourcesContainer" unique_id=918093618]
+layout_mode = 2
+color = Color(0.96, 0.94, 0.89, 0.84)
+
+[node name="MarginContainer" type="MarginContainer" parent="ResourcesContainer" unique_id=2095881397]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ResourcesContainer/MarginContainer" unique_id=140709213]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Caption" type="Label" parent="ResourcesContainer/MarginContainer/VBoxContainer" unique_id=771974115]
+layout_mode = 2
+text = "Credits"
+
+[node name="MoneyLabel" type="Label" parent="ResourcesContainer/MarginContainer/VBoxContainer" unique_id=138009001]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0 credits"
+vertical_alignment = 1
+
+[node name="CO2Container" type="MarginContainer" parent="." unique_id=247704804]
+offset_left = 18.0
+offset_top = 110.0
+offset_right = 248.0
+offset_bottom = 192.0
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="ColorRect" type="ColorRect" parent="CO2Container" unique_id=1416201117]
+layout_mode = 2
+color = Color(0.96, 0.94, 0.89, 0.84)
+
+[node name="MarginContainer" type="MarginContainer" parent="CO2Container" unique_id=768432155]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CO2Container/MarginContainer" unique_id=692197049]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Caption" type="Label" parent="CO2Container/MarginContainer/VBoxContainer" unique_id=127297551]
+layout_mode = 2
+text = "Impact carbone"
+
+[node name="CO2Label" type="Label" parent="CO2Container/MarginContainer/VBoxContainer" unique_id=1909872910]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0.0 g/min CO2"
+vertical_alignment = 1
+
+[node name="BuildMenuContainer" type="VBoxContainer" parent="." unique_id=1150902757]
+unique_name_in_owner = true
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -300.0
+offset_right = 248.0
+offset_bottom = -20.0
+grow_vertical = 0
+theme_override_constants/separation = 8
+
+[node name="BuildMenuTitle" type="Label" parent="BuildMenuContainer" unique_id=919372114]
+layout_mode = 2
+
+[node name="BtnBuildBelt" type="Button" parent="BuildMenuContainer" unique_id=559379114]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Convoyeurs"
+
+[node name="BtnBuildTurbine" type="Button" parent="BuildMenuContainer" unique_id=1270201037]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Energie"
+
+[node name="BtnBuildFactory" type="Button" parent="BuildMenuContainer" unique_id=1572101387]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Production"
+
+[node name="BtnEntrepot" type="Button" parent="BuildMenuContainer" unique_id=540830721]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="OrdersPanel" type="PanelContainer" parent="." unique_id=498211001]
+unique_name_in_owner = true
+visible = false
+offset_left = 232.0
+offset_top = 18.0
+offset_right = 724.0
+offset_bottom = 430.0
+
+[node name="MarginContainer" type="MarginContainer" parent="OrdersPanel" unique_id=498211002]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OrdersPanel/MarginContainer" unique_id=498211003]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211004]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Commandes de ressources"
+
+[node name="ModeRow" type="HBoxContainer" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211027]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BtnOrderModeImport" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer/ModeRow" unique_id=498211028]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Import"
+
+[node name="BtnOrderModeExport" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer/ModeRow" unique_id=498211029]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Export"
+
+[node name="InventorySummaryLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211005]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Stock vide"
+autowrap_mode = 3
+
+[node name="OrderGrid" type="GridContainer" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211006]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 6
+columns = 2
+
+[node name="ResourceLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211007]
+layout_mode = 2
+text = "Ressource"
+
+[node name="OrderResourceSelector" type="OptionButton" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211008]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="QuantityLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211009]
+layout_mode = 2
+text = "Quantite"
+
+[node name="OrderQuantitySpinBox" type="SpinBox" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211010]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+max_value = 500.0
+value = 10.0
+
+[node name="UnitCostLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211011]
+layout_mode = 2
+text = "Prix unitaire"
+
+[node name="OrderUnitCostValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211012]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 €"
+
+[node name="TotalCostLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211013]
+layout_mode = 2
+text = "Cout total"
+
+[node name="OrderTotalCostValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211014]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 €"
+
+[node name="EstimatedCostLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211034]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Cout estime"
+
+[node name="EstimatedCostValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211035]
+unique_name_in_owner = true
+layout_mode = 2
+text = "N/A"
+
+[node name="MarginLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211030]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Marge"
+
+[node name="OrderMarginValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211031]
+unique_name_in_owner = true
+layout_mode = 2
+text = "N/A"
+
+[node name="StockLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211015]
+layout_mode = 2
+text = "Stock courant"
+
+[node name="OrderStockValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211016]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+
+[node name="DefaultDeliveryPointLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211017]
+layout_mode = 2
+text = "Point par defaut"
+
+[node name="DefaultDeliveryPointValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211018]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Aucun"
+
+[node name="OrderDeliveryPointLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211019]
+layout_mode = 2
+text = "Point de cette commande"
+
+[node name="OrderDeliveryPointValue" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer/OrderGrid" unique_id=498211020]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Aucun"
+
+[node name="ButtonsRow" type="HBoxContainer" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211021]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BtnChooseDefaultDeliveryPoint" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer/ButtonsRow" unique_id=498211022]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Point par defaut"
+
+[node name="BtnChooseOrderDeliveryPoint" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer/ButtonsRow" unique_id=498211023]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Point de commande"
+
+[node name="BtnClearOrderDeliveryPoint" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer/ButtonsRow" unique_id=498211024]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Effacer point"
+
+[node name="OrdersStatusLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211025]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Aucune commande en cours."
+autowrap_mode = 3
+
+[node name="ExportHistoryTitle" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211032]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Derniers gains d'export"
+
+[node name="ExportHistoryLabel" type="Label" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211033]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Aucun export termine."
+autowrap_mode = 3
+
+[node name="BtnSubmitOrder" type="Button" parent="OrdersPanel/MarginContainer/VBoxContainer" unique_id=498211026]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Commander"
+
+[node name="SessionOverviewPanel" type="PanelContainer" parent="." unique_id=675144948]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -290.0
+offset_top = -215.0
+offset_right = 290.0
+offset_bottom = 215.0
+
+[node name="MarginContainer" type="MarginContainer" parent="SessionOverviewPanel" unique_id=432869373]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SessionOverviewPanel/MarginContainer" unique_id=1219415110]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer" unique_id=1956281952]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Infos de la partie"
+horizontal_alignment = 1
+
+[node name="InfoGrid" type="GridContainer" parent="SessionOverviewPanel/MarginContainer/VBoxContainer" unique_id=2012156695]
+layout_mode = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="DayLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=164693166]
+layout_mode = 2
+text = "Jour"
+
+[node name="OverviewDayValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1612728383]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Jour 1"
+horizontal_alignment = 2
+
+[node name="TimeLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=488056875]
+layout_mode = 2
+text = "Heure"
+
+[node name="OverviewTimeValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=822626886]
+unique_name_in_owner = true
+layout_mode = 2
+text = "08:00"
+horizontal_alignment = 2
+
+[node name="CreditsLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=2057540841]
+layout_mode = 2
+text = "Credits"
+
+[node name="OverviewCreditsValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1636981734]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 €"
+horizontal_alignment = 2
+
+[node name="MachinesLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1098813945]
+layout_mode = 2
+text = "Machines total"
+
+[node name="OverviewMachinesValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1645397864]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0"
+horizontal_alignment = 2
+
+[node name="ActiveMachinesLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1244793099]
+layout_mode = 2
+text = "Machines actives"
+
+[node name="OverviewActiveMachinesValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=656499050]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 / 0"
+horizontal_alignment = 2
+
+[node name="ProductionRateLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=770963294]
+layout_mode = 2
+text = "Taux de production"
+
+[node name="OverviewProductionRateValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=93367735]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0%"
+horizontal_alignment = 2
+
+[node name="FailuresLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1883435217]
+layout_mode = 2
+text = "Machines en panne"
+
+[node name="OverviewFailuresValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1418545568]
+unique_name_in_owner = true
+layout_mode = 2
+text = "A venir (placeholder)"
+horizontal_alignment = 2
+
+[node name="CO2Label" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1469679323]
+layout_mode = 2
+text = "CO2"
+
+[node name="OverviewCO2Value" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1872482549]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.0 g/min"
+horizontal_alignment = 2
+
+[node name="ElectricityLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1540392897]
+layout_mode = 2
+text = "Electricite"
+
+[node name="OverviewElectricityValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1645637162]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0.0 kW"
+horizontal_alignment = 2
+
+[node name="HintLabel" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer" unique_id=533120122]
+layout_mode = 2
+text = "I pour ouvrir ou fermer cette vue"
+horizontal_alignment = 1
+
+[node name="Menu_Belt" type="HBoxContainer" parent="." unique_id=330465475]
+offset_left = 24.0
+offset_top = 384.0
+offset_right = 328.0
+offset_bottom = 432.0
+theme_override_constants/separation = 8
+
+[node name="Curve_Top" type="Button" parent="Menu_Belt" unique_id=454416111]
+layout_mode = 2
+text = "⮍"
+
+[node name="Curve_Down" type="Button" parent="Menu_Belt" unique_id=279223697]
+layout_mode = 2
+text = "⮏"
+
+[node name="Curve_Right" type="Button" parent="Menu_Belt" unique_id=991484786]
+layout_mode = 2
+text = "⮎"
+
+[node name="Curve_left" type="Button" parent="Menu_Belt" unique_id=546413980]
+layout_mode = 2
+text = "⮌"
+
+[node name="Belt_droit" type="Button" parent="Menu_Belt" unique_id=1001744654]
+layout_mode = 2
+text = "🡭"
+
+[node name="Belt_left" type="Button" parent="Menu_Belt" unique_id=1980610375]
+layout_mode = 2
+text = "🡴"

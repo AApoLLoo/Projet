@@ -49,11 +49,11 @@ func _ready() -> void:
 	_apply_start_state()
 	_setup_delivery_point_marker()
 	if _preview_mode:
-		_disable_preview_interactions()
-		return
 		var hud = get_node_or_null("HUD")
 		if hud:
 			hud.visible = false
+		_disable_preview_interactions()
+		return
 
 	_build_pause_ui()
 	TimeManager.is_time_running = true

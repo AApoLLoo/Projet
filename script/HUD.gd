@@ -179,7 +179,6 @@ var _minimap_viewport_size: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
 	btn_build_entrepot.pressed.connect(func():
-		print("Clic sur ENTREPÔT !")
 		_start_building_process("entrepot")
 	)
 	_ensure_input_actions()
@@ -213,33 +212,27 @@ func _ready() -> void:
 	
 	# Exemple pour les tapis droits
 	belt_droit.pressed.connect(func():
-		print("Mode construction : Tapis Droit")
 		_start_building_process("belt_right")
 		menu_belt.hide()
 	)
 	belt_left.pressed.connect(func():
-		print("Mode construction : Tapis Droit")
 		_start_building_process("belt_left")
 		menu_belt.hide()
 	)
 	# Exemple pour vos courbes (Curves)
 	curve_top.pressed.connect(func():
-		print("Mode construction : Courbe Haut (Curve Top)")
 		_start_building_process("curve_top")
 		menu_belt.hide()
 	)
 	curve_down.pressed.connect(func():
-		print("Mode construction : Courbe Haut (Curve Top)")
 		_start_building_process("curve_down")
 		menu_belt.hide()
 	)
 	curve_right.pressed.connect(func():
-		print("Mode construction : Courbe Haut (Curve Top)")
 		_start_building_process("curve_right")
 		menu_belt.hide()
 	)
 	curve_left.pressed.connect(func():
-		print("Mode construction : Courbe Haut (Curve Top)")
 		_start_building_process("curve_left")
 		menu_belt.hide()
 	)
@@ -283,7 +276,6 @@ func _ready() -> void:
 
 	# 2. Les sous-boutons lancent la construction
 	btn_build_factory.pressed.connect(func():
-		print("Clic sur USINE !")
 		_start_building_process("factory")
 	)
 	
@@ -292,7 +284,6 @@ func _ready() -> void:
 	# --------------------------------------------------
 	
 	btn_build_turbine.pressed.connect(func():
-		print("Clic sur TURBINE !")
 		_start_building_process("turbine")
 	)
 
@@ -373,7 +364,12 @@ func _on_contract_arrived(contract: Dictionary) -> void:
 
 func _on_contract_completed(contract: Dictionary) -> void:
 	_update_contracts_display()
-	_show_hint_toast("✓ Contrat rempli ! +%.0f €" % float(contract["reward"]))
+	var streak: int = ContractManager.completed_streak if ContractManager else 0
+	var streak_bonus_pct: int = int(minf(float(streak - 1) * 5.0, 50.0))
+	var msg: String = "✓ Contrat rempli ! +%.0f €" % float(contract["reward"])
+	if streak_bonus_pct > 0:
+		msg += " (🔥 Streak +%d%%)" % streak_bonus_pct
+	_show_hint_toast(msg)
 
 func _on_contract_failed(contract: Dictionary) -> void:
 	_update_contracts_display()
@@ -652,15 +648,22 @@ func _update_contracts_display() -> void:
 		return
 	var contracts: Array[Dictionary] = ContractManager.get_active_contracts()
 	if contracts.is_empty():
-		contracts_label.text = ""
+		contracts_label.text = "Aucun contrat actif"
 		return
 	var parts: PackedStringArray = []
+	var current_day: int = TimeManager.current_day if TimeManager else 1
 	for c in contracts:
 		var delivered := int(c["delivered"])
 		var contract_quantity := int(c["quantity"])
 		var label := String(c["resource_label"])
-		parts.append("📦 %s : %d/%d" % [label, delivered, contract_quantity])
-	contracts_label.text = "Contrats : " + " | ".join(parts)
+		var days_left: int = int(c["day_deadline"]) - current_day
+		var reward := int(float(c["reward"]))
+		var day_str: String = "⚠ URGENT" if days_left <= 0 else ("J-%d" % days_left)
+		parts.append("📦 %s : %d/%d [%s | +%d€]" % [label, delivered, contract_quantity, day_str, reward])
+	var streak_text: String = ""
+	if ContractManager.completed_streak > 1:
+		streak_text = " 🔥x%d" % ContractManager.completed_streak
+	contracts_label.text = "Contrats : " + " | ".join(parts) + streak_text
 	
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
@@ -672,15 +675,10 @@ func _start_building_process(building_type: String) -> void:
 			_entity_panel.hide()
 
 func _on_entity_selected(entity) -> void:
-	print("DEBUG: Signal de sélection reçu !") # <--- AJOUTE ÇA
-	
 	if entity == null:
-		print("DEBUG: Entité sélectionnée est NULL")
 		if _entity_panel: _entity_panel.hide()
 		if _warehouse_panel: _warehouse_panel.hide()
 		return
-
-	print("DEBUG: Type de l'entité : ", entity.get_script().get_path()) # <--- AJOUTE ÇA
 
 	# ... reste de ton code ...
 
@@ -877,7 +875,6 @@ func _update_day_display(day: int) -> void:
 	day_label.text = "Jour %d" % day
 
 func _on_resources_updated() -> void:
-	print("HUD : Signal resources_updated reçu ! Mise à jour de l'interface...")
 	_update_money_display()
 	_update_co2_display()
 	_update_session_overview()
@@ -1356,8 +1353,6 @@ func _on_undo_build_pressed() -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	if building_manager and building_manager.has_method("undo_last_build"):
 		building_manager.undo_last_build()
-	else:
-		print("Annulation impossible : BuildingManager introuvable ou méthode manquante")
 
 func _style_button(button: Button, base_color: Color, text_color: Color = Color.WHITE) -> void:
 	UITheme.style_button(button, base_color, text_color, false, true)

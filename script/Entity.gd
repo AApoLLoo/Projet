@@ -333,6 +333,11 @@ func _can_operate_now() -> bool:
 		return false
 	if not _has_output_capacity_for_recipe():
 		return false
+	# Vérifier que le réseau a assez d'énergie pour les bâtiments consommateurs
+	var energy_needed: float = current_recipe.get("energy_delta", 0.0)
+	if energy_needed > 0.0:  # Ce bâtiment consomme de l'énergie
+		if GameManager.energy_usage > 500.0:  # Réseau surchargé (déficit > 500kW)
+			return false
 	var inputs: Dictionary = current_recipe.get("inputs", {})
 	if inputs.is_empty():
 		return true

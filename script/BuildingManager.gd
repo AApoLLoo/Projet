@@ -155,7 +155,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Clic gauche pour placer l'usine
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_try_place_building()
-		print("JE POSE LE BATIMENT !")
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 		var mouse_pos = get_global_mouse_position()
@@ -241,6 +240,7 @@ func _try_place_building() -> void:
 			"occupied_cells": occupied_by_build.duplicate(),
 			"instance": factory_instance,
 			"cost": factory_cost,
+			"co2_cost": factory_instance.get("build_co2_cost") if factory_instance else 0.0,
 		}
 		last_build_state_changed.emit(true)
 
@@ -270,9 +270,12 @@ func undo_last_build() -> void:
 
 	_clear_occupied_cells_for_instance(inst, occupied_for_build)
 
-	# Remboursement de 50%
+	# Remboursement de 50% du coût crédits
 	GameManager.add_credits(cost * 0.5)
-	# Remboursement de la totalité de consommation de C02
+	# Remboursement de la totalité du CO2 de construction
+	var co2_cost = float(_last_built.get("co2_cost", 0.0))
+	if co2_cost > 0.0:
+		GameManager.remove_construction_co2(co2_cost)
 
 	_last_built.clear()
 	last_build_state_changed.emit(false)
