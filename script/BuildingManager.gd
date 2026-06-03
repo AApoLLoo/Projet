@@ -75,7 +75,7 @@ func get_world_pos(cell_pos: Vector2i) -> Vector2:
 		return Vector2(cell_pos.x * cell_size + cell_size / 2.0, cell_pos.y * cell_size + cell_size / 2.0)
 # ----------------------------------------
 
-func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1, footprint_offsets: Array = [Vector2i.ZERO]) -> void:
+func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1, footprint_offsets: Array = [Vector2i.ZERO], preview_scale: Vector2 = Vector2.ONE) -> void:
 	if is_selecting_delivery_point:
 		stop_delivery_point_selection()
 
@@ -96,7 +96,7 @@ func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_
 	is_building = true
 
 	# Reset scale / modulate au cas où
-	preview_sprite.scale = Vector2.ONE
+	preview_sprite.scale = preview_scale
 	preview_sprite.modulate = Color(1,1,1,0.6)
 
 func stop_building() -> void:

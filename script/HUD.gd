@@ -90,12 +90,13 @@ var _warehouse_panel: PanelContainer = null
 # --- DICTIONNAIRE MIS À JOUR AVEC DIRECTIONS ET VIRAGES ---
 var buildings_data = {
 	"factory": {
-		"scene": preload("res://scene/factory.tscn"),
-		"texture": preload("res://asset/IndustrialTile_14.png"),
-		"cost": 200.0,
-		"frames": 1,
-		"footprint_offsets": [Vector2i.ZERO]
-	},
+	"scene": preload("res://scene/factory.tscn"),
+	"texture": preload("res://asset/usine.png"),
+	"cost": 200.0,
+	"frames": 1,
+	"preview_scale": Vector2(0.4, 0.4),
+	"footprint_offsets": [Vector2i.ZERO]
+},
 	"turbine": {
 		"scene": preload("res://scene/turbine_2d.tscn"),
 		"texture": preload("res://asset/Turbine Animation base.png"),
@@ -665,7 +666,14 @@ func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	if building_manager:
 		var data = buildings_data[building_type]
-		building_manager.start_building(data["scene"], data["cost"], data["texture"], data.get("frames", 1), data.get("footprint_offsets", [Vector2i.ZERO]))
+		building_manager.start_building(
+	data["scene"],
+	data["cost"],
+	data["texture"],
+	data.get("frames", 1),
+	data.get("footprint_offsets", [Vector2i.ZERO]),
+	data.get("preview_scale", Vector2.ONE)
+)
 		# Masquer les panneaux entité quand on entre en mode construction
 		if _entity_panel:
 			_entity_panel.hide()
