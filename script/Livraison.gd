@@ -379,3 +379,39 @@ func _find_recipe_for_output(resource_id: String) -> Dictionary:
 			if outputs.has(resource_id):
 				return recipe
 	return {}
+
+func get_save_state() -> Dictionary:
+	var current_order_data: Variant = null
+	if _delivery_in_progress and not _current_order.is_empty():
+		current_order_data = _current_order.duplicate(true)
+	return {
+		"pending_orders": _pending_orders.duplicate(true),
+		"current_order": current_order_data,
+	}
+
+func apply_save_state(data: Dictionary) -> void:
+	_pending_orders.clear()
+	_current_order.clear()
+	_delivery_in_progress = false
+
+	# Livraison qui était en cours au moment de la sauvegarde
+	var current_order_data: Variant = data.get("current_order")
+	if current_order_data is Dictionary and not current_order_data.is_empty():
+		var job_type: String = String(current_order_data.get("job_type", JOB_IMPORT))
+		if job_type == JOB_EXPORT:
+			# Le stock était déjà consommé avant la sauvegarde → créditer directement
+			if GameManager:
+				GameManager.add_credits(float(current_order_data.get("total_cost", 0.0)))
+		else:
+			# Import : les crédits étaient déjà déduits → remettre en tête de file
+			_pending_orders.append(current_order_data.duplicate(true))
+
+	# Commandes en attente (non encore démarrées)
+	var raw_pending: Variant = data.get("pending_orders", [])
+	if raw_pending is Array:
+		for order in raw_pending:
+			if order is Dictionary:
+				_pending_orders.append(order.duplicate(true))
+
+	queue_changed.emit(_pending_orders.size())
+	_try_start_next_delivery()

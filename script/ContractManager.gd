@@ -176,6 +176,23 @@ func start_new_game() -> void:
 	var start_day: int = TimeManager.current_day if TimeManager else 1
 	_generate_contract(start_day)
 
+func get_save_state() -> Dictionary:
+	return {
+		"active_contracts": active_contracts.duplicate(true),
+		"completed_streak": completed_streak,
+		"last_generated_day": _last_generated_day,
+	}
+
+func apply_save_state(data: Dictionary) -> void:
+	active_contracts.clear()
+	completed_streak = int(data.get("completed_streak", 0))
+	_last_generated_day = int(data.get("last_generated_day", -1))
+	var raw_contracts: Variant = data.get("active_contracts", [])
+	if raw_contracts is Array:
+		for c in raw_contracts:
+			if c is Dictionary:
+				active_contracts.append(c.duplicate(true))
+
 func get_active_contracts() -> Array[Dictionary]:
 	return active_contracts.duplicate(true)
 
