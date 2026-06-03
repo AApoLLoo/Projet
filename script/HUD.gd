@@ -300,7 +300,10 @@ func _ready() -> void:
 	_style_button(btn_build_turbine, Color.html("#4F8F5B"))
 	_style_button(btn_build_factory, Color.html("#A66A3F"))
 	
-	btn_build_entrepot.text = "Entrepôt"
+	btn_build_belt.custom_minimum_size = Vector2(200.0, 32.0)
+	btn_build_turbine.custom_minimum_size = Vector2(200.0, 32.0)
+	btn_build_factory.custom_minimum_size = Vector2(200.0, 32.0)
+	_update_build_button_prices()
 	btn_build_entrepot.custom_minimum_size = Vector2(200.0, 32.0)
 	_style_button(btn_build_entrepot, Color.html("#69558C"))
 
@@ -1285,6 +1288,19 @@ func _on_delivery_queue_changed(queue_size: int) -> void:
 		btn_toggle_orders.text = "Commandes [%d]" % queue_size
 	else:
 		btn_toggle_orders.text = "Commandes"
+
+func _update_build_button_prices() -> void:
+	_set_build_button_price(btn_build_belt, "Convoyeurs", "belt_right")
+	_set_build_button_price(btn_build_turbine, "Energie", "turbine")
+	_set_build_button_price(btn_build_factory, "Production", "factory")
+	_set_build_button_price(btn_build_entrepot, "Entrepot", "entrepot")
+
+func _set_build_button_price(button: Button, label: String, building_id: String) -> void:
+	if button == null:
+		return
+	var building_data: Dictionary = buildings_data.get(building_id, {})
+	var cost: float = float(building_data.get("cost", 0.0))
+	button.text = "%s - %s" % [label, _format_money_value(cost)]
 
 func _format_money_value(amount: float) -> String:
 	var formatted_money: String = String.num(amount, 2)
