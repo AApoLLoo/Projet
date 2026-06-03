@@ -84,8 +84,7 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var btn_choose_order_delivery_point: Button = %BtnChooseOrderDeliveryPoint
 @onready var btn_clear_order_delivery_point: Button = %BtnClearOrderDeliveryPoint
 @onready var btn_submit_order: Button = %BtnSubmitOrder
-@onready var entrepot_panel = $EntrepotPanel # Chemin vers votre panneau dans le HUD
-var _warehouse_panel: PanelContainer = null
+@onready var _warehouse_panel = $EntrepotPanel
 
 
 # --- DICTIONNAIRE MIS À JOUR ---

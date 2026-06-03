@@ -1,6 +1,5 @@
 extends PanelContainer
 
-# Assurez-vous que les noms dans l'éditeur correspondent à ces "%"
 @onready var title_label: Label = %TitleLabel
 @onready var inventory_list: ItemList = %InventoryList
 @onready var status_label: Label = %StatusLabel
@@ -8,37 +7,37 @@ extends PanelContainer
 var current_warehouse: WarehouseEntity = null
 
 func _ready() -> void:
+	# 1. Appliquer le thème dès le démarrage
+	UITheme.style_card(self, true, true) # Style le panneau
+	UITheme.style_item_list(inventory_list) # Style la liste
+	
 	hide()
 
 func setup(warehouse: WarehouseEntity) -> void:
-	# 1. Nettoyage
+	# Gestion de la connexion du signal (sécurisée)
 	if current_warehouse and current_warehouse.entity_updated.is_connected(_refresh_ui):
 		current_warehouse.entity_updated.disconnect(_refresh_ui)
 
 	current_warehouse = warehouse
-	
-	# 2. Connexion
 	current_warehouse.entity_updated.connect(_refresh_ui)
 	
-	# 3. Affichage initial
 	_refresh_ui()
 	show()
 
 func _refresh_ui(_entity: Entity = null) -> void:
-	# 1. Debug : On regarde si la fonction est bien lancée
-	print("Refresh UI appelé !")
-	
 	if not current_warehouse:
-		print("Erreur : current_warehouse est null !")
-		return # La fonction s'arrête ici si l'entrepôt n'est pas défini
+		return
+
+	inventory_list.clear()
 	
-	print("Affichage des données pour : ", current_warehouse)
+	# On accède directement à l'inventaire de l'entrepôt
+	var items = current_warehouse.inventory 
 	
-	# ... reste de votre code ...
-	
-	# 2. Forcez la visibilité (des fois le parent cache le panneau)	
-	self.show()
-	
+	for item_name in items:
+		var quantity = items[item_name]
+		# Ajout à l'UI
+		inventory_list.add_item("%s : %d" % [item_name, quantity])
+
 func _on_close() -> void:
 	if current_warehouse and current_warehouse.entity_updated.is_connected(_refresh_ui):
 		current_warehouse.entity_updated.disconnect(_refresh_ui)

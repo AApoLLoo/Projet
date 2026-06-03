@@ -21,7 +21,7 @@ const ITEM_SPACING_PROGRESS: float = 0.28
 @export var travel_time: float = 0.45
 @export var throughput_amount: int = 1
 @export var max_carried_items: int = 3
-
+var is_powered: bool = false
 var carried_resource: String = ""
 var carried_amount: int = 0
 var travel_progress: float = 0.0
@@ -39,21 +39,42 @@ const ITEM_FRAMES: Dictionary = {
 }
 
 @onready var _item_marker_root: Node2D = _ensure_item_marker_root()
-
+func _check_neighbor_turbines():
+	# Liste des directions adjacentes
+	var neighbors = [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]
+	
+	for offset in neighbors:
+		var neighbor_pos = cell_position + offset
+		
+		# ON UTILISE ENTITYMANAGER ICI
+		var entity = EntityManager.get_entity_at_cell(neighbor_pos)
+		print("Vérification case ", neighbor_pos, " : ", entity)
+		# Vérification si l'entité est une turbine et si elle est active
+		if entity != null and entity.entity_type == "turbine":
+			print("Turbine")
+			if entity.is_active:
+				print("En marche")
+				set_powered(true)
+				return # On a trouvé une turbine active, c'est bon
 func _ready() -> void:
 	entity_type = conveyor_kind
 	super._ready()
 	is_active = true
+	
+	# Enregistrement immédiat ici !
+	#EntityManager.register_entity(self)
+	
 	_update_item_markers()
+	_check_neighbor_turbines.call_deferred() # Différé aussi pour être sûr
 
-func _post_ready() -> void:
-	EntityManager.register_entity(self)
 
 func _process(delta: float) -> void:
-	if not is_active:
-		_update_item_markers()
+	# On vérifie si le tapis est actif ET alimenté
+	if not is_active or not is_powered:
+		_update_item_markers() # On met quand même à jour les visuels des items
 		return
 
+	# Si on est ici, le tapis est alimenté, on continue la logique normale
 	if not carried_items.is_empty():
 		_advance_items(delta)
 		if _front_item_ready_to_exit() and _try_push_to_output():
@@ -63,6 +84,7 @@ func _process(delta: float) -> void:
 		_try_pull_from_input()
 
 	_update_item_markers()
+
 
 func get_status_text() -> String:
 	if not is_active:
@@ -489,3 +511,5 @@ func _offset_to_marker_position(offset: Vector2i) -> Vector2:
 	if offset == Vector2i(-1, -1):
 		return Vector2(-22.0, -11.0)
 	return Vector2.ZERO
+func set_powered(state: bool) -> void:
+	is_powered = state

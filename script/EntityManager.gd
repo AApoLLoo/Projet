@@ -23,6 +23,7 @@ signal totals_changed(energy_total: float, co2_total: float)
 # ─── API ─────────────────────────────────────────────────────────────────────
 
 func register_entity(entity: Entity) -> void:
+	print("EntityManager : Enregistrement de ", entity.entity_type, " à ", entity.cell_position)
 	entities[entity.entity_id] = entity
 	recalculate_totals()
 
@@ -68,11 +69,22 @@ func count() -> int:
 	return entities.size()
 
 func get_entity_at_cell(cell_pos: Vector2i) -> Entity:
-	for entity in entities.values():
+	# print("--- DEBUG EntityManager: Recherche de ", cell_pos, " ---") # Optionnel
+	for id in entities:
+		var entity = entities[id]
+		
+		# 1. Est-ce que l'entité existe encore ?
 		if not is_instance_valid(entity):
 			continue
+			
+		# 2. Est-ce que la position correspond ?
 		if entity.cell_position == cell_pos:
 			return entity
+		else:
+			# Si on est très proche, on affiche pour voir s'il y a une erreur de coordonnées
+			if entity.cell_position.distance_squared_to(Vector2(cell_pos)) < 4:
+				print("   DEBUG: Entité trouvée proche en ", entity.cell_position, " mais pas exacte.")
+				 
 	return null
 
 func get_adjacent_entities(cell_pos: Vector2i) -> Array:
