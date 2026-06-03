@@ -355,7 +355,13 @@ func _ready() -> void:
 	
 func _on_contract_arrived(contract: Dictionary) -> void:
 	_update_contracts_display()
-	_show_hint_toast("📦 Nouveau contrat !")
+	var msg := "📦 Nouveau contrat : %s x%d\n+%.0f€ si livré avant J-%d" % [
+		String(contract.get("resource_label", "?")),
+		int(contract.get("quantity", 0)),
+		float(contract.get("reward", 0.0)),
+		int(contract.get("deadline_days", 2))
+	]
+	_show_toast(msg, UITheme.ACCENT_GOLD)
 
 func _on_contract_completed(contract: Dictionary) -> void:
 	_update_contracts_display()
@@ -647,6 +653,7 @@ func _update_contracts_display() -> void:
 		contracts_label.hide()
 		return
 	contracts_label.show()
+	contracts_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var parts: PackedStringArray = []
 	var current_day: int = TimeManager.current_day if TimeManager else 1
 	for c in contracts:
@@ -660,7 +667,7 @@ func _update_contracts_display() -> void:
 	var streak_text: String = ""
 	if ContractManager.completed_streak > 1:
 		streak_text = " 🔥x%d" % ContractManager.completed_streak
-	contracts_label.text = "Contrats : " + " | ".join(parts) + streak_text
+	contracts_label.text = "Contrats :\n" + "\n".join(parts) + streak_text
 	
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
