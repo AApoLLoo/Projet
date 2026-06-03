@@ -887,7 +887,7 @@ func _update_day_display(day: int) -> void:
 	day_label.text = "Jour %d" % day
 
 func _on_resources_updated() -> void:
-	print("HUD : Signal resources_updated reçu ! Mise à jour de l'interface...")
+	#print("HUD : Signal resources_updated reçu ! Mise à jour de l'interface...")
 	_update_money_display()
 	_update_co2_display()
 	_update_session_overview()

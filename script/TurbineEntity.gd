@@ -15,7 +15,7 @@ func _ready() -> void:
 	
 	# Force l'activation dès le spawn
 	is_active = true 
-	
+	update_neighbors.call_deferred()
 	#EntityManager.register_entity(self)
 	# Le scan se fera via le BuildingManager lors de la pose
 
@@ -51,18 +51,22 @@ func _on_active_toggled(value: bool):
 	update_neighbors()
 
 func update_neighbors():
-	# Rayon 2 pour couvrir le 5x5
-	for x in range(-2, 3):
-		for y in range(-2, 3):
-			if x == 0 and y == 0: continue
+	var rayon = 10
+	
+	for x in range(-rayon, rayon + 1):
+		for y in range(-rayon, rayon + 1):
+			if x == 0 and y == 0:
+				continue
 			
-			var neighbor_pos = cell_position + Vector2i(x, y)
-			var entity = EntityManager.get_entity_at_cell(neighbor_pos)
+			# Vérifie la distance réelle (pas juste le carré)
+			if Vector2(x, y).length() > float(rayon):
+				continue
 			
-			if entity != null:
-				var type = entity.get("entity_type")
-				# On vérifie si c'est un tapis
-				if type != null and "belt" in str(type):
-					print("   >>> OUI ! Convoyeur détecté en ", neighbor_pos, ". Activation : ", is_active)
-					if entity.has_method("set_powered"):
-						entity.set_powered(is_active)
+			var pos_a_verifier = cell_position + Vector2i(x, y)
+			var ent = EntityManager.get_entity_at_cell(pos_a_verifier)
+			
+			if ent != null:
+				var type = str(ent.get("entity_type"))
+				if "belt" in type:
+					if ent.has_method("set_powered"):
+						ent.set_powered(is_active)

@@ -69,22 +69,24 @@ func count() -> int:
 	return entities.size()
 
 func get_entity_at_cell(cell_pos: Vector2i) -> Entity:
-	# print("--- DEBUG EntityManager: Recherche de ", cell_pos, " ---") # Optionnel
 	for id in entities:
 		var entity = entities[id]
 		
-		# 1. Est-ce que l'entité existe encore ?
 		if not is_instance_valid(entity):
 			continue
 			
-		# 2. Est-ce que la position correspond ?
+		# DEBUG TRÈS PRÉCIS
 		if entity.cell_position == cell_pos:
-			return entity
+			return entity # Succès !
 		else:
-			# Si on est très proche, on affiche pour voir s'il y a une erreur de coordonnées
-			if entity.cell_position.distance_squared_to(Vector2(cell_pos)) < 4:
-				print("   DEBUG: Entité trouvée proche en ", entity.cell_position, " mais pas exacte.")
-				 
+			# On vérifie si par hasard ce n'est pas un problème de Vector2 vs Vector2i
+			# (Si les valeurs sont identiques mais le type diffère, le == peut échouer)
+			if Vector2i(entity.cell_position) == cell_pos:
+				# Si ça rentre ici, c'est que ton objet a une position qui ressemble à un Vector2
+				# alors qu'il devrait être un Vector2i
+				print("DEBUG : Position correspondante trouvée mais type différent. Entité : ", entity.cell_position, " Cherché : ", cell_pos)
+				return entity
+	
 	return null
 
 func get_adjacent_entities(cell_pos: Vector2i) -> Array:

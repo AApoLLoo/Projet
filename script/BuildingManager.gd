@@ -545,12 +545,14 @@ func _get_default_footprint_offsets(entity_type: String) -> Array[Vector2i]:
 		_:
 			return [Vector2i.ZERO]
 func _refresh_turbines_around(pos: Vector2i):
-	# On scanne un rayon de 2 autour de la nouvelle position pos
-	for x in range(-2, 3):
-		for y in range(-2, 3):
+	# Même rayon de 2 que dans la turbine !
+	var rayon = 2
+	
+	for x in range(-rayon, rayon + 1):
+		for y in range(-rayon, rayon + 1):
 			var check_pos = pos + Vector2i(x, y)
 			var ent = EntityManager.get_entity_at_cell(check_pos)
+			
+			# Si on trouve une turbine dans cette zone, on la force à rescanner
 			if ent != null and ent.entity_type == "turbine":
-				#print("BuildingManager prévient la turbine en ", check_pos)
 				ent.update_neighbors()
-	

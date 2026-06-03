@@ -40,22 +40,29 @@ const ITEM_FRAMES: Dictionary = {
 
 @onready var _item_marker_root: Node2D = _ensure_item_marker_root()
 func _check_neighbor_turbines():
-	# Liste des directions adjacentes
-	var neighbors = [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]
+	var rayon = 10
 	
-	for offset in neighbors:
-		var neighbor_pos = cell_position + offset
+	for x in range(-rayon, rayon + 1):
+		for y in range(-rayon, rayon + 1):
+			if x == 0 and y == 0:
+				continue
+			
+			if Vector2(x, y).length() > float(rayon):  # ← ajoute ça
+				continue
+			
+			var pos = cell_position + Vector2i(x, y)
+			var entity = EntityManager.get_entity_at_cell(pos)
+			if entity != null and entity.entity_type == "turbine" and entity.is_active:
+				print("Trouvé entité : ", entity.entity_type, " en ", pos, " distance=", Vector2(x,y).length())
+				print("Turbine trouvée, is_active = ", entity.is_active, " type=", typeof(entity.is_active))
+				print("Test condition finale : ", entity != null, " / ", entity.entity_type == "turbine", " / ", entity.is_active)
+				if entity.is_active:
+					print(">>> set_powered(true) va être appelé !")
+					set_powered(true)
+				return
+	
+	set_powered(false)# ← crucial : aucune turbine trouvée = pas alimenté
 		
-		# ON UTILISE ENTITYMANAGER ICI
-		var entity = EntityManager.get_entity_at_cell(neighbor_pos)
-		print("Vérification case ", neighbor_pos, " : ", entity)
-		# Vérification si l'entité est une turbine et si elle est active
-		if entity != null and entity.entity_type == "turbine":
-			print("Turbine")
-			if entity.is_active:
-				print("En marche")
-				set_powered(true)
-				return # On a trouvé une turbine active, c'est bon
 func _ready() -> void:
 	entity_type = conveyor_kind
 	super._ready()
@@ -65,7 +72,7 @@ func _ready() -> void:
 	#EntityManager.register_entity(self)
 	
 	_update_item_markers()
-	_check_neighbor_turbines.call_deferred() # Différé aussi pour être sûr
+	#_check_neighbor_turbines.call_deferred() # Différé aussi pour être sûr
 
 
 func _process(delta: float) -> void:
@@ -511,5 +518,13 @@ func _offset_to_marker_position(offset: Vector2i) -> Vector2:
 	if offset == Vector2i(-1, -1):
 		return Vector2(-22.0, -11.0)
 	return Vector2.ZERO
-func set_powered(state: bool) -> void:
-	is_powered = state
+# Dans ConveyorEntity.gd
+
+func set_powered(active: bool) -> void:
+	print("set_powered appelé avec : ", active)
+	is_powered = active  # plus de garde
+	if is_powered:
+		$AnimatedSprite2D.play()
+	else:
+		$AnimatedSprite2D.stop()
+		$AnimatedSprite2D.frame = 0

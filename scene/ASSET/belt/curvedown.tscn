@@ -1,23 +1,39 @@
 [gd_scene format=3 uid="uid://d0ij2ecdqoe82"]
 
 [ext_resource type="Script" uid="uid://dwlkmwtnf317r" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
-[ext_resource type="Texture2D" uid="uid://clta1krj27rau" path="res://asset/convoyer/Corners/Curve_0002.png" id="2_y66ns"]
+[ext_resource type="Texture2D" uid="uid://bn74nd1vnggtb" path="res://asset/convoyer/conveyer belt all-0001.png" id="2_y66ns"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dtdom"]
 atlas = ExtResource("2_y66ns")
-region = Rect2(0, 0, 172, 171)
+region = Rect2(0, 576, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_a815h"]
 atlas = ExtResource("2_y66ns")
-region = Rect2(172, 0, 172, 171)
+region = Rect2(32, 576, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2kyf6"]
 atlas = ExtResource("2_y66ns")
-region = Rect2(516, 0, 172, 171)
+region = Rect2(64, 576, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_00s6v"]
 atlas = ExtResource("2_y66ns")
-region = Rect2(344, 0, 172, 171)
+region = Rect2(96, 576, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5rnpu"]
+atlas = ExtResource("2_y66ns")
+region = Rect2(128, 576, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ix28v"]
+atlas = ExtResource("2_y66ns")
+region = Rect2(160, 576, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_efht0"]
+atlas = ExtResource("2_y66ns")
+region = Rect2(192, 576, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rsmih"]
+atlas = ExtResource("2_y66ns")
+region = Rect2(224, 576, 32, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_mffpd"]
 animations = [{
@@ -33,6 +49,18 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_00s6v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5rnpu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ix28v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_efht0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rsmih")
 }],
 "loop": true,
 "name": &"default",
