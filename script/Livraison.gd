@@ -324,34 +324,6 @@ func _fail_delivery(message: String) -> void:
 	push_warning(message)
 	delivery_failed.emit(message)
 	
-func _find_nearest_entrepot(delivery_point: Dictionary) -> Node:
-	var entrepots = get_tree().get_nodes_in_group("entrepot")
-
-	if entrepots.is_empty():
-		return null
-
-	if entrepots.size() == 1:
-		return entrepots[0]
-
-	var target_pos := Vector2(
-		float(delivery_point.get("world_x", 0.0)),
-		float(delivery_point.get("world_y", 0.0))
-	)
-
-	var nearest = entrepots[0]
-	var min_dist: float = INF
-
-	for e in entrepots:
-		if not is_instance_valid(e):
-			continue
-
-		var dist: float = target_pos.distance_to(e.global_position)
-
-		if dist < min_dist:
-			min_dist = dist
-			nearest = e
-
-	return nearest
 
 func _prepare_job_for_dispatch(order: Dictionary) -> bool:
 	var job_type: String = String(order.get("job_type", JOB_IMPORT))
@@ -442,19 +414,17 @@ func _find_recipe_for_output(resource_id: String) -> Dictionary:
 	return {}
 
 func get_save_state() -> Dictionary:
-<<<<<<< HEAD
 	return {
 		"pending_orders": _pending_orders.duplicate(true),
 		"current_order": _current_order.duplicate(true) if _delivery_in_progress else {},
 		"delivery_in_progress": _delivery_in_progress
-=======
+	}
 	var current_order_data: Variant = null
 	if _delivery_in_progress and not _current_order.is_empty():
 		current_order_data = _current_order.duplicate(true)
 	return {
 		"pending_orders": _pending_orders.duplicate(true),
 		"current_order": current_order_data,
->>>>>>> main
 	}
 
 func apply_save_state(data: Dictionary) -> void:
@@ -462,8 +432,6 @@ func apply_save_state(data: Dictionary) -> void:
 	_current_order.clear()
 	_delivery_in_progress = false
 
-<<<<<<< HEAD
-=======
 	# Livraison qui était en cours au moment de la sauvegarde
 	var current_order_data: Variant = data.get("current_order")
 	if current_order_data is Dictionary and not current_order_data.is_empty():
@@ -477,21 +445,17 @@ func apply_save_state(data: Dictionary) -> void:
 			_pending_orders.append(current_order_data.duplicate(true))
 
 	# Commandes en attente (non encore démarrées)
->>>>>>> main
 	var raw_pending: Variant = data.get("pending_orders", [])
 	if raw_pending is Array:
 		for order in raw_pending:
 			if order is Dictionary:
 				_pending_orders.append(order.duplicate(true))
 
-<<<<<<< HEAD
 	var saved_current: Variant = data.get("current_order", {})
 	if saved_current is Dictionary and not saved_current.is_empty():
 		_pending_orders.push_front(saved_current.duplicate(true))
 
 	queue_changed.emit(_pending_orders.size())
 	delivery_state_changed.emit(false, {})
-=======
 	queue_changed.emit(_pending_orders.size())
->>>>>>> main
 	_try_start_next_delivery()
