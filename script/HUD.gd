@@ -495,7 +495,7 @@ func _build_shortcut_bar() -> void:
 
 	var shortcuts: Array = [
 		["Échap", "Menu Pause"],
-		["Q", "Construction"],
+		["B", "Construction"],
 		["Tab", "Logistique"],
 		["I", "Vue usine"],
 		["P", "Pause temps"],
@@ -688,7 +688,7 @@ func _update_contracts_display() -> void:
 		contracts_label.hide()
 		return
 	contracts_label.show()
-	contracts_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	contracts_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	var parts: PackedStringArray = []
 	var current_day: int = TimeManager.current_day if TimeManager else 1
 	for c in contracts:
@@ -702,7 +702,7 @@ func _update_contracts_display() -> void:
 	var streak_text: String = ""
 	if ContractManager.completed_streak > 1:
 		streak_text = " 🔥x%d" % ContractManager.completed_streak
-	contracts_label.text = "Contrats :\n" + "\n".join(parts) + streak_text
+	contracts_label.text = "Contrats :  " + "   |   ".join(parts) + streak_text
 	
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
@@ -1381,7 +1381,7 @@ func _format_energy_value(value: float) -> String:
 func _ensure_input_actions() -> void:
 	_ensure_action_with_keys(ACTION_TOGGLE_ORDER_PANEL, [KEY_TAB])
 	_ensure_action_with_keys(ACTION_TOGGLE_SESSION_OVERVIEW, [KEY_I])
-	_ensure_action_with_keys(ACTION_TOGGLE_BUILD_MENU, [KEY_Q])
+	_ensure_action_with_keys(ACTION_TOGGLE_BUILD_MENU, [KEY_B])
 	_ensure_action_with_keys(&"hud_quick_save", [KEY_E])        
 	_ensure_action_with_keys(&"hud_toggle_pause", [KEY_P])
 
