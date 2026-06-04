@@ -84,7 +84,7 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var btn_clear_order_delivery_point: Button = %BtnClearOrderDeliveryPoint
 @onready var btn_submit_order: Button = %BtnSubmitOrder
 var _warehouse_panel: PanelContainer = null
-
+var _contract_just_failed: bool = false
 
 # --- DICTIONNAIRE MIS À JOUR ---
 # --- DICTIONNAIRE MIS À JOUR AVEC DIRECTIONS ET VIRAGES ---
@@ -374,7 +374,10 @@ func _on_contract_arrived(contract: Dictionary) -> void:
 		float(contract.get("reward", 0.0)),
 		int(contract.get("deadline_days", 2))
 	]
-	_show_toast(msg, UITheme.ACCENT_GOLD)
+	if _contract_just_failed:
+		await get_tree().create_timer(4.8).timeout
+		_contract_just_failed = false
+	_show_hint_toast(msg)
 
 func _on_contract_completed(contract: Dictionary) -> void:
 	_update_contracts_display()
@@ -387,7 +390,8 @@ func _on_contract_completed(contract: Dictionary) -> void:
 
 func _on_contract_failed(contract: Dictionary) -> void:
 	_update_contracts_display()
-	_show_hint_toast("✗ Contrat échoué : -%.0f €" % float(contract["penalty"]))
+	_contract_just_failed = true
+	_show_hint_toast("✗ Contrat échoué : vous perdez %.0f €" % float(contract["penalty"]))
 	
 func _show_hint_toast(message: String) -> void:
 	var toast := PanelContainer.new()

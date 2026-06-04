@@ -323,22 +323,36 @@ func _finish_delivery(order: Dictionary) -> void:
 func _fail_delivery(message: String) -> void:
 	push_warning(message)
 	delivery_failed.emit(message)
+	
 
 func _prepare_job_for_dispatch(order: Dictionary) -> bool:
 	var job_type: String = String(order.get("job_type", JOB_IMPORT))
 	if job_type != JOB_EXPORT:
 		return true
+
 	if GameManager == null:
 		_fail_delivery("GameManager introuvable pour preparer l'export.")
 		return false
+
 	var resource_id: String = String(order.get("resource_id", ""))
 	var quantity: int = int(order.get("quantity", 0))
+
 	if resource_id.is_empty() or quantity <= 0:
 		_fail_delivery("Export invalide: donnees de ressource manquantes.")
 		return false
+
+	var entrepot = _find_nearest_entrepot(order.get("delivery_point", {}))
+
+	if entrepot and entrepot.has_method("give_resources"):
+		if not entrepot.give_resources(resource_id, quantity):
+			_fail_delivery("Stock insuffisant dans l'entrepot pour exporter %s x%d." % [get_resource_label(resource_id), quantity])
+			return false
+		return true
+
 	if not GameManager.consume_resources({resource_id: quantity}):
 		_fail_delivery("Stock insuffisant au depart du camion pour exporter %s x%d." % [get_resource_label(resource_id), quantity])
 		return false
+
 	return true
 
 func _is_resource_available_for_job(resource_id: String, job_type: String) -> bool:
@@ -400,6 +414,11 @@ func _find_recipe_for_output(resource_id: String) -> Dictionary:
 	return {}
 
 func get_save_state() -> Dictionary:
+	return {
+		"pending_orders": _pending_orders.duplicate(true),
+		"current_order": _current_order.duplicate(true) if _delivery_in_progress else {},
+		"delivery_in_progress": _delivery_in_progress
+	}
 	var current_order_data: Variant = null
 	if _delivery_in_progress and not _current_order.is_empty():
 		current_order_data = _current_order.duplicate(true)
@@ -432,5 +451,11 @@ func apply_save_state(data: Dictionary) -> void:
 			if order is Dictionary:
 				_pending_orders.append(order.duplicate(true))
 
+	var saved_current: Variant = data.get("current_order", {})
+	if saved_current is Dictionary and not saved_current.is_empty():
+		_pending_orders.push_front(saved_current.duplicate(true))
+
+	queue_changed.emit(_pending_orders.size())
+	delivery_state_changed.emit(false, {})
 	queue_changed.emit(_pending_orders.size())
 	_try_start_next_delivery()

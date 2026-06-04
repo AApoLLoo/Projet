@@ -24,6 +24,20 @@ func can_accept_input(resource_id: String, amount: int = 1) -> bool:
 
 # Donner des ressources depuis cet entrepôt (pour les exports)
 func give_resources(resource_id: String, amount: int) -> bool:
+	if amount <= 0:
+		return false
+
+	if int(inventory.get(resource_id, 0)) < amount:
+		return false
+
+	if GameManager.get_resource_stock(resource_id) < amount:
+		return false
+
+	GameManager.consume_resources({resource_id: amount})
+
+	inventory[resource_id] = int(inventory.get(resource_id, 0)) - amount
+	if int(inventory.get(resource_id, 0)) <= 0:
+		inventory.erase(resource_id)
 	var local_stock: int = inventory.get(resource_id, 0)
 	if local_stock < amount:
 		return false
