@@ -6,11 +6,18 @@ class_name TurbineEntity
 # Gère l'animation (AnimatedSprite2D) en fonction de is_active.
 # ─────────────────────────────────────────────────────────────────────────────
 
+# kW produits par cette turbine dans sa zone
+var electricity_output: float = 100.0
+# Rayon (en cellules) de la zone d'alimentation électrique
+var zone_radius: int = 20
+
 @onready var _anim_sprite: AnimatedSprite2D = _find_anim_sprite()
 @onready var _white_puff_vfx: WhitePuffVfx = _find_white_puff_vfx()
 
 func _ready() -> void:
 	entity_type = "turbine"
+	# Les turbines produisent de l'électricité, elles n'en consomment pas
+	electricity_need = 0.0
 	super._ready()
 	# Démarre automatiquement à la pose ; désactivé si restauré depuis une sauvegarde
 	if not is_active:
@@ -48,7 +55,7 @@ func _on_active_toggled(value: bool):
 	update_neighbors()
 
 func update_neighbors():
-	var rayon = 10
+	var rayon = zone_radius
 	
 	for x in range(-rayon, rayon + 1):
 		for y in range(-rayon, rayon + 1):

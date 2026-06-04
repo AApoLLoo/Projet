@@ -363,6 +363,24 @@ func _ready() -> void:
 			)
 		destroy_button.set_pressed(_building_manager.is_destroying)
 
+	# --- BOUTON AFFICHAGE ZONE ÉLECTRIQUE ---
+	var elec_overlay_button: Button = Button.new()
+	elec_overlay_button.name = "BtnElectricityOverlay"
+	elec_overlay_button.text = "Zone électricité"
+	elec_overlay_button.custom_minimum_size = Vector2(200.0, 32.0)
+	elec_overlay_button.toggle_mode = true
+	elec_overlay_button.set_pressed(false)
+	_style_button(elec_overlay_button, Color.html("#2A6B4A"))
+	if build_menu_container:
+		build_menu_container.add_child(elec_overlay_button)
+	else:
+		add_child(elec_overlay_button)
+	elec_overlay_button.toggled.connect(func(_pressed: bool):
+		var level: Node = get_tree().current_scene
+		if level and level.has_method("toggle_electricity_overlay"):
+			level.toggle_electricity_overlay()
+	)
+
 	_update_contracts_display()
 
 	

@@ -558,8 +558,8 @@ func _get_default_footprint_offsets(entity_type: String) -> Array[Vector2i]:
 		_:
 			return [Vector2i.ZERO]
 func _refresh_turbines_around(pos: Vector2i):
-	# Même rayon de 2 que dans la turbine !
-	var rayon = 2
+	# Même rayon que la zone de turbine pour que les turbines proches rescannent leurs voisins
+	var rayon = 20
 	
 	for x in range(-rayon, rayon + 1):
 		for y in range(-rayon, rayon + 1):

@@ -96,3 +96,19 @@ func get_adjacent_entities(cell_pos: Vector2i) -> Array:
 		if neighbor != null:
 			neighbors.append(neighbor)
 	return neighbors
+
+# Retourne l'électricité disponible (kW) à une cellule donnée,
+# en sommant toutes les turbines actives dont la zone couvre cette cellule.
+# Plusieurs turbines dans la même zone s'additionnent.
+func get_electricity_at_cell(cell_pos: Vector2i) -> float:
+	var total: float = 0.0
+	for entity in entities.values():
+		if not is_instance_valid(entity):
+			continue
+		if entity.entity_type != "turbine" or not entity.is_active:
+			continue
+		var radius: int = entity.get("zone_radius") if entity.get("zone_radius") != null else 20
+		var dist: float = Vector2(cell_pos - entity.cell_position).length()
+		if dist <= float(radius):
+			total += float(entity.get("electricity_output") if entity.get("electricity_output") != null else 100.0)
+	return total
