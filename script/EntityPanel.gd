@@ -136,7 +136,10 @@ func _on_rate_changed(value: float) -> void:
 func _on_active_toggled(pressed: bool) -> void:
 	if current_entity == null:
 		return
-	current_entity.is_active = pressed
+	if current_entity.has_method("_on_active_toggled"):
+		current_entity._on_active_toggled(pressed)
+	else:
+		current_entity.is_active = pressed
 
 func _on_entity_updated(_entity: Entity) -> void:
 	_refresh_recipe_details()
