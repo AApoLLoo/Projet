@@ -48,14 +48,14 @@ const RESOURCE_CATALOG: Dictionary = {
 		"label": "Piece de base",
 		"import_unit_cost": 120.0,
 		"export_unit_value": 180.0,  
-		"can_import": true,
+		"can_import": false,
 		"can_export": true,
 	},
 	"piece_avancee": {
 		"label": "Piece avancee",
 		"import_unit_cost": 240.0,
 		"export_unit_value": 420.0,   
-		"can_import": true,
+		"can_import": false,
 		"can_export": true,
 	},
 }
@@ -243,10 +243,17 @@ func _set_truck_unloading_state(truck_instance: Node2D, unloading: bool) -> void
 	var bar: ProgressBar = truck_instance.get_node_or_null("Truck/loadingbar") as ProgressBar
 	var anim: AnimatedSprite2D = truck_instance.get_node_or_null("Truck") as AnimatedSprite2D
 	if bar:
-		bar.visible = unloading
 		if unloading:
+			bar.value = 0
+			bar.max_value = 100
 			bar.show()
 			bar.z_index = 100
+			# Anime la barre de 0 à 100 sur toute la durée du déchargement
+			var bar_tween: Tween = create_tween()
+			bar_tween.tween_property(bar, "value", 100.0, unload_time)
+		else:
+			bar.hide()
+			bar.value = 0
 	if anim:
 		if unloading:
 			anim.play("default")
@@ -257,6 +264,7 @@ func _set_truck_unloading_state(truck_instance: Node2D, unloading: bool) -> void
 # ─── MODIFIÉ : spawn des matériaux au point de livraison ───────────────────────
 # Dans Projet/script/Livraison.gd
 
+
 func _apply_delivery_payload(order: Dictionary) -> void:
 	if not GameManager:
 		return
@@ -265,39 +273,45 @@ func _apply_delivery_payload(order: Dictionary) -> void:
 	var resource_id: String = String(order.get("resource_id", ""))
 	var quantity: int = int(order.get("quantity", 0))
 	
-	# 1. Chercher l'entrepôt le plus proche du point de livraison
-	# On suppose que l'entrepôt est dans le groupe "entrepot"
-	var entrepot = get_tree().get_first_node_in_group("entrepot")
+	# Chercher l'entrepôt le plus proche du point de livraison
+	var best_entrepot = _find_nearest_entrepot(order.get("delivery_point", {}))
 	
 	if job_type == JOB_EXPORT:
-		# Export : On retire du stock via l'entrepôt (si possible) et on ajoute les crédits
-		if entrepot and entrepot.has_method("give_resources"):
-			if entrepot.give_resources(resource_id, quantity):
-				GameManager.add_credits(float(order.get("total_cost", 0.0)))
-			else:
-				push_error("Impossible de prendre les ressources de l'entrepôt")
+		# Export : ressources déjà consommées dans _prepare_job_for_dispatch
+		# On ajoute les crédits ET on valide les contrats
+		GameManager.add_credits(float(order.get("total_cost", 0.0)))
+		if ContractManager:
+			ContractManager.try_fulfill_contracts(resource_id, quantity)
 		return
 
-	# Import : On spawne les matériaux au point de livraison ET on ajoute au stock via l'entrepôt
-	if materiau_scene:
-		var delivery_point: Dictionary = order.get("delivery_point", {})
-		var base_pos: Vector2 = Vector2(
-			float(delivery_point.get("world_x", 0.0)),
-			float(delivery_point.get("world_y", 0.0))
-		)
-		for i in quantity:
-			var mat = materiau_scene.instantiate()
-			# Décale légèrement chaque colis pour éviter la superposition
-			mat.global_position = base_pos + Vector2((i % 5) * 40, (i / 5) * 40)
-			# Passe le type de ressource au matériau pour qu'il adapte son apparence
-			mat.destination = resource_id
-			get_tree().current_scene.add_child(mat)
+	# Import : Stocker dans l'entrepôt le plus proche
+	if best_entrepot and best_entrepot.has_method("deposit_input"):
+		best_entrepot.deposit_input(resource_id, quantity)
 	else:
-		push_warning("Livraison: materiau_scene non assignée, les matériaux ne spawneront pas.")
+		push_warning("Livraison: aucun entrepôt trouvé, ajout direct au stock.")
+		GameManager.add_resource_stock({resource_id: quantity})
 
-	# Ajoute quand même au stock GameManager
-	GameManager.add_resource_stock({resource_id: int(order.get("quantity", 0))})
-# ──────────────────────────────────────────────────────────────────────────────
+func _find_nearest_entrepot(delivery_point: Dictionary) -> Node:
+	var entrepots = get_tree().get_nodes_in_group("entrepot")
+	if entrepots.is_empty():
+		return null
+	if entrepots.size() == 1:
+		return entrepots[0]
+	# Trouver le plus proche du point de livraison
+	var target_pos := Vector2(
+		float(delivery_point.get("world_x", 0.0)),
+		float(delivery_point.get("world_y", 0.0))
+	)
+	var nearest = entrepots[0]
+	var min_dist := INF
+	for e in entrepots:
+		if not is_instance_valid(e):
+			continue
+		var dist := target_pos.distance_to(e.global_position)
+		if dist < min_dist:
+			min_dist = dist
+			nearest = e
+	return nearest
 
 func _finish_delivery(order: Dictionary) -> void:
 	_current_order.clear()
@@ -309,22 +323,36 @@ func _finish_delivery(order: Dictionary) -> void:
 func _fail_delivery(message: String) -> void:
 	push_warning(message)
 	delivery_failed.emit(message)
+	
 
 func _prepare_job_for_dispatch(order: Dictionary) -> bool:
 	var job_type: String = String(order.get("job_type", JOB_IMPORT))
 	if job_type != JOB_EXPORT:
 		return true
+
 	if GameManager == null:
 		_fail_delivery("GameManager introuvable pour preparer l'export.")
 		return false
+
 	var resource_id: String = String(order.get("resource_id", ""))
 	var quantity: int = int(order.get("quantity", 0))
+
 	if resource_id.is_empty() or quantity <= 0:
 		_fail_delivery("Export invalide: donnees de ressource manquantes.")
 		return false
+
+	var entrepot = _find_nearest_entrepot(order.get("delivery_point", {}))
+
+	if entrepot and entrepot.has_method("give_resources"):
+		if not entrepot.give_resources(resource_id, quantity):
+			_fail_delivery("Stock insuffisant dans l'entrepot pour exporter %s x%d." % [get_resource_label(resource_id), quantity])
+			return false
+		return true
+
 	if not GameManager.consume_resources({resource_id: quantity}):
 		_fail_delivery("Stock insuffisant au depart du camion pour exporter %s x%d." % [get_resource_label(resource_id), quantity])
 		return false
+
 	return true
 
 func _is_resource_available_for_job(resource_id: String, job_type: String) -> bool:
@@ -384,3 +412,50 @@ func _find_recipe_for_output(resource_id: String) -> Dictionary:
 			if outputs.has(resource_id):
 				return recipe
 	return {}
+
+func get_save_state() -> Dictionary:
+	return {
+		"pending_orders": _pending_orders.duplicate(true),
+		"current_order": _current_order.duplicate(true) if _delivery_in_progress else {},
+		"delivery_in_progress": _delivery_in_progress
+	}
+	var current_order_data: Variant = null
+	if _delivery_in_progress and not _current_order.is_empty():
+		current_order_data = _current_order.duplicate(true)
+	return {
+		"pending_orders": _pending_orders.duplicate(true),
+		"current_order": current_order_data,
+	}
+
+func apply_save_state(data: Dictionary) -> void:
+	_pending_orders.clear()
+	_current_order.clear()
+	_delivery_in_progress = false
+
+	# Livraison qui était en cours au moment de la sauvegarde
+	var current_order_data: Variant = data.get("current_order")
+	if current_order_data is Dictionary and not current_order_data.is_empty():
+		var job_type: String = String(current_order_data.get("job_type", JOB_IMPORT))
+		if job_type == JOB_EXPORT:
+			# Le stock était déjà consommé avant la sauvegarde → créditer directement
+			if GameManager:
+				GameManager.add_credits(float(current_order_data.get("total_cost", 0.0)))
+		else:
+			# Import : les crédits étaient déjà déduits → remettre en tête de file
+			_pending_orders.append(current_order_data.duplicate(true))
+
+	# Commandes en attente (non encore démarrées)
+	var raw_pending: Variant = data.get("pending_orders", [])
+	if raw_pending is Array:
+		for order in raw_pending:
+			if order is Dictionary:
+				_pending_orders.append(order.duplicate(true))
+
+	var saved_current: Variant = data.get("current_order", {})
+	if saved_current is Dictionary and not saved_current.is_empty():
+		_pending_orders.push_front(saved_current.duplicate(true))
+
+	queue_changed.emit(_pending_orders.size())
+	delivery_state_changed.emit(false, {})
+	queue_changed.emit(_pending_orders.size())
+	_try_start_next_delivery()

@@ -12,12 +12,9 @@ class_name TurbineEntity
 func _ready() -> void:
 	entity_type = "turbine"
 	super._ready()
-	
-	# Force l'activation dès le spawn
-	is_active = true 
-	update_neighbors.call_deferred()
-	#EntityManager.register_entity(self)
-	# Le scan se fera via le BuildingManager lors de la pose
+	# Démarre automatiquement à la pose ; désactivé si restauré depuis une sauvegarde
+	if not is_active:
+		is_active = true
 
 func _on_active_changed(active: bool) -> void:
 	if _anim_sprite == null:

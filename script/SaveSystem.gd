@@ -146,6 +146,12 @@ func save_level_state_to_slot(slot_id: String, camera_position: Vector2, floor_s
 		state["resource_stock"] = GameManager.get_resource_stock_snapshot()
 		state["delivery_point"] = GameManager.get_default_delivery_point_state()
 		state["export_history"] = GameManager.get_export_history()
+	if TimeManager:
+		state["time_speed"] = TimeManager.time_speed
+	if ContractManager and ContractManager.has_method("get_save_state"):
+		state["contracts"] = ContractManager.get_save_state()
+	var raw_dq: Variant = floor_state.get("delivery_queue")
+	state["delivery_queue"] = raw_dq if raw_dq is Dictionary else {}
 	# Sauvegarder toutes les entités actives
 	var entities_array: Array = []
 	for entity in EntityManager.entities.values():
@@ -239,6 +245,9 @@ func get_default_state() -> Dictionary:
 	state["export_history"] = []
 	state["ground_materials"] = []
 	state["entities"] = []
+	state["contracts"] = {}
+	state["delivery_queue"] = {}
+	state["time_speed"] = 1.0
 	return state
 
 func _sanitize_state(raw_state: Dictionary) -> Dictionary:
@@ -265,6 +274,11 @@ func _sanitize_state(raw_state: Dictionary) -> Dictionary:
 	# Préserver le tableau des entités tel quel (validé case par case à la restauration)
 	var raw_entities: Variant = raw_state.get("entities")
 	state["entities"] = raw_entities if raw_entities is Array else []
+	var raw_contracts: Variant = raw_state.get("contracts")
+	state["contracts"] = raw_contracts if raw_contracts is Dictionary else {}
+	var raw_dq: Variant = raw_state.get("delivery_queue")
+	state["delivery_queue"] = raw_dq if raw_dq is Dictionary else {}
+	state["time_speed"] = _to_float(raw_state.get("time_speed"), 1.0)
 	var raw_name: String = _variant_to_string(raw_state.get("save_name"), _default_save_name())
 	state["save_name"] = _sanitize_save_name(raw_name, _default_save_name())
 	return state
