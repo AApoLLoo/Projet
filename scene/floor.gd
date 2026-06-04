@@ -88,30 +88,42 @@ func _visible_chunks() -> Dictionary:
 			result[Vector2i(cx, cy)] = true
 
 	return result
-
+func _pick_random_tile(rng: RandomNumberGenerator) -> Vector2i:
+	var weighted_tiles := [
+		{"tile": Vector2i(0, 0), "weight": 70},  # 70% du temps
+		{"tile": Vector2i(1, 0), "weight": 10},  # 20% du temps
+		{"tile": Vector2i(2, 1), "weight": 10},  # 10% du temps
+		{"tile": Vector2i(0, 1), "weight": 10},  # 20% du temps
+		{"tile": Vector2i(2, 0), "weight": 10},  # 10% du temps
+		{"tile": Vector2i(1, 2), "weight": 10},  # 10% du temps
+		{"tile": Vector2i(2, 2), "weight": 10},  # 10% du temps
+	]
+	
+	var total := 0
+	for entry in weighted_tiles:
+		total += entry["weight"]
+	
+	var roll := rng.randi() % total
+	var cumul := 0
+	for entry in weighted_tiles:
+		cumul += entry["weight"]
+		if roll < cumul:
+			return entry["tile"]
+	
+	return Vector2i(0, 0)
 func _load_chunk(chunk: Vector2i) -> void:
 	var sx := chunk.x * chunk_size
 	var sy := chunk.y * chunk_size
 	
 	# Définit tes tiles disponibles (coordonnées dans l'atlas)
-	var tiles := [
-	Vector2i(0, 0),
-	Vector2i(1, 0),
-	Vector2i(2, 0),
-	Vector2i(0, 1),
-	Vector2i(1, 1),
-	Vector2i(2, 1),
-	Vector2i(0, 2),
-	Vector2i(1, 2),
-	Vector2i(2, 2),
-]
+
 	for x in range(sx, sx + chunk_size):
 		for y in range(sy, sy + chunk_size):
 			# Seed basée sur la position pour que le résultat soit stable
 			# (même tile au même endroit si on recharge le chunk)
 			var rng := RandomNumberGenerator.new()
 			rng.seed = hash(Vector2i(x, y))
-			var tile = tiles[rng.randi() % tiles.size()]
+			var tile = _pick_random_tile(rng)
 			set_cell(Vector2i(x, y), SOURCE_ID, tile)
 
 func _unload_chunk(chunk: Vector2i) -> void:
