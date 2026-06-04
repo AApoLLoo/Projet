@@ -36,9 +36,10 @@ func _generate_contract(day: int) -> void:
 	if day == _last_generated_day:
 		return
 	_last_generated_day = day
-
-	# Chaque jour génère 1 à 2 contrats (1 seul au début, 2 à partir du jour 3)
-	var contracts_per_day: int = 1 if day < 3 else 2
+	var slots_available: int = 2 - active_contracts.size()
+	if slots_available <= 0:
+		return
+	var contracts_per_day: int = mini(1 if day < 3 else 2, slots_available)
 	var templates_to_use: Array = CONTRACT_TEMPLATES.duplicate()
 	templates_to_use.shuffle()
 
@@ -116,6 +117,8 @@ func _complete_contract(contract: Dictionary) -> void:
 	_generate_single_contract(current_day)
 
 func _generate_single_contract(day: int) -> void:
+	if active_contracts.size() >= 2:
+		return
 	var templates_to_use: Array = CONTRACT_TEMPLATES.duplicate()
 	templates_to_use.shuffle()
 	# Éviter de générer un doublon d'une ressource déjà en contrat actif
