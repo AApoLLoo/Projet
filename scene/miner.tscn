@@ -1,0 +1,87 @@
+[gd_scene format=3 uid="uid://miner_entity_001"]
+
+[ext_resource type="Script" path="res://script/MinerEntity.gd" id="1_minerentity"]
+[ext_resource type="Texture2D" path="res://asset/Miner/miner-one/north-east/mining-animation.png" id="2_minereanim"]
+[ext_resource type="PackedScene" path="res://scene/white_puff_vfx.tscn" id="3_whitepuffvfx"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f0"]
+atlas = ExtResource("2_minereanim")
+region = Rect2(0, 0, 64, 92)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f1"]
+atlas = ExtResource("2_minereanim")
+region = Rect2(64, 0, 64, 92)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f2"]
+atlas = ExtResource("2_minereanim")
+region = Rect2(128, 0, 64, 92)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f3"]
+atlas = ExtResource("2_minereanim")
+region = Rect2(192, 0, 64, 92)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f4"]
+atlas = ExtResource("2_minereanim")
+region = Rect2(256, 0, 64, 92)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f5"]
+atlas = ExtResource("2_minereanim")
+region = Rect2(320, 0, 64, 92)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f6"]
+atlas = ExtResource("2_minereanim")
+region = Rect2(384, 0, 64, 92)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f7"]
+atlas = ExtResource("2_minereanim")
+region = Rect2(448, 0, 64, 92)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_miner"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f7")
+}],
+"loop": true,
+"name": &"default",
+"speed": 8.0
+}]
+
+[node name="Miner" type="Node2D" unique_id=1001]
+z_index = 5
+script = ExtResource("1_minerentity")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1002]
+y_sort_enabled = true
+sprite_frames = SubResource("SpriteFrames_miner")
+autoplay = "default"
+scale = Vector2(0.7, 0.7)
+
+[node name="WhitePuffVfx" parent="." unique_id=1003 instance=ExtResource("3_whitepuffvfx")]
+position = Vector2(0, -30)
+scale = Vector2(0.18, 0.18)
+puff_interval = 2.0
+puff_interval_jitter = 0.4
+puff_offset_jitter = Vector2(3, 1.5)
+puff_scale_jitter = 0.05

@@ -6,6 +6,7 @@ const ENTITY_HITBOX_COLLISION_MASK: int = Entity.HITBOX_COLLISION_LAYER
 const _ENTITY_SCENES: Dictionary = {
 	"turbine": preload("res://scene/turbine_2d.tscn"),
 	"factory": preload("res://scene/factory.tscn"),
+	"miner": preload("res://scene/miner.tscn"),
 	"belt_right": preload("res://scene/ASSET/belt/beltmid.tscn"),
 	"belt_left": preload("res://scene/ASSET/belt/beltleft.tscn"),
 	"curve_top": preload("res://scene/ASSET/beltcurvetop.tscn"),
@@ -37,6 +38,7 @@ signal entity_selected(entity)
 signal delivery_point_selected(cell_pos, world_pos)
 signal delivery_point_hovered(cell_pos, world_pos)
 signal delivery_point_selection_changed(enabled)
+signal delivery_point_error(message: String)
 signal entrepot_inspected(entrepot_instance)
 var is_destroying: bool = false
 var is_selecting_delivery_point: bool = false
@@ -74,7 +76,7 @@ func get_world_pos(cell_pos: Vector2i) -> Vector2:
 		return Vector2(cell_pos.x * cell_size + cell_size / 2.0, cell_pos.y * cell_size + cell_size / 2.0)
 # ----------------------------------------
 
-func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1, footprint_offsets: Array = [Vector2i.ZERO]) -> void:
+func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1, footprint_offsets: Array = [Vector2i.ZERO], preview_scale: Vector2 = Vector2.ONE) -> void:
 	if is_selecting_delivery_point:
 		stop_delivery_point_selection()
 
@@ -95,7 +97,7 @@ func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_
 	is_building = true
 
 	# Reset scale / modulate au cas où
-	preview_sprite.scale = Vector2.ONE
+	preview_sprite.scale = preview_scale
 	preview_sprite.modulate = Color(1,1,1,0.6)
 	
 func stop_building() -> void:
@@ -154,7 +156,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Clic gauche pour placer l'usine
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_try_place_building()
-		print("JE POSE LE BATIMENT !")
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 		var mouse_pos = get_global_mouse_position()
@@ -239,6 +240,7 @@ func _try_place_building() -> void:
 			"occupied_cells": occupied_by_build.duplicate(),
 			"instance": factory_instance,
 			"cost": factory_cost,
+			"co2_cost": factory_instance.get("build_co2_cost") if factory_instance else 0.0,
 		}
 		last_build_state_changed.emit(true)
 		
@@ -258,22 +260,24 @@ func has_last_build() -> bool:
 	return _last_built.size() > 0
 
 func undo_last_build() -> void:
-	# Annule le dernier bâtiment placé et rembourse la moitié du coût
 	if not has_last_build():
 		return
 
 	var inst = _last_built.get("instance")
 	var occupied_for_build: Array = _last_built.get("occupied_cells", [])
-	var cost = float(_last_built.get("cost", 0.0))
+	var cost: float = float(str(_last_built.get("cost", 0.0)))
+	var co2_cost: float = float(str(_last_built.get("co2_cost", 0.0)))
 
 	if is_instance_valid(inst):
 		inst.queue_free()
 
 	_clear_occupied_cells_for_instance(inst, occupied_for_build)
 
-	# Remboursement de 50%
+	# Remboursement de 50% du coût crédits
 	GameManager.add_credits(cost * 0.5)
-	# Remboursement de la totalité de consommation de C02
+	# Remboursement de la totalité du CO2 de construction
+	if co2_cost > 0.0:
+		GameManager.remove_construction_co2(co2_cost)
 
 	_last_built.clear()
 	last_build_state_changed.emit(false)
@@ -284,10 +288,10 @@ func start_destroying() -> void:
 	if is_selecting_delivery_point:
 		stop_delivery_point_selection()
 	is_destroying = true
-	# S'assurer de quitter le mode construction si actif
 	if is_building:
 		stop_building()
 	destroy_mode_changed.emit(true)
+
 
 func stop_destroying() -> void:
 	is_destroying = false
@@ -320,23 +324,32 @@ func is_delivery_point_selection_active() -> bool:
 func _select_delivery_point_at_mouse() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
-	
-	# Vérification : Y a-t-il un bâtiment à cette position ?
-	if not occupied_cells.has(cell_pos):
-		print("Erreur : Aucun bâtiment ici.")
-		return
 
-	var data = occupied_cells[cell_pos]
-	var inst = data.get("instance")
+	# Cherche un entrepôt sur la cellule cliquée
+	var entrepot_inst = null
+	if occupied_cells.has(cell_pos):
+		var data = occupied_cells[cell_pos]
+		var inst = data.get("instance")
+		if is_instance_valid(inst) and inst.is_in_group("entrepot"):
+			entrepot_inst = inst
 
-	# Vérification : Est-ce que cet objet est un entrepôt ?
-	# (On suppose que votre scène entrepot.tscn est dans le groupe "entrepot")
-	if is_instance_valid(inst) and inst.is_in_group("entrepot"):
-		var world_pos: Vector2 = get_world_pos(cell_pos)
-		delivery_point_selected.emit(cell_pos, world_pos)
+	# Fallback : cherche dans toutes les cellules occupées par un entrepôt
+	if entrepot_inst == null:
+		for key in occupied_cells.keys():
+			var data = occupied_cells[key]
+			var inst = data.get("instance")
+			if is_instance_valid(inst) and inst.is_in_group("entrepot"):
+				entrepot_inst = inst
+				break
+
+	if entrepot_inst != null:
+		# Snapper le point au centre exact de l'entrepôt, peu importe où on clique
+		var snap_pos: Vector2 = entrepot_inst.global_position
+		var snap_cell: Vector2i = get_grid_pos(snap_pos)
+		delivery_point_selected.emit(snap_cell, snap_pos)
 		stop_delivery_point_selection()
 	else:
-		print("Ce bâtiment n'est pas un entrepôt !")
+		delivery_point_error.emit("⚠ Aucun entrepôt sur la carte ! Pose d'abord un entrepôt.")
 
 
 func _try_destroy_at_mouse() -> void:

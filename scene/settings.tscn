@@ -195,6 +195,15 @@ layout_mode = 2
 text = "80%"
 horizontal_alignment = 2
 
+[node name="MusicControlRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content" unique_id=1001979767]
+layout_mode = 2
+
+[node name="BtnMusicPause" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MusicControlRow" unique_id=362127628]
+layout_mode = 2
+
+[node name="BtnMusicNext" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/Content/Body/AudioCard/MarginContainer/Content/MusicControlRow" unique_id=464310065]
+layout_mode = 2
+
 [node name="Buttons" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content" unique_id=2125975687]
 layout_mode = 2
 theme_override_constants/separation = 12
