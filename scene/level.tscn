@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dg3krn5y8658m" path="res://script/BuildingManager.gd" id="2_u2b8d"]
 [ext_resource type="Script" uid="uid://k84hls15n7gq" path="res://scene/camera_controller.gd" id="3_0bn3b"]
 [ext_resource type="Script" uid="uid://dokhhfob5h6be" path="res://scene/level.gd" id="4_q3wyj"]
-[ext_resource type="Texture2D" uid="uid://coiklxr3opc7g" path="res://asset/Grass.png" id="5_oxop7"]
+[ext_resource type="Texture2D" uid="uid://bxgjcotvna6d7" path="res://asset/Grass(1).png" id="5_oxop7"]
 [ext_resource type="Script" uid="uid://bx6id27enx61e" path="res://script/DayNightCycle.gd" id="5_ukt71"]
 [ext_resource type="Script" uid="uid://d2gs4e03solck" path="res://scene/floor.gd" id="7_aw33w"]
 [ext_resource type="PackedScene" uid="uid://sq53v1i5wkrl" path="res://scene/hud.tscn" id="7_bddx0"]
