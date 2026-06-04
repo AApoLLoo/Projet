@@ -1,23 +1,39 @@
 [gd_scene format=3 uid="uid://d3hg0gffbxbn"]
 
 [ext_resource type="Script" uid="uid://dwlkmwtnf317r" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
-[ext_resource type="Texture2D" uid="uid://cmly562pfqm5c" path="res://asset/convoyer/Corners/Curve_0004.png" id="2_e0lgy"]
+[ext_resource type="Texture2D" uid="uid://bn74nd1vnggtb" path="res://asset/convoyer/conveyer belt all-0001.png" id="2_e0lgy"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xnt2x"]
 atlas = ExtResource("2_e0lgy")
-region = Rect2(0, 0, 172, 171)
+region = Rect2(0, 896, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5ksss"]
 atlas = ExtResource("2_e0lgy")
-region = Rect2(172, 0, 172, 171)
+region = Rect2(32, 896, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_nk546"]
 atlas = ExtResource("2_e0lgy")
-region = Rect2(344, 0, 172, 171)
+region = Rect2(64, 896, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bbgy7"]
 atlas = ExtResource("2_e0lgy")
-region = Rect2(516, 0, 172, 171)
+region = Rect2(96, 896, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vus3x"]
+atlas = ExtResource("2_e0lgy")
+region = Rect2(128, 896, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xls17"]
+atlas = ExtResource("2_e0lgy")
+region = Rect2(160, 896, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_53g03"]
+atlas = ExtResource("2_e0lgy")
+region = Rect2(192, 896, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oguxl"]
+atlas = ExtResource("2_e0lgy")
+region = Rect2(224, 896, 32, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_3e41q"]
 animations = [{
@@ -33,6 +49,18 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_bbgy7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vus3x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xls17")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_53g03")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oguxl")
 }],
 "loop": true,
 "name": &"default",
@@ -49,6 +77,5 @@ output_offset = Vector2i(1, -1)
 position = Vector2(-0.9999999, 2.0000002)
 scale = Vector2(1, 0.935)
 sprite_frames = SubResource("SpriteFrames_3e41q")
-autoplay = "default"
 frame_progress = 0.82305723
 offset = Vector2(-8, -20)

@@ -56,6 +56,7 @@ signal entity_updated(entity: Entity)
 # ─── Lifecycle ───────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	#print("Entity _ready, cell_position = ", cell_position)
 	entity_id = _generate_id()
 	set_process(true)
 	_ensure_hitbox()

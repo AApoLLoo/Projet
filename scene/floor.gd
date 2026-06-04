@@ -90,12 +90,29 @@ func _visible_chunks() -> Dictionary:
 	return result
 
 func _load_chunk(chunk: Vector2i) -> void:
-	# Calcul des bornes du chunk (soutenir coordonnées négatives si carte infinie)
 	var sx := chunk.x * chunk_size
 	var sy := chunk.y * chunk_size
+	
+	# Définit tes tiles disponibles (coordonnées dans l'atlas)
+	var tiles := [
+	Vector2i(0, 0),
+	Vector2i(1, 0),
+	Vector2i(2, 0),
+	Vector2i(0, 1),
+	Vector2i(1, 1),
+	Vector2i(2, 1),
+	Vector2i(0, 2),
+	Vector2i(1, 2),
+	Vector2i(2, 2),
+]
 	for x in range(sx, sx + chunk_size):
 		for y in range(sy, sy + chunk_size):
-			set_cell(Vector2i(x, y), SOURCE_ID, ATLAS_COORDS)
+			# Seed basée sur la position pour que le résultat soit stable
+			# (même tile au même endroit si on recharge le chunk)
+			var rng := RandomNumberGenerator.new()
+			rng.seed = hash(Vector2i(x, y))
+			var tile = tiles[rng.randi() % tiles.size()]
+			set_cell(Vector2i(x, y), SOURCE_ID, tile)
 
 func _unload_chunk(chunk: Vector2i) -> void:
 	var sx := chunk.x * chunk_size

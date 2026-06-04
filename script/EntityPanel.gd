@@ -67,6 +67,7 @@ func _style_panel() -> void:
 
 func setup(entity: Entity) -> void:
 	# Déconnecter l'ancienne entité si nécessaire
+	print("DEBUG: setup() appelé avec l'entité : ", entity)
 	if current_entity != null and _entity_signal_connected:
 		if current_entity.entity_updated.is_connected(_on_entity_updated):
 			current_entity.entity_updated.disconnect(_on_entity_updated)
@@ -141,7 +142,10 @@ func _on_rate_changed(value: float) -> void:
 func _on_active_toggled(pressed: bool) -> void:
 	if current_entity == null:
 		return
-	current_entity.is_active = pressed
+	if current_entity.has_method("_on_active_toggled"):
+		current_entity._on_active_toggled(pressed)
+	else:
+		current_entity.is_active = pressed
 
 func _on_entity_updated(_entity: Entity) -> void:
 	_refresh_recipe_details()
@@ -149,10 +153,26 @@ func _on_entity_updated(_entity: Entity) -> void:
 	_refresh_stock()
 
 # ─── Rafraîchissement ─────────────────────────────────────────────────────────
-
+func _refresh_warehouse_details(warehouse: WarehouseEntity) -> void:
+	input_list.clear()
+	output_list.clear()
+	
+	# On récupère l'inventaire
+	var inventory = warehouse.get_inventory()
+	
+	if inventory.is_empty():
+		input_list.add_item("Entrepôt vide")
+	else:
+		for item_name in inventory:
+			input_list.add_item("%s : %d" % [item_name, inventory[item_name]])
+			
 func _refresh_recipe_details() -> void:
 	if current_entity == null:
 		return
+	if _is_warehouse_entity(current_entity):
+		_refresh_warehouse_details(current_entity as WarehouseEntity)
+		return
+		
 	if _is_conveyor_entity(current_entity):
 		_refresh_conveyor_details(current_entity as ConveyorEntity)
 		return
@@ -226,6 +246,25 @@ func _on_game_resources_updated() -> void:
 
 func _apply_entity_mode() -> void:
 	var is_conveyor: bool = _is_conveyor_entity(current_entity)
+	var is_warehouse: bool = _is_warehouse_entity(current_entity)
+	
+	# On cache tout ce qui est spécifique aux usines
+	var hide_factory_ui: bool = is_conveyor or is_warehouse
+	recipe_label.visible = not hide_factory_ui
+	recipe_selector.visible = not hide_factory_ui
+	rate_title_label.visible = not hide_factory_ui
+	rate_box.visible = not hide_factory_ui
+	
+	# Labels personnalisés
+	if is_warehouse:
+		input_label.text = "Stock actuel"
+		output_label.text = "" # Inutile pour un entrepôt
+	elif is_conveyor:
+		input_label.text = "Entree"
+		output_label.text = "Sortie"
+	else:
+		input_label.text = "Entrees"
+		output_label.text = "Sorties"
 	recipe_label.visible = not is_conveyor
 	recipe_selector.visible = not is_conveyor
 	rate_title_label.visible = not is_conveyor
@@ -286,3 +325,6 @@ func _display_name(entity_type: String) -> String:
 		"curve_left": return "Convoyeur courbe gauche"
 		"curve_right": return "Convoyeur courbe droite"
 		_:          return entity_type.capitalize()
+# Ajoutez ceci dans EntityPanel.gd
+func _is_warehouse_entity(entity: Entity) -> bool:
+	return entity is WarehouseEntity		

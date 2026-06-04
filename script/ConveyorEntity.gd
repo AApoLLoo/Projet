@@ -21,7 +21,7 @@ const ITEM_SPACING_PROGRESS: float = 0.28
 @export var travel_time: float = 0.45
 @export var throughput_amount: int = 1
 @export var max_carried_items: int = 3
-
+var is_powered: bool = false
 var carried_resource: String = ""
 var carried_amount: int = 0
 var travel_progress: float = 0.0
@@ -39,21 +39,49 @@ const ITEM_FRAMES: Dictionary = {
 }
 
 @onready var _item_marker_root: Node2D = _ensure_item_marker_root()
-
+func _check_neighbor_turbines():
+	var rayon = 10
+	
+	for x in range(-rayon, rayon + 1):
+		for y in range(-rayon, rayon + 1):
+			if x == 0 and y == 0:
+				continue
+			
+			if Vector2(x, y).length() > float(rayon):  # ← ajoute ça
+				continue
+			
+			var pos = cell_position + Vector2i(x, y)
+			var entity = EntityManager.get_entity_at_cell(pos)
+			if entity != null and entity.entity_type == "turbine" and entity.is_active:
+				print("Trouvé entité : ", entity.entity_type, " en ", pos, " distance=", Vector2(x,y).length())
+				print("Turbine trouvée, is_active = ", entity.is_active, " type=", typeof(entity.is_active))
+				print("Test condition finale : ", entity != null, " / ", entity.entity_type == "turbine", " / ", entity.is_active)
+				if entity.is_active:
+					print(">>> set_powered(true) va être appelé !")
+					set_powered(true)
+				return
+	
+	set_powered(false)# ← crucial : aucune turbine trouvée = pas alimenté
+		
 func _ready() -> void:
 	entity_type = conveyor_kind
 	super._ready()
 	is_active = true
+	
+	# Enregistrement immédiat ici !
+	#EntityManager.register_entity(self)
+	
 	_update_item_markers()
+	#_check_neighbor_turbines.call_deferred() # Différé aussi pour être sûr
 
-func _post_ready() -> void:
-	EntityManager.register_entity(self)
 
 func _process(delta: float) -> void:
-	if not is_active:
-		_update_item_markers()
+	# On vérifie si le tapis est actif ET alimenté
+	if not is_active or not is_powered:
+		_update_item_markers() # On met quand même à jour les visuels des items
 		return
 
+	# Si on est ici, le tapis est alimenté, on continue la logique normale
 	if not carried_items.is_empty():
 		_advance_items(delta)
 		if _front_item_ready_to_exit() and _try_push_to_output():
@@ -81,6 +109,7 @@ func _update_connection_color() -> void:
 		anim_sprite.modulate = Color(1.0, 0.75, 0.2)
 	else:
 		anim_sprite.modulate = Color(0.55, 0.55, 0.55)
+
 
 func get_status_text() -> String:
 	if not is_active:
@@ -515,3 +544,13 @@ func _offset_to_marker_position(offset: Vector2i) -> Vector2:
 	if offset == Vector2i(-1, -1):
 		return Vector2(-22.0, -11.0)
 	return Vector2.ZERO
+# Dans ConveyorEntity.gd
+
+func set_powered(active: bool) -> void:
+	print("set_powered appelé avec : ", active)
+	is_powered = active  # plus de garde
+	if is_powered:
+		$AnimatedSprite2D.play()
+	else:
+		$AnimatedSprite2D.stop()
+		$AnimatedSprite2D.frame = 0

@@ -99,7 +99,7 @@ func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_
 	# Reset scale / modulate au cas où
 	preview_sprite.scale = preview_scale
 	preview_sprite.modulate = Color(1,1,1,0.6)
-
+	
 func stop_building() -> void:
 	is_building = false
 	preview_sprite.visible = false
@@ -206,36 +206,35 @@ func _update_preview() -> void:
 
 func _try_place_building() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
-	
-	# --- MODIFICATION ICI : Calcul de position isométrique ---
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
-	# ---------------------------------------------------------
 	
 	if _can_build(cell_pos):
-		# Déduction des crédits grâce à la fonction existante
+		# Déduction des crédits
 		GameManager.add_credits(-factory_cost)
 		
-		# Création de l'usine
+		# 1. Création de l'instance
 		var factory_instance: Node2D = factory_scene.instantiate()
-		# Ajoute en tant qu'enfant du nœud de bâtiments (si défini) avant de positionner
+		
+		# 2. Configuration des données
+		if factory_instance is Entity:
+			factory_instance.cell_position = cell_pos
+			factory_instance.build_cost = factory_cost
+		
+		# 3. Ajout à l'arbre
 		if buildings_node:
 			buildings_node.add_child(factory_instance)
 		else:
 			add_child(factory_instance)
 			
-		# Positionner l'instance au centre de la case en coordonnées globales
+		# 4. Positionnement visuel
 		factory_instance.global_position = preview_sprite.global_position
 		_configure_instance_visuals(factory_instance)
 			
-		# Assigner la position grille et le coût à l'entité si elle hérite de Entity
-		if factory_instance is Entity:
-			factory_instance.cell_position = cell_pos
-			factory_instance.build_cost = factory_cost
-
+		# 5. Enregistrement des cellules
 		var occupied_by_build: Array[Vector2i] = _get_occupied_cells_for_build(cell_pos, _current_build_footprint_offsets)
 		_register_occupied_cells(factory_instance, occupied_by_build, cell_pos, factory_cost)
 
-		# Sauvegarde du dernier bâtiment placé pour permettre annulation/remboursement
+		# 6. Sauvegarde
 		_last_built = {
 			"cell_pos": cell_pos,
 			"occupied_cells": occupied_by_build.duplicate(),
@@ -244,7 +243,10 @@ func _try_place_building() -> void:
 			"co2_cost": factory_instance.get("build_co2_cost") if factory_instance else 0.0,
 		}
 		last_build_state_changed.emit(true)
-
+		
+		# --- ICI : On appelle la fonction de rafraîchissement ---
+		# Comme on est dans _try_place_building, cell_pos est connu !
+		_refresh_turbines_around(cell_pos)
 func _can_build(cell_pos: Vector2i) -> bool:
 	for occupied_cell in _get_occupied_cells_for_build(cell_pos, _current_build_footprint_offsets):
 		if occupied_cells.has(occupied_cell):
@@ -555,3 +557,15 @@ func _get_default_footprint_offsets(entity_type: String) -> Array[Vector2i]:
 			return [Vector2i.ZERO, Vector2i(1, 0)]
 		_:
 			return [Vector2i.ZERO]
+func _refresh_turbines_around(pos: Vector2i):
+	# Même rayon de 2 que dans la turbine !
+	var rayon = 2
+	
+	for x in range(-rayon, rayon + 1):
+		for y in range(-rayon, rayon + 1):
+			var check_pos = pos + Vector2i(x, y)
+			var ent = EntityManager.get_entity_at_cell(check_pos)
+			
+			# Si on trouve une turbine dans cette zone, on la force à rescanner
+			if ent != null and ent.entity_type == "turbine":
+				ent.update_neighbors()

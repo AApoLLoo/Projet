@@ -42,3 +42,28 @@ func _find_white_puff_vfx() -> WhitePuffVfx:
 		if child is WhitePuffVfx:
 			return child
 	return null
+# Dans TurbineEntity.gd
+func _on_active_toggled(value: bool):
+	is_active = value
+	update_neighbors()
+
+func update_neighbors():
+	var rayon = 10
+	
+	for x in range(-rayon, rayon + 1):
+		for y in range(-rayon, rayon + 1):
+			if x == 0 and y == 0:
+				continue
+			
+			# Vérifie la distance réelle (pas juste le carré)
+			if Vector2(x, y).length() > float(rayon):
+				continue
+			
+			var pos_a_verifier = cell_position + Vector2i(x, y)
+			var ent = EntityManager.get_entity_at_cell(pos_a_verifier)
+			
+			if ent != null:
+				var type = str(ent.get("entity_type"))
+				if "belt" in type:
+					if ent.has_method("set_powered"):
+						ent.set_powered(is_active)

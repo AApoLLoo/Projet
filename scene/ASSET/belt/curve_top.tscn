@@ -1,26 +1,45 @@
 [gd_scene format=3 uid="uid://dk2v0mr1fc7a7"]
 
-[ext_resource type="Texture2D" uid="uid://d2vywgm42mkmw" path="res://asset/convoyer/Corners/Curve_0001.png" id="1_ee0ve"]
+[ext_resource type="Texture2D" uid="uid://bde1gil6scax2" path="res://asset/convoyer/combiner.png" id="1_ee0ve"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ee0ve"]
+atlas = ExtResource("1_ee0ve")
+region = Rect2(0, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6exns"]
 atlas = ExtResource("1_ee0ve")
-region = Rect2(0, 0, 172, 171)
+region = Rect2(64, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_7fjmj"]
 atlas = ExtResource("1_ee0ve")
-region = Rect2(172, 0, 172, 171)
+region = Rect2(128, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qo26p"]
 atlas = ExtResource("1_ee0ve")
-region = Rect2(344, 0, 172, 171)
+region = Rect2(192, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gvk1l"]
 atlas = ExtResource("1_ee0ve")
-region = Rect2(516, 0, 172, 171)
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_krbsw"]
+atlas = ExtResource("1_ee0ve")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nfxod"]
+atlas = ExtResource("1_ee0ve")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_avtiu"]
+atlas = ExtResource("1_ee0ve")
+region = Rect2(448, 0, 64, 64)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_k4cve"]
 animations = [{
 "frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ee0ve")
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_6exns")
 }, {
@@ -32,6 +51,15 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_gvk1l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_krbsw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nfxod")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_avtiu")
 }],
 "loop": true,
 "name": &"default",
@@ -43,5 +71,4 @@ animations = [{
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=554087036]
 scale = Vector2(0.1, 0.1)
 sprite_frames = SubResource("SpriteFrames_k4cve")
-frame_progress = 0.808285
-offset = Vector2(15, 0)
+frame_progress = 0.22617039

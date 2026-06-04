@@ -23,6 +23,7 @@ signal totals_changed(energy_total: float, co2_total: float)
 # ─── API ─────────────────────────────────────────────────────────────────────
 
 func register_entity(entity: Entity) -> void:
+	print("EntityManager : Enregistrement de ", entity.entity_type, " à ", entity.cell_position)
 	entities[entity.entity_id] = entity
 	recalculate_totals()
 
@@ -68,11 +69,24 @@ func count() -> int:
 	return entities.size()
 
 func get_entity_at_cell(cell_pos: Vector2i) -> Entity:
-	for entity in entities.values():
+	for id in entities:
+		var entity = entities[id]
+		
 		if not is_instance_valid(entity):
 			continue
+			
+		# DEBUG TRÈS PRÉCIS
 		if entity.cell_position == cell_pos:
-			return entity
+			return entity # Succès !
+		else:
+			# On vérifie si par hasard ce n'est pas un problème de Vector2 vs Vector2i
+			# (Si les valeurs sont identiques mais le type diffère, le == peut échouer)
+			if Vector2i(entity.cell_position) == cell_pos:
+				# Si ça rentre ici, c'est que ton objet a une position qui ressemble à un Vector2
+				# alors qu'il devrait être un Vector2i
+				print("DEBUG : Position correspondante trouvée mais type différent. Entité : ", entity.cell_position, " Cherché : ", cell_pos)
+				return entity
+	
 	return null
 
 func get_adjacent_entities(cell_pos: Vector2i) -> Array:
