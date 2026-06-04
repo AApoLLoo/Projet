@@ -70,6 +70,6 @@ output_offset = Vector2i(1, -1)
 unique_name_in_owner = true
 y_sort_enabled = true
 position = Vector2(33.76323, -34)
-scale = Vector2(1, 0.992)
+scale = Vector2(1.75, 1.736)
 sprite_frames = SubResource("SpriteFrames_pjtlh")
 frame_progress = 0.17502806

@@ -88,7 +88,7 @@ func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_
 	factory_cost = cost
 	_current_build_footprint_offsets = _normalize_footprint_offsets(footprint_offsets)
 	preview_sprite.texture = texture
-	
+	preview_sprite.centered = true
 	# Découpe l'image animée
 	preview_sprite.hframes = frames_count
 	preview_sprite.frame = 0 # Affiche seulement la première image
@@ -97,7 +97,7 @@ func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_
 	is_building = true
 
 	# Reset scale / modulate au cas où
-	preview_sprite.scale = preview_scale
+	preview_sprite.scale = Vector2(1.75, 1.75)
 	preview_sprite.modulate = Color(1,1,1,0.6)
 	
 func stop_building() -> void:

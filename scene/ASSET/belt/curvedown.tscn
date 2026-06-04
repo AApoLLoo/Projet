@@ -75,6 +75,7 @@ output_offset = Vector2i(1, 1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1777190488]
 position = Vector2(0, -1)
+scale = Vector2(1.75, 1.75)
 sprite_frames = SubResource("SpriteFrames_mffpd")
-frame_progress = 0.24345605
+frame_progress = 0.6805433
 offset = Vector2(16.5, -0.5)
