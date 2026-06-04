@@ -48,6 +48,7 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var btn_build_belt: Button = %BtnBuildBelt       
 @onready var btn_build_turbine: Button = %BtnBuildTurbine 
 @onready var btn_build_entrepot: Button = %BtnEntrepot 
+@onready var btn_build_miner: Button = %BtnBuildMiner
 ###BELT###
 @onready var menu_belt: HBoxContainer = $Menu_Belt
 @onready var curve_top: Button = $Menu_Belt/Curve_Top
@@ -82,7 +83,6 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var btn_choose_order_delivery_point: Button = %BtnChooseOrderDeliveryPoint
 @onready var btn_clear_order_delivery_point: Button = %BtnClearOrderDeliveryPoint
 @onready var btn_submit_order: Button = %BtnSubmitOrder
-@onready var entrepot_panel = $EntrepotPanel # Chemin vers votre panneau dans le HUD
 var _warehouse_panel: PanelContainer = null
 
 
@@ -152,9 +152,16 @@ var buildings_data = {
 	},
 	"entrepot":{
 		"scene": preload("res://scene/entrepot.tscn"),
-		"texture": preload("res://asset/image-removebg-preview.png"), # <- Remplacez par le chemin de votre image
-		"cost": 1000.0, # Ajustez le prix comme vous voulez
+		"texture": preload("res://asset/image-removebg-preview.png"),
+		"cost": 1000.0,
 		"frames": 1,
+		"footprint_offsets": [Vector2i.ZERO]
+	},
+	"miner": {
+		"scene": preload("res://scene/miner.tscn"),
+		"texture": preload("res://asset/Miner/miner-one/north-east/mining-animation.png"),
+		"cost": 300.0,
+		"frames": 8,
 		"footprint_offsets": [Vector2i.ZERO]
 	}
 }
@@ -287,13 +294,19 @@ func _ready() -> void:
 		_start_building_process("turbine")
 	)
 
+	btn_build_miner.pressed.connect(func():
+		_start_building_process("miner")
+	)
+
 	_style_button(btn_build_belt, Color.html("#3D6F8E"))
 	_style_button(btn_build_turbine, Color.html("#4F8F5B"))
 	_style_button(btn_build_factory, Color.html("#A66A3F"))
+	_style_button(btn_build_miner, Color.html("#5E8A4F"))
 	
 	btn_build_belt.custom_minimum_size = Vector2(200.0, 32.0)
 	btn_build_turbine.custom_minimum_size = Vector2(200.0, 32.0)
 	btn_build_factory.custom_minimum_size = Vector2(200.0, 32.0)
+	btn_build_miner.custom_minimum_size = Vector2(200.0, 32.0)
 	_update_build_button_prices()
 	btn_build_entrepot.custom_minimum_size = Vector2(200.0, 32.0)
 	_style_button(btn_build_entrepot, Color.html("#69558C"))
@@ -355,7 +368,13 @@ func _ready() -> void:
 	
 func _on_contract_arrived(contract: Dictionary) -> void:
 	_update_contracts_display()
-	_show_hint_toast("📦 Nouveau contrat !")
+	var msg := "📦 Nouveau contrat : %s x%d\n+%.0f€ si livré avant J-%d" % [
+		String(contract.get("resource_label", "?")),
+		int(contract.get("quantity", 0)),
+		float(contract.get("reward", 0.0)),
+		int(contract.get("deadline_days", 2))
+	]
+	_show_toast(msg, UITheme.ACCENT_GOLD)
 
 func _on_contract_completed(contract: Dictionary) -> void:
 	_update_contracts_display()
@@ -647,6 +666,7 @@ func _update_contracts_display() -> void:
 		contracts_label.hide()
 		return
 	contracts_label.show()
+	contracts_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var parts: PackedStringArray = []
 	var current_day: int = TimeManager.current_day if TimeManager else 1
 	for c in contracts:
@@ -660,7 +680,7 @@ func _update_contracts_display() -> void:
 	var streak_text: String = ""
 	if ContractManager.completed_streak > 1:
 		streak_text = " 🔥x%d" % ContractManager.completed_streak
-	contracts_label.text = "Contrats : " + " | ".join(parts) + streak_text
+	contracts_label.text = "Contrats :\n" + "\n".join(parts) + streak_text
 	
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
@@ -681,6 +701,9 @@ func _start_building_process(building_type: String) -> void:
 			_warehouse_panel.hide()
 
 # --- CORRECTION : aiguillage correct entre les deux panneaux ---
+func open_entity_panel(entity: Entity) -> void:
+	_on_entity_selected(entity)
+
 func _on_entity_selected(entity) -> void:
 	if entity == null:
 		if _entity_panel: _entity_panel.hide()
@@ -1294,6 +1317,7 @@ func _update_build_button_prices() -> void:
 	_set_build_button_price(btn_build_turbine, "Energie", "turbine")
 	_set_build_button_price(btn_build_factory, "Production", "factory")
 	_set_build_button_price(btn_build_entrepot, "Entrepot", "entrepot")
+	_set_build_button_price(btn_build_miner, "Extraction", "miner")
 
 func _set_build_button_price(button: Button, label: String, building_id: String) -> void:
 	if button == null:

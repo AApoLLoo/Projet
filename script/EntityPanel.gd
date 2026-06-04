@@ -21,6 +21,9 @@ extends PanelContainer
 @onready var status_label: Label            = %StatusLabel
 @onready var active_toggle: CheckButton     = %ActiveToggle
 @onready var close_btn: Button              = %CloseBtn
+@onready var stock_list: ItemList           = %StockList
+@onready var stock_title: Label             = $MarginContainer/VBoxContainer/StockTitle
+@onready var _hsep5: HSeparator             = $MarginContainer/VBoxContainer/HSep5
 
 var current_entity: Entity = null
 
@@ -42,6 +45,7 @@ func _style_panel() -> void:
 	UITheme.style_option_button(recipe_selector)
 	UITheme.style_item_list(input_list)
 	UITheme.style_item_list(output_list)
+	UITheme.style_item_list(stock_list)
 	UITheme.style_slider(rate_slider, UITheme.ACCENT_SKY)
 	UITheme.style_toggle(active_toggle, UITheme.ACCENT_TEAL)
 	UITheme.style_button(close_btn, UITheme.ACCENT_RED, UITheme.TEXT_LIGHT, false, true)
@@ -57,6 +61,7 @@ func _style_panel() -> void:
 		UITheme.style_label(label, "caption")
 	for label in [rate_label, energy_label, co2_label, status_label]:
 		UITheme.style_label(label, "body")
+	UITheme.style_label(stock_title, "caption")
 
 # ─── API publique ─────────────────────────────────────────────────────────────
 
@@ -101,6 +106,7 @@ func setup(entity: Entity) -> void:
 	# Détails recette et stats
 	_refresh_recipe_details()
 	_refresh_stats()
+	_refresh_stock()
 
 	# Connecter le signal de mise à jour
 	entity.entity_updated.connect(_on_entity_updated)
@@ -140,6 +146,7 @@ func _on_active_toggled(pressed: bool) -> void:
 func _on_entity_updated(_entity: Entity) -> void:
 	_refresh_recipe_details()
 	_refresh_stats()
+	_refresh_stock()
 
 # ─── Rafraîchissement ─────────────────────────────────────────────────────────
 
@@ -225,6 +232,10 @@ func _apply_entity_mode() -> void:
 	rate_box.visible = not is_conveyor
 	input_label.text = "Entree" if is_conveyor else "Entrees"
 	output_label.text = "Sortie" if is_conveyor else "Sorties"
+	var show_stock: bool = not is_conveyor
+	_hsep5.visible = show_stock
+	stock_title.visible = show_stock
+	stock_list.visible = show_stock
 
 func _refresh_conveyor_details(conveyor: ConveyorEntity) -> void:
 	input_list.clear()
@@ -240,6 +251,26 @@ func _refresh_conveyor_details(conveyor: ConveyorEntity) -> void:
 		output_list.add_item("Items: %d" % conveyor.carried_items.size())
 		output_list.add_item("Tete: %s x%d" % [conveyor.carried_resource, conveyor.carried_amount])
 		output_list.add_item("Progression: %d%%" % roundi(conveyor.travel_progress * 100.0))
+
+func _refresh_stock() -> void:
+	if current_entity == null or not stock_list.visible:
+		return
+	stock_list.clear()
+	var has_any: bool = false
+	for resource_id in current_entity.input_buffer.keys():
+		var amount: int = int(current_entity.input_buffer[resource_id])
+		if amount <= 0:
+			continue
+		has_any = true
+		stock_list.add_item("📥 %s — %d" % [resource_id, amount])
+	for resource_id in current_entity.output_buffer.keys():
+		var amount: int = int(current_entity.output_buffer[resource_id])
+		if amount <= 0:
+			continue
+		has_any = true
+		stock_list.add_item("📤 %s — %d" % [resource_id, amount])
+	if not has_any:
+		stock_list.add_item("(buffers vides)")
 
 func _is_conveyor_entity(entity: Entity) -> bool:
 	return entity is ConveyorEntity

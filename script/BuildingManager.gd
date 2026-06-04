@@ -6,6 +6,7 @@ const ENTITY_HITBOX_COLLISION_MASK: int = Entity.HITBOX_COLLISION_LAYER
 const _ENTITY_SCENES: Dictionary = {
 	"turbine": preload("res://scene/turbine_2d.tscn"),
 	"factory": preload("res://scene/factory.tscn"),
+	"miner": preload("res://scene/miner.tscn"),
 	"belt_right": preload("res://scene/ASSET/belt/beltmid.tscn"),
 	"belt_left": preload("res://scene/ASSET/belt/beltleft.tscn"),
 	"curve_top": preload("res://scene/ASSET/beltcurvetop.tscn"),

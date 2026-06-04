@@ -89,6 +89,7 @@ text = "Vue usine"
 [node name="ContractsLabel" type="Label" parent="MarginContainer/MarginContainer/VBoxContainer" unique_id=125805602]
 unique_name_in_owner = true
 layout_mode = 2
+autowrap_mode = 3
 
 [node name="MinimapContainer" type="MarginContainer" parent="." unique_id=987692439]
 anchors_preset = 3
@@ -259,6 +260,11 @@ text = "Production"
 [node name="BtnEntrepot" type="Button" parent="BuildMenuContainer" unique_id=540830721]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="BtnBuildMiner" type="Button" parent="BuildMenuContainer" unique_id=720134901]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Extraction"
 
 [node name="OrdersPanel" type="PanelContainer" parent="." unique_id=498211001]
 unique_name_in_owner = true

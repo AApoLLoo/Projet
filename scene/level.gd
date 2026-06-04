@@ -313,9 +313,23 @@ func _apply_start_state() -> void:
 
 	_restore_ground_materials(start_state.get("ground_materials", []))
 
-	# Réinitialiser les contrats et en générer un nouveau
+	# Réinitialiser ou restaurer les contrats
 	if ContractManager:
-		ContractManager.start_new_game()
+		var contracts_data: Variant = start_state.get("contracts")
+		if contracts_data is Dictionary and not contracts_data.is_empty() and ContractManager.has_method("apply_save_state"):
+			ContractManager.apply_save_state(contracts_data)
+		else:
+			ContractManager.start_new_game()
+
+	# Restaurer la file de livraisons
+	var delivery_manager: Node = get_node_or_null("DeliveryManager")
+	if delivery_manager and delivery_manager.has_method("apply_save_state"):
+		var dq_data: Variant = start_state.get("delivery_queue")
+		if dq_data is Dictionary:
+			delivery_manager.call("apply_save_state", dq_data)
+
+	# Restaurer la vitesse du temps
+	TimeManager.time_speed = _to_float(start_state.get("time_speed"), 1.0)
 
 	# Forcer la mise à jour de l'UI
 	var hour: int = int(TimeManager.current_time)
@@ -632,6 +646,10 @@ func _collect_floor_state() -> Dictionary:
 		var state_result: Variant = floor_script.call("get_generation_state")
 		floor_state = _to_dictionary(state_result)
 	floor_state["ground_materials"] = _collect_ground_materials()
+	# Inclure l'état de la file de livraisons
+	var dm: Node = get_node_or_null("DeliveryManager")
+	if dm and dm.has_method("get_save_state"):
+		floor_state["delivery_queue"] = dm.call("get_save_state")
 	return floor_state
 
 func _collect_ground_materials() -> Array[Dictionary]:

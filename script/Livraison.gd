@@ -264,6 +264,7 @@ func _set_truck_unloading_state(truck_instance: Node2D, unloading: bool) -> void
 # ─── MODIFIÉ : spawn des matériaux au point de livraison ───────────────────────
 # Dans Projet/script/Livraison.gd
 
+
 func _apply_delivery_payload(order: Dictionary) -> void:
 	if not GameManager:
 		return
@@ -272,27 +273,45 @@ func _apply_delivery_payload(order: Dictionary) -> void:
 	var resource_id: String = String(order.get("resource_id", ""))
 	var quantity: int = int(order.get("quantity", 0))
 	
-	# 1. Chercher l'entrepôt le plus proche du point de livraison
-	# On suppose que l'entrepôt est dans le groupe "entrepot"
-	var entrepot = get_tree().get_first_node_in_group("entrepot")
+	# Chercher l'entrepôt le plus proche du point de livraison
+	var best_entrepot = _find_nearest_entrepot(order.get("delivery_point", {}))
 	
 	if job_type == JOB_EXPORT:
-		# Export : On retire du stock via l'entrepôt (si possible) et on ajoute les crédits
-		if entrepot and entrepot.has_method("give_resources"):
-			if entrepot.give_resources(resource_id, quantity):
-				GameManager.add_credits(float(order.get("total_cost", 0.0)))
-			else:
-				push_error("Impossible de prendre les ressources de l'entrepôt")
+		# Export : ressources déjà consommées dans _prepare_job_for_dispatch
+		# On ajoute les crédits ET on valide les contrats
+		GameManager.add_credits(float(order.get("total_cost", 0.0)))
+		if ContractManager:
+			ContractManager.try_fulfill_contracts(resource_id, quantity)
 		return
 
-	# Import : Stocker directement dans l'entrepôt (pas de spawn physique)
-	var entrepot_node = get_tree().get_first_node_in_group("entrepot")
-	if entrepot_node and entrepot_node.has_method("deposit_input"):
-		entrepot_node.deposit_input(resource_id, quantity)
+	# Import : Stocker dans l'entrepôt le plus proche
+	if best_entrepot and best_entrepot.has_method("deposit_input"):
+		best_entrepot.deposit_input(resource_id, quantity)
 	else:
 		push_warning("Livraison: aucun entrepôt trouvé, ajout direct au stock.")
 		GameManager.add_resource_stock({resource_id: quantity})
-# ──────────────────────────────────────────────────────────────────────────────
+
+func _find_nearest_entrepot(delivery_point: Dictionary) -> Node:
+	var entrepots = get_tree().get_nodes_in_group("entrepot")
+	if entrepots.is_empty():
+		return null
+	if entrepots.size() == 1:
+		return entrepots[0]
+	# Trouver le plus proche du point de livraison
+	var target_pos := Vector2(
+		float(delivery_point.get("world_x", 0.0)),
+		float(delivery_point.get("world_y", 0.0))
+	)
+	var nearest = entrepots[0]
+	var min_dist := INF
+	for e in entrepots:
+		if not is_instance_valid(e):
+			continue
+		var dist := target_pos.distance_to(e.global_position)
+		if dist < min_dist:
+			min_dist = dist
+			nearest = e
+	return nearest
 
 func _finish_delivery(order: Dictionary) -> void:
 	_current_order.clear()
@@ -423,10 +442,19 @@ func _find_recipe_for_output(resource_id: String) -> Dictionary:
 	return {}
 
 func get_save_state() -> Dictionary:
+<<<<<<< HEAD
 	return {
 		"pending_orders": _pending_orders.duplicate(true),
 		"current_order": _current_order.duplicate(true) if _delivery_in_progress else {},
 		"delivery_in_progress": _delivery_in_progress
+=======
+	var current_order_data: Variant = null
+	if _delivery_in_progress and not _current_order.is_empty():
+		current_order_data = _current_order.duplicate(true)
+	return {
+		"pending_orders": _pending_orders.duplicate(true),
+		"current_order": current_order_data,
+>>>>>>> main
 	}
 
 func apply_save_state(data: Dictionary) -> void:
@@ -434,16 +462,36 @@ func apply_save_state(data: Dictionary) -> void:
 	_current_order.clear()
 	_delivery_in_progress = false
 
+<<<<<<< HEAD
+=======
+	# Livraison qui était en cours au moment de la sauvegarde
+	var current_order_data: Variant = data.get("current_order")
+	if current_order_data is Dictionary and not current_order_data.is_empty():
+		var job_type: String = String(current_order_data.get("job_type", JOB_IMPORT))
+		if job_type == JOB_EXPORT:
+			# Le stock était déjà consommé avant la sauvegarde → créditer directement
+			if GameManager:
+				GameManager.add_credits(float(current_order_data.get("total_cost", 0.0)))
+		else:
+			# Import : les crédits étaient déjà déduits → remettre en tête de file
+			_pending_orders.append(current_order_data.duplicate(true))
+
+	# Commandes en attente (non encore démarrées)
+>>>>>>> main
 	var raw_pending: Variant = data.get("pending_orders", [])
 	if raw_pending is Array:
 		for order in raw_pending:
 			if order is Dictionary:
 				_pending_orders.append(order.duplicate(true))
 
+<<<<<<< HEAD
 	var saved_current: Variant = data.get("current_order", {})
 	if saved_current is Dictionary and not saved_current.is_empty():
 		_pending_orders.push_front(saved_current.duplicate(true))
 
 	queue_changed.emit(_pending_orders.size())
 	delivery_state_changed.emit(false, {})
+=======
+	queue_changed.emit(_pending_orders.size())
+>>>>>>> main
 	_try_start_next_delivery()

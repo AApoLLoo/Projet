@@ -90,6 +90,35 @@ var recipes: Dictionary = {
 			"energy_delta": 120.0,    # consomme 120 kW
 			"co2_rate": 5.0
 		}
+	],
+	"miner": [
+		{
+			"id": "extract_matiere_brute",
+			"name": "Extraction de matière brute",
+			"inputs": {},
+			"outputs": { "matiere_brute": 1 },
+			"production_time": 3.0,
+			"energy_delta": 30.0,
+			"co2_rate": 1.0
+		},
+		{
+			"id": "extract_charbon",
+			"name": "Extraction de charbon",
+			"inputs": {},
+			"outputs": { "charbon": 1 },
+			"production_time": 5.0,
+			"energy_delta": 40.0,
+			"co2_rate": 3.0
+		},
+		{
+			"id": "extract_metal",
+			"name": "Extraction de métal brut",
+			"inputs": {},
+			"outputs": { "metal": 1 },
+			"production_time": 8.0,
+			"energy_delta": 50.0,
+			"co2_rate": 2.0
+		}
 	]
 }
 
