@@ -301,7 +301,7 @@ func _ready() -> void:
 	_style_button(btn_build_belt, Color.html("#3D6F8E"))
 	_style_button(btn_build_turbine, Color.html("#4F8F5B"))
 	_style_button(btn_build_factory, Color.html("#A66A3F"))
-	_style_button(btn_build_miner, Color.html("#5E8A4F"))
+	_style_button(btn_build_miner, Color.html("#D4A017"))
 	
 	btn_build_belt.custom_minimum_size = Vector2(200.0, 32.0)
 	btn_build_turbine.custom_minimum_size = Vector2(200.0, 32.0)
@@ -369,11 +369,11 @@ func _ready() -> void:
 func _on_contract_arrived(contract: Dictionary) -> void:
 	_update_contracts_display()
 	var msg := "📦 Nouveau contrat : %s x%d\n+%.0f€ si livré avant J-%d" % [
-		String(contract.get("resource_label", "?")),
-		int(contract.get("quantity", 0)),
-		float(contract.get("reward", 0.0)),
-		int(contract.get("deadline_days", 2))
-	]
+	String(contract.get("resource_label", "?")),
+	int(contract.get("quantity", 0)),
+	float(contract.get("reward", 0.0)),
+	int(contract.get("day_deadline", 0)) - int(contract.get("day_issued", 0))
+]
 	if _contract_just_failed:
 		await get_tree().create_timer(4.8).timeout
 		_contract_just_failed = false
