@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dg3krn5y8658m" path="res://script/BuildingManager.gd" id="2_u2b8d"]
 [ext_resource type="Script" uid="uid://k84hls15n7gq" path="res://scene/camera_controller.gd" id="3_0bn3b"]
 [ext_resource type="Script" uid="uid://dokhhfob5h6be" path="res://scene/level.gd" id="4_q3wyj"]
-[ext_resource type="Texture2D" uid="uid://bxgjcotvna6d7" path="res://asset/Grass(1).png" id="5_oxop7"]
+[ext_resource type="Texture2D" uid="uid://cr0d2xtr6pey4" path="res://asset/pixel-cyberpunk-interior.png" id="5_ktmlt"]
 [ext_resource type="Script" uid="uid://bx6id27enx61e" path="res://script/DayNightCycle.gd" id="5_ukt71"]
 [ext_resource type="Script" uid="uid://d2gs4e03solck" path="res://scene/floor.gd" id="7_aw33w"]
 [ext_resource type="PackedScene" uid="uid://bnit1gqnd4kqp" path="res://scene/hud.tscn" id="7_bddx0"]
@@ -16,7 +16,7 @@ offsets = PackedFloat32Array(0, 0.5106383, 1)
 colors = PackedColorArray(0.14117648, 0, 0.5137255, 1, 0.97082883, 0.5449091, 0.08165432, 1, 0.14117648, 0, 0.5137255, 1)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ktmlt"]
-texture = ExtResource("5_oxop7")
+texture = ExtResource("5_ktmlt")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 1:0/0 = 0
@@ -121,6 +121,7 @@ day_night_gradient = SubResource("Gradient_bddx0")
 [node name="HUD" parent="." unique_id=667082562 instance=ExtResource("7_bddx0")]
 
 [node name="Floor" type="TileMapLayer" parent="." unique_id=1173680372]
+scale = Vector2(4, 4)
 tile_set = SubResource("TileSet_u2b8d")
 script = ExtResource("7_aw33w")
 chunk_size = 32

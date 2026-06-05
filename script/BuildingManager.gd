@@ -63,10 +63,11 @@ func _ready() -> void:
 # --- NOUVELLES FONCTIONS ISOMÉTRIQUES ---
 
 
-const BUILDING_CELL_SIZE: int = 64
+const BUILDING_CELL_SIZE: int = 32
 
 func get_grid_pos(world_pos: Vector2) -> Vector2i:
-	return Vector2i(int(floor(world_pos.x / BUILDING_CELL_SIZE)), int(floor(world_pos.y / BUILDING_CELL_SIZE)))
+	var result = Vector2i(int(floor(world_pos.x / 32)), int(floor(world_pos.y / 32)))
+	return result
 
 func get_world_pos(cell_pos: Vector2i) -> Vector2:
 	return Vector2(cell_pos.x * BUILDING_CELL_SIZE + 32.0, cell_pos.y * BUILDING_CELL_SIZE + 32.0)

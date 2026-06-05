@@ -66,13 +66,9 @@ func _check_neighbor_turbines():
 func _ready() -> void:
 	entity_type = conveyor_kind
 	super._ready()
-	is_active = true
-	
-	# Enregistrement immédiat ici !
-	#EntityManager.register_entity(self)
-	
+	is_active = true  # ← déjà là, mais vérifie que c'est bien APRÈS super._ready()
 	_update_item_markers()
-	#_check_neighbor_turbines.call_deferred() # Différé aussi pour être sûr
+	_check_neighbor_turbines.call_deferred()
 
 
 func _process(delta: float) -> void:
