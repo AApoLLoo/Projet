@@ -254,54 +254,65 @@ func _ready() -> void:
 		orders_panel.hide()
 
 	# On s'assure que le menu est caché au démarrage
-	menu_belt.hide()
+	if menu_belt:
+		menu_belt.hide()
 	
 	# Connexion aux signaux du TimeManager
 	TimeManager.time_changed.connect(_on_time_changed)
 	TimeManager.day_changed.connect(_on_day_changed)
 	
 	# Exemple pour les tapis droits
-	belt_droit.pressed.connect(func():
-		_start_building_process("belt_right")
-		menu_belt.hide()
-	)
-	belt_left.pressed.connect(func():
-		_start_building_process("belt_left")
-		menu_belt.hide()
-	)
+	if belt_droit:
+		belt_droit.pressed.connect(func():
+			_start_building_process("belt_right")
+			menu_belt.hide()
+		)
+	if belt_left:
+		belt_left.pressed.connect(func():
+			_start_building_process("belt_left")
+			menu_belt.hide()
+		)
 	# Exemple pour vos courbes (Curves)
-	curve_top.pressed.connect(func():
-		_start_building_process("curve_top")
-		menu_belt.hide()
-	)
-	curve_down.pressed.connect(func():
-		_start_building_process("curve_down")
-		menu_belt.hide()
-	)
-	curve_right.pressed.connect(func():
-		_start_building_process("curve_right")
-		menu_belt.hide()
-	)
-	curve_left.pressed.connect(func():
-		_start_building_process("curve_left")
-		menu_belt.hide()
-	)
-	belt_east.pressed.connect(func():
-		_start_building_process("belt_east")
-		menu_belt.hide()
-	)
-	belt_south.pressed.connect(func():
-		_start_building_process("belt_south")
-		menu_belt.hide()
-	)
-	belt_merger.pressed.connect(func():
-		_start_building_process("merger")
-		menu_belt.hide()
-	)
-	belt_splitter.pressed.connect(func():
-		_start_building_process("splitter")
-		menu_belt.hide()
-	)
+	if curve_top:
+		curve_top.pressed.connect(func():
+			_start_building_process("curve_top")
+			menu_belt.hide()
+		)
+	if curve_down:
+		curve_down.pressed.connect(func():
+			_start_building_process("curve_down")
+			menu_belt.hide()
+		)
+	if curve_right:
+		curve_right.pressed.connect(func():
+			_start_building_process("curve_right")
+			menu_belt.hide()
+		)
+	if curve_left:
+		curve_left.pressed.connect(func():
+			_start_building_process("curve_left")
+			menu_belt.hide()
+		)
+	if belt_east:
+		belt_east.pressed.connect(func():
+			_start_building_process("belt_east")
+			menu_belt.hide()
+		)
+	if belt_south:
+		belt_south.pressed.connect(func():
+			_start_building_process("belt_south")
+			menu_belt.hide()
+		)
+	if belt_merger:
+		belt_merger.pressed.connect(func():
+			_start_building_process("merger")
+			menu_belt.hide()
+		)
+	if belt_splitter:
+		belt_splitter.pressed.connect(func():
+			_start_building_process("splitter")
+			menu_belt.hide()
+		)
 
 	if GameManager:
 		GameManager.resources_updated.connect(_on_resources_updated)
