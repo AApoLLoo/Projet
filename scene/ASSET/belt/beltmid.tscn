@@ -70,5 +70,7 @@ output_offset = Vector2i(1, -1)
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=489065791]
 unique_name_in_owner = true
 y_sort_enabled = true
+position = Vector2(33.76323, -34)
+scale = Vector2(1.75, 1.736)
 sprite_frames = SubResource("SpriteFrames_pjtlh")
 autoplay = "default"
