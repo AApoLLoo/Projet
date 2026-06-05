@@ -61,20 +61,15 @@ func _ready() -> void:
 	preview_sprite.centered = true
 
 # --- NOUVELLES FONCTIONS ISOMÉTRIQUES ---
+
+
+const BUILDING_CELL_SIZE: int = 64
+
 func get_grid_pos(world_pos: Vector2) -> Vector2i:
-	if floor_tilemap:
-		return floor_tilemap.local_to_map(world_pos)
-	else:
-		# Fallback si le TileMap n'est pas assigné dans l'inspecteur
-		return Vector2i(int(floor(world_pos.x / cell_size)), int(floor(world_pos.y / cell_size)))
+	return Vector2i(int(floor(world_pos.x / BUILDING_CELL_SIZE)), int(floor(world_pos.y / BUILDING_CELL_SIZE)))
 
 func get_world_pos(cell_pos: Vector2i) -> Vector2:
-	if floor_tilemap:
-		return floor_tilemap.map_to_local(cell_pos)
-	else:
-		# Fallback si le TileMap n'est pas assigné
-		return Vector2(cell_pos.x * cell_size + cell_size / 2.0, cell_pos.y * cell_size + cell_size / 2.0)
-# ----------------------------------------
+	return Vector2(cell_pos.x * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0, cell_pos.y * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0)
 
 func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1, footprint_offsets: Array = [Vector2i.ZERO], preview_scale: Vector2 = Vector2.ONE) -> void:
 	if is_selecting_delivery_point:
@@ -209,23 +204,24 @@ func _try_place_building() -> void:
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
 	
 	if _can_build(cell_pos):
-		# Déduction des crédits
 		GameManager.add_credits(-factory_cost)
-		
-		# 1. Création de l'instance
 		var factory_instance: Node2D = factory_scene.instantiate()
 		
-		# 2. Configuration des données
 		if factory_instance is Entity:
 			factory_instance.cell_position = cell_pos
 			factory_instance.build_cost = factory_cost
 		
-		# 3. Ajout à l'arbre
+		# ── Configurer les offsets AVANT add_child (avant _ready) ──
+		if factory_instance is ConveyorEntity:
+			_configure_conveyor_direction(factory_instance)
+			#factory_instance.is_powered = true
+		# ───────────────────────────────────────────────────────────
+
+		# ENSUITE seulement on ajoute à l'arbre → _ready() se déclenche ici
 		if buildings_node:
 			buildings_node.add_child(factory_instance)
 		else:
 			add_child(factory_instance)
-			
 		# 4. Positionnement visuel
 		factory_instance.global_position = preview_sprite.global_position
 		_configure_instance_visuals(factory_instance)
@@ -569,3 +565,19 @@ func _refresh_turbines_around(pos: Vector2i):
 			# Si on trouve une turbine dans cette zone, on la force à rescanner
 			if ent != null and ent.entity_type == "turbine":
 				ent.update_neighbors()
+# Table des directions par type de belt
+const CONVEYOR_DIRECTIONS: Dictionary = {
+	"belt_right":  { "input": Vector2i(-1,  0), "output": Vector2i( 1,  0) },
+	"belt_left":   { "input": Vector2i( 1,  0), "output": Vector2i(-1,  0) },
+	"curve_top":   { "input": Vector2i( 0,  1), "output": Vector2i( 1,  0) },
+	"curve_down":  { "input": Vector2i(-1,  0), "output": Vector2i( 0,  1) },
+	"curve_left":  { "input": Vector2i( 0, -1), "output": Vector2i(-1,  0) },
+	"curve_right": { "input": Vector2i( 1,  0), "output": Vector2i( 0, -1) },
+}
+
+func _configure_conveyor_direction(conveyor: ConveyorEntity) -> void:
+	var kind: String = conveyor.conveyor_kind
+	if CONVEYOR_DIRECTIONS.has(kind):
+		var dir: Dictionary = CONVEYOR_DIRECTIONS[kind]
+		conveyor.input_offset  = dir["input"]
+		conveyor.output_offset = dir["output"]

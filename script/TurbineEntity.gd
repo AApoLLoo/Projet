@@ -23,19 +23,17 @@ func _ready() -> void:
 	if not is_active:
 		is_active = true
 
+# Dans TurbineEntity._on_active_changed() :
 func _on_active_changed(active: bool) -> void:
-	if _anim_sprite == null:
-		_anim_sprite = _find_anim_sprite()
-	if _anim_sprite != null:
-		if active:
-			_anim_sprite.play()
-		else:
-			_anim_sprite.stop()
-			_anim_sprite.frame = 0
-	if _white_puff_vfx == null:
-		_white_puff_vfx = _find_white_puff_vfx()
-	if _white_puff_vfx != null:
-		_white_puff_vfx.set_emitting(active)
+	var rayon = 20
+	for x in range(-rayon, rayon + 1):
+		for y in range(-rayon, rayon + 1):
+			if Vector2(x, y).length() > float(rayon):
+				continue
+			var pos = cell_position + Vector2i(x, y)
+			var entity = EntityManager.get_entity_at_cell(pos)
+			if entity is ConveyorEntity:
+				entity._check_neighbor_turbines()
 
 # Cherche l'AnimatedSprite2D parmi les enfants (fonctionne même si le nom change)
 func _find_anim_sprite() -> AnimatedSprite2D:
