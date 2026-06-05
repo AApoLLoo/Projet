@@ -20,7 +20,7 @@ const ITEM_SPACING_PROGRESS: float = 0.28
 @export var output_offset: Vector2i = Vector2i(1, 0)
 @export var travel_time: float = 0.45
 @export var throughput_amount: int = 1
-@export var max_carried_items: int = 3
+@export var max_carried_items: int = 1
 var is_powered: bool = false
 var carried_resource: String = ""
 var carried_amount: int = 0
@@ -76,23 +76,23 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	# On vérifie si le tapis est actif ET alimenté
 	if not is_active or not is_powered:
-		_update_item_markers() # On met quand même à jour les visuels des items
+		_update_item_markers()
 		return
 
-	# Si on est ici, le tapis est alimenté, on continue la logique normale
 	if not carried_items.is_empty():
 		_advance_items(delta)
-		if _front_item_ready_to_exit() and _try_push_to_output():
-			_clear_carried_item()
+		if _front_item_ready_to_exit():
+			var pushed = _try_push_to_output()
+			if pushed:
+				_clear_carried_item()
 
 	if _has_input_capacity():
-		_try_pull_from_input()
+		var pulled = _try_pull_from_input()
+		
 
 	_update_item_markers()
 	_update_connection_color()
-
 # Colore le tapis selon son état de connexion :
 #   Blanc  = connecté des deux côtés (entrée ET sortie)
 #   Orange = connecté d'un seul côté (départ ou fin de chaîne)
@@ -166,17 +166,23 @@ func has_output_connection() -> bool:
 	var downstream_cell: Vector2i = cell_position + output_offset
 	if _is_delivery_hub_cell(downstream_cell):
 		return true
+	# Recherche exacte
 	var preferred_downstream: Entity = EntityManager.get_entity_at_cell(downstream_cell)
 	if preferred_downstream != null:
 		return true
-	var downstream_entity: Entity = _find_downstream_entity(downstream_cell)
-	if downstream_entity == null:
-		return false
-	if downstream_entity is ConveyorEntity:
-		var downstream_conveyor: ConveyorEntity = downstream_entity
-		return downstream_conveyor.expects_input_from(cell_position)
-	return true
-
+	# Recherche élargie autour de la cellule cible
+	for offset in NEIGHBOR_SEARCH_OFFSETS:
+		var neighbor: Entity = EntityManager.get_entity_at_cell(downstream_cell + offset)
+		if neighbor == null or neighbor == self:
+			continue
+		if neighbor is ConveyorEntity:
+			var nc: ConveyorEntity = neighbor
+			if nc.expects_input_from(cell_position):
+				return true
+		else:
+			if (downstream_cell + offset) != (cell_position + input_offset):
+				return true
+	return false
 func is_adjacent_to_cell(target_cell: Vector2i) -> bool:
 	var delta: Vector2i = target_cell - cell_position
 	return max(abs(delta.x), abs(delta.y)) == 1 and delta != Vector2i.ZERO
@@ -252,6 +258,7 @@ func _try_pull_from_input() -> bool:
 	var upstream_entity: Entity = _find_upstream_entity(upstream_cell)
 	if upstream_entity == null:
 		return false
+
 	if upstream_entity is ConveyorEntity:
 		var upstream_conveyor: ConveyorEntity = upstream_entity
 		return _try_pull_from_upstream_conveyor(upstream_conveyor, upstream_cell)
@@ -262,9 +269,8 @@ func _try_pull_from_input() -> bool:
 	var pulled_amount: int = upstream_entity.withdraw_output(selected_resource, throughput_amount)
 	if pulled_amount <= 0:
 		return false
-
 	return receive_conveyor_item(selected_resource, pulled_amount) == pulled_amount
-
+	
 func _try_pull_from_upstream_conveyor(upstream_conveyor: ConveyorEntity, expected_upstream_cell: Vector2i) -> bool:
 	var exact_upstream_match: bool = upstream_conveyor.cell_position == expected_upstream_cell
 	if not exact_upstream_match and not upstream_conveyor.can_release_to_conveyor(cell_position):
@@ -284,6 +290,7 @@ func _try_push_to_output() -> bool:
 	var resource_id: String = String(front_item.get("resource_id", ""))
 	var amount: int = int(front_item.get("amount", 0))
 	var downstream_cell: Vector2i = cell_position + output_offset
+
 	if _is_delivery_hub_cell(downstream_cell):
 		GameManager.add_resource_stock({resource_id: amount})
 		return true
@@ -302,7 +309,6 @@ func _try_push_to_output() -> bool:
 	if not downstream_entity.can_accept_input(resource_id, amount):
 		return false
 	return downstream_entity.deposit_input(resource_id, amount) == amount
-
 func _find_upstream_entity(preferred_cell: Vector2i) -> Entity:
 	var preferred_entity: Entity = EntityManager.get_entity_at_cell(preferred_cell)
 	if preferred_entity != null:
@@ -323,21 +329,25 @@ func _find_upstream_entity(preferred_cell: Vector2i) -> Entity:
 	return null
 
 func _find_downstream_entity(preferred_cell: Vector2i) -> Entity:
+	# 1. Recherche exacte sur la cellule cible
 	var preferred_entity: Entity = EntityManager.get_entity_at_cell(preferred_cell)
 	if preferred_entity != null:
 		return preferred_entity
 
+	# 2. Recherche élargie : si un bâtiment non-tapis occupe une cellule
+	#    adjacente à preferred_cell (cas entrepôt multi-cellule)
 	for offset in NEIGHBOR_SEARCH_OFFSETS:
-		var neighbor: Entity = EntityManager.get_entity_at_cell(cell_position + offset)
+		var neighbor_cell: Vector2i = preferred_cell + offset
+		var neighbor: Entity = EntityManager.get_entity_at_cell(neighbor_cell)
 		if neighbor == null or neighbor == self:
 			continue
 		if neighbor is ConveyorEntity:
-			var neighbor_conveyor: ConveyorEntity = neighbor
-			if neighbor_conveyor.expects_input_from(cell_position):
-				return neighbor_conveyor
+			var nc: ConveyorEntity = neighbor
+			if nc.expects_input_from(cell_position):
+				return nc
 		else:
-			# Bâtiment non-tapis adjacent : valide comme destination si pas du côté entrée
-			if cell_position + offset != cell_position + input_offset:
+			# Bâtiment non-tapis (entrepôt, usine) : accepte s'il n'est pas derrière nous
+			if neighbor_cell != cell_position + input_offset:
 				return neighbor
 	return null
 
