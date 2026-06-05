@@ -121,7 +121,6 @@ day_night_gradient = SubResource("Gradient_bddx0")
 [node name="HUD" parent="." unique_id=667082562 instance=ExtResource("7_bddx0")]
 
 [node name="Floor" type="TileMapLayer" parent="." unique_id=1173680372]
-scale = Vector2(4, 4)
 tile_set = SubResource("TileSet_u2b8d")
 script = ExtResource("7_aw33w")
 chunk_size = 32

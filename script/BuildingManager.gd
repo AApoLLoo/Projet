@@ -63,14 +63,13 @@ func _ready() -> void:
 # --- NOUVELLES FONCTIONS ISOMÉTRIQUES ---
 
 
-const BUILDING_CELL_SIZE: int = 32
+const BUILDING_CELL_SIZE: int = 64
 
 func get_grid_pos(world_pos: Vector2) -> Vector2i:
-	var result = Vector2i(int(floor(world_pos.x / 32)), int(floor(world_pos.y / 32)))
-	return result
+	return Vector2i(int(floor(world_pos.x / BUILDING_CELL_SIZE)), int(floor(world_pos.y / BUILDING_CELL_SIZE)))
 
 func get_world_pos(cell_pos: Vector2i) -> Vector2:
-	return Vector2(cell_pos.x * BUILDING_CELL_SIZE + 32.0, cell_pos.y * BUILDING_CELL_SIZE + 32.0)
+	return Vector2(cell_pos.x * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0, cell_pos.y * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0)
 
 func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1, footprint_offsets: Array = [Vector2i.ZERO], preview_scale: Vector2 = Vector2.ONE) -> void:
 	if is_selecting_delivery_point:
