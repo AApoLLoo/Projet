@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://b3hn7rq1tz5yw"]
+
+[ext_resource type="Script" uid="uid://dwlkmwtnf317r" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
+[ext_resource type="Texture2D" uid="uid://bde1gil6scax2" path="res://asset/convoyer/combiner.png" id="2_combiner"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mg0"]
+atlas = ExtResource("2_combiner")
+region = Rect2(0, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mg1"]
+atlas = ExtResource("2_combiner")
+region = Rect2(64, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mg2"]
+atlas = ExtResource("2_combiner")
+region = Rect2(128, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mg3"]
+atlas = ExtResource("2_combiner")
+region = Rect2(192, 64, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_merger"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mg0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mg1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mg2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mg3")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="merger" type="Node2D" unique_id=7005]
+script = ExtResource("1_conveyorentity")
+conveyor_kind = "merger"
+input_offset = Vector2i(-1, 0)
+output_offset = Vector2i(0, 1)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=7006]
+sprite_frames = SubResource("SpriteFrames_merger")
+autoplay = "default"

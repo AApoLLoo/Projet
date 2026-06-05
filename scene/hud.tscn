@@ -575,7 +575,7 @@ horizontal_alignment = 1
 [node name="Menu_Belt" type="HBoxContainer" parent="." unique_id=330465475]
 offset_left = 24.0
 offset_top = 384.0
-offset_right = 328.0
+offset_right = 620.0
 offset_bottom = 432.0
 theme_override_constants/separation = 8
 
@@ -602,3 +602,19 @@ text = "🡭"
 [node name="Belt_left" type="Button" parent="Menu_Belt" unique_id=1980610375]
 layout_mode = 2
 text = "🡴"
+
+[node name="Belt_East" type="Button" parent="Menu_Belt" unique_id=7010]
+layout_mode = 2
+text = "→"
+
+[node name="Belt_South" type="Button" parent="Menu_Belt" unique_id=7011]
+layout_mode = 2
+text = "↓"
+
+[node name="Belt_Merger" type="Button" parent="Menu_Belt" unique_id=7012]
+layout_mode = 2
+text = "Merge"
+
+[node name="Belt_Splitter" type="Button" parent="Menu_Belt" unique_id=7013]
+layout_mode = 2
+text = "Split"

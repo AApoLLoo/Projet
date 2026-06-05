@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://e6gj9ms4xu8nv"]
+
+[ext_resource type="Script" uid="uid://dwlkmwtnf317r" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
+[ext_resource type="Texture2D" uid="uid://bde1gil6scax2" path="res://asset/convoyer/combiner.png" id="2_combiner"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sp0"]
+atlas = ExtResource("2_combiner")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sp1"]
+atlas = ExtResource("2_combiner")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sp2"]
+atlas = ExtResource("2_combiner")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sp3"]
+atlas = ExtResource("2_combiner")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sp4"]
+atlas = ExtResource("2_combiner")
+region = Rect2(256, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sp5"]
+atlas = ExtResource("2_combiner")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sp6"]
+atlas = ExtResource("2_combiner")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sp7"]
+atlas = ExtResource("2_combiner")
+region = Rect2(448, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_splitter"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sp0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sp1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sp2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sp3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sp4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sp5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sp6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sp7")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="splitter" type="Node2D" unique_id=7007]
+script = ExtResource("1_conveyorentity")
+conveyor_kind = "splitter"
+input_offset = Vector2i(-1, 0)
+output_offset = Vector2i(1, 0)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=7008]
+sprite_frames = SubResource("SpriteFrames_splitter")
+autoplay = "default"

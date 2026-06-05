@@ -9,6 +9,10 @@ const _ENTITY_SCENES: Dictionary = {
 	"miner": preload("res://scene/miner.tscn"),
 	"belt_right": preload("res://scene/ASSET/belt/beltmid.tscn"),
 	"belt_left": preload("res://scene/ASSET/belt/beltleft.tscn"),
+	"belt_east": preload("res://scene/ASSET/belt/belteast.tscn"),
+	"belt_south": preload("res://scene/ASSET/belt/beltsouth.tscn"),
+	"merger": preload("res://scene/ASSET/belt/merger.tscn"),
+	"splitter": preload("res://scene/ASSET/belt/splitter.tscn"),
 	"curve_top": preload("res://scene/ASSET/beltcurvetop.tscn"),
 	"curve_down": preload("res://scene/ASSET/belt/curvedown.tscn"),
 	"curve_left": preload("res://scene/ASSET/belt/curveleft.tscn"),
@@ -507,9 +511,8 @@ func _configure_instance_visuals(instance: Node2D) -> void:
 	for child in instance.get_children():
 		if child is Sprite2D:
 			child.centered = true
-			child.region_enabled = false
-		#elif child is AnimatedSprite2D:
-			#child.centered = true
+		elif child is AnimatedSprite2D:
+			child.centered = true
 
 func _normalize_footprint_offsets(footprint_offsets: Array) -> Array[Vector2i]:
 	var normalized: Array[Vector2i] = []

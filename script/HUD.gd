@@ -57,6 +57,10 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var curve_left: Button = $Menu_Belt/Curve_left
 @onready var belt_droit: Button = $Menu_Belt/Belt_droit
 @onready var belt_left: Button = $Menu_Belt/Belt_left
+@onready var belt_east: Button = $Menu_Belt/Belt_East
+@onready var belt_south: Button = $Menu_Belt/Belt_South
+@onready var belt_merger: Button = $Menu_Belt/Belt_Merger
+@onready var belt_splitter: Button = $Menu_Belt/Belt_Splitter
 
 @onready var orders_panel: PanelContainer = %OrdersPanel
 @onready var orders_title_label: Label = $OrdersPanel/MarginContainer/VBoxContainer/TitleLabel
@@ -105,49 +109,90 @@ var buildings_data = {
 		"footprint_offsets": [Vector2i.ZERO, Vector2i(1, 0)]
 	},
 	
-	# --- TAPIS DROITS (Exemples de directions si vous séparez les scènes) ---
+	# --- TAPIS DROITS ---
 	"belt_right": {
-		"scene": preload("res://scene/ASSET/belt/beltmid.tscn"), # À adapter si vous créez une scène par direction
-		"texture": preload("res://asset/belt-midNO.png"),
+		"scene": preload("res://scene/ASSET/belt/beltmid.tscn"),
+		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
+		"texture_region": Rect2(0, 0, 32, 32),
 		"cost": 50.0,
-		"frames": 4,
+		"frames": 1,
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"belt_left": {
-		"scene": preload("res://scene/ASSET/belt/beltleft.tscn"), 
-		"texture": preload("res://asset/belt-mid.png"),
+		"scene": preload("res://scene/ASSET/belt/beltleft.tscn"),
+		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
+		"texture_region": Rect2(0, 128, 32, 32),
 		"cost": 50.0,
-		"frames": 4,
+		"frames": 1,
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	
-	# --- VIRAGES / COURBES (Curves 1 à 4 basées sur vos assets) ---
+	# --- TAPIS CARDINAUX SUPPLEMENTAIRES ---
+	"belt_east": {
+		"scene": preload("res://scene/ASSET/belt/belteast.tscn"),
+		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
+		"texture_region": Rect2(0, 32, 32, 32),
+		"cost": 50.0,
+		"frames": 1,
+		"footprint_offsets": [Vector2i.ZERO]
+	},
+	"belt_south": {
+		"scene": preload("res://scene/ASSET/belt/beltsouth.tscn"),
+		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
+		"texture_region": Rect2(0, 64, 32, 32),
+		"cost": 50.0,
+		"frames": 1,
+		"footprint_offsets": [Vector2i.ZERO]
+	},
+	# --- MERGEUR / SPLITTER ---
+	"merger": {
+		"scene": preload("res://scene/ASSET/belt/merger.tscn"),
+		"texture": preload("res://asset/convoyer/combiner.png"),
+		"texture_region": Rect2(0, 64, 64, 64),
+		"cost": 80.0,
+		"frames": 1,
+		"footprint_offsets": [Vector2i.ZERO]
+	},
+	"splitter": {
+		"scene": preload("res://scene/ASSET/belt/splitter.tscn"),
+		"texture": preload("res://asset/convoyer/combiner.png"),
+		"texture_region": Rect2(0, 0, 64, 64),
+		"cost": 80.0,
+		"frames": 1,
+		"footprint_offsets": [Vector2i.ZERO]
+	},
+	# --- VIRAGES / COURBES ---
+	# curves.png : 64x128, 2 frames x 4 lignes (row0=top, row1=right, row2=down, row3=left)
 	"curve_top": {
-		"scene": preload("res://scene/ASSET/beltcurvetop.tscn"), # Votre scène existante !
-		"texture": preload("res://asset/Curve_0001.png"),   # Texture correspondante
+		"scene": preload("res://scene/ASSET/beltcurvetop.tscn"),
+		"texture": preload("res://asset/convoyer/curves.png"),
+		"texture_region": Rect2(0, 0, 32, 32),
 		"cost": 60.0,
-		"frames": 4, # Mettez le nombre de frames d'animation si elles sont animées
+		"frames": 1,
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"curve_down": {
-		"scene": preload("res://scene/ASSET/belt/curvedown.tscn"), # À créer sur le modèle de beltcurvetop
-		"texture": preload("res://asset/Curve_0002.png"),
+		"scene": preload("res://scene/ASSET/belt/curvedown.tscn"),
+		"texture": preload("res://asset/convoyer/curves.png"),
+		"texture_region": Rect2(0, 64, 32, 32),
 		"cost": 60.0,
-		"frames": 4,
+		"frames": 1,
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"curve_left": {
 		"scene": preload("res://scene/ASSET/belt/curveleft.tscn"),
-		"texture": preload("res://asset/Curve_0003.png"),
+		"texture": preload("res://asset/convoyer/curves.png"),
+		"texture_region": Rect2(0, 96, 32, 32),
 		"cost": 60.0,
-		"frames": 4,
+		"frames": 1,
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"curve_right": {
 		"scene": preload("res://scene/ASSET/belt/curveright.tscn"),
-		"texture": preload("res://asset/Curve_0004.png"),
+		"texture": preload("res://asset/convoyer/curves.png"),
+		"texture_region": Rect2(0, 32, 32, 32),
 		"cost": 60.0,
-		"frames": 4,
+		"frames": 1,
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"entrepot":{
@@ -241,7 +286,23 @@ func _ready() -> void:
 		_start_building_process("curve_left")
 		menu_belt.hide()
 	)
-	
+	belt_east.pressed.connect(func():
+		_start_building_process("belt_east")
+		menu_belt.hide()
+	)
+	belt_south.pressed.connect(func():
+		_start_building_process("belt_south")
+		menu_belt.hide()
+	)
+	belt_merger.pressed.connect(func():
+		_start_building_process("merger")
+		menu_belt.hide()
+	)
+	belt_splitter.pressed.connect(func():
+		_start_building_process("splitter")
+		menu_belt.hide()
+	)
+
 	if GameManager:
 		GameManager.resources_updated.connect(_on_resources_updated)
 		if GameManager.has_signal("default_delivery_point_changed"):
@@ -463,8 +524,10 @@ func _style_hud() -> void:
 		UITheme.style_button(button, UITheme.ACCENT_GOLD, UITheme.INK_DARK, true, true)
 	for button in [btn_build_belt, btn_build_turbine, btn_build_factory]:
 		button.custom_minimum_size = Vector2(200.0, 32.0)
-	for button in [curve_top, curve_down, curve_right, curve_left, belt_droit, belt_left]:
+	for button in [curve_top, curve_down, curve_right, curve_left, belt_droit, belt_left, belt_east, belt_south]:
 		UITheme.style_button(button, Color("#E9EEF1"), UITheme.INK_DARK, false, true)
+	for button in [belt_merger, belt_splitter]:
+		UITheme.style_button(button, Color("#6E8A9E"), UITheme.INK_DARK, false, true)
 	UITheme.style_card(orders_panel, false, true)
 	UITheme.style_card(session_overview_panel, false, true)
 	_style_order_panels()
@@ -708,14 +771,20 @@ func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	if building_manager:
 		var data = buildings_data[building_type]
+		var preview_tex: Texture2D = data["texture"]
+		if data.has("texture_region"):
+			var atlas_tex := AtlasTexture.new()
+			atlas_tex.atlas = data["texture"]
+			atlas_tex.region = data["texture_region"]
+			preview_tex = atlas_tex
 		building_manager.start_building(
-	data["scene"],
-	data["cost"],
-	data["texture"],
-	data.get("frames", 1),
-	data.get("footprint_offsets", [Vector2i.ZERO]),
-	data.get("preview_scale", Vector2.ONE)
-)
+			data["scene"],
+			data["cost"],
+			preview_tex,
+			1,
+			data.get("footprint_offsets", [Vector2i.ZERO]),
+			data.get("preview_scale", Vector2.ONE)
+		)
 		# Masquer les panneaux entité quand on entre en mode construction
 		if _entity_panel:
 			_entity_panel.hide()

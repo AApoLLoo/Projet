@@ -63,13 +63,12 @@ animations = [{
 [node name="beltmid" type="Node2D" unique_id=2105109412]
 y_sort_enabled = true
 script = ExtResource("1_conveyorentity")
+conveyor_kind = "belt_right"
 input_offset = Vector2i(-1, 1)
 output_offset = Vector2i(1, -1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=489065791]
 unique_name_in_owner = true
 y_sort_enabled = true
-position = Vector2(33.76323, -34)
-scale = Vector2(1, 0.992)
 sprite_frames = SubResource("SpriteFrames_pjtlh")
-frame_progress = 0.17502806
+autoplay = "default"
