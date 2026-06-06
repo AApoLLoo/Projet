@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://d7fm8kp2vw9xq"]
+[gd_scene format=3 uid="uid://c0rnistcqe6y"]
 
 [ext_resource type="Script" uid="uid://dwlkmwtnf317r" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
 [ext_resource type="Texture2D" uid="uid://bn74nd1vnggtb" path="res://asset/convoyer/conveyer belt all-0001.png" id="2_beltall"]
@@ -74,5 +74,6 @@ input_offset = Vector2i(0, -1)
 output_offset = Vector2i(0, 1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=7004]
+scale = Vector2(1.75, 1.736)
 sprite_frames = SubResource("SpriteFrames_beltsouth")
 autoplay = "default"

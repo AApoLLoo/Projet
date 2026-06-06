@@ -70,11 +70,17 @@ func _ready() -> void:
 const BUILDING_CELL_SIZE: int = 64
 
 func get_grid_pos(world_pos: Vector2) -> Vector2i:
-	return Vector2i(int(floor(world_pos.x / BUILDING_CELL_SIZE)), int(floor(world_pos.y / BUILDING_CELL_SIZE)))
+	return Vector2i(
+		int(floor(world_pos.x / float(BUILDING_CELL_SIZE))),
+		int(floor(world_pos.y / float(BUILDING_CELL_SIZE)))
+	)
 
 func get_world_pos(cell_pos: Vector2i) -> Vector2:
-	return Vector2(cell_pos.x * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0, cell_pos.y * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0)
-
+	return Vector2(
+		float(cell_pos.x) * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0,
+		float(cell_pos.y) * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0
+	)
+	
 func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1, footprint_offsets: Array = [Vector2i.ZERO], preview_scale: Vector2 = Vector2.ONE) -> void:
 	if is_selecting_delivery_point:
 		stop_delivery_point_selection()
@@ -96,7 +102,7 @@ func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_
 	is_building = true
 
 	# Reset scale / modulate au cas où
-	preview_sprite.scale = Vector2(1.75, 1.75)
+	preview_sprite.scale = preview_scale  # utilise la scale transmise par HUD (propre à chaque bâtiment)
 	preview_sprite.modulate = Color(1,1,1,0.6)
 	
 func stop_building() -> void:
@@ -193,10 +199,9 @@ func _update_delivery_point_hover_preview() -> void:
 func _update_preview() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	
-	# --- MODIFICATION ICI : Calcul de position isométrique ---
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
-	preview_sprite.global_position = get_world_pos(cell_pos)
-	# ---------------------------------------------------------
+	var snap_pos: Vector2 = get_world_pos(cell_pos)
+	preview_sprite.global_position = snap_pos
 	
 	if _can_build(cell_pos):
 		preview_sprite.modulate = Color(0, 1, 0, 0.6) # Vert semi-transparent si plaçable
@@ -206,7 +211,7 @@ func _update_preview() -> void:
 func _try_place_building() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
-	
+	var snap_pos: Vector2 = get_world_pos(cell_pos)
 	if _can_build(cell_pos):
 		GameManager.add_credits(-factory_cost)
 		var factory_instance: Node2D = factory_scene.instantiate()
@@ -221,14 +226,13 @@ func _try_place_building() -> void:
 			#factory_instance.is_powered = true
 		# ───────────────────────────────────────────────────────────
 
-		# ENSUITE seulement on ajoute à l'arbre → _ready() se déclenche ici
 		if buildings_node:
 			buildings_node.add_child(factory_instance)
 		else:
 			add_child(factory_instance)
-		# 4. Positionnement visuel
-		factory_instance.global_position = preview_sprite.global_position
+		# 4. Positionnement visuel : centrer les sprites D'ABORD, puis positionner
 		_configure_instance_visuals(factory_instance)
+		factory_instance.global_position = get_world_pos(cell_pos)
 			
 		# 5. Enregistrement des cellules
 		var occupied_by_build: Array[Vector2i] = _get_occupied_cells_for_build(cell_pos, _current_build_footprint_offsets)
@@ -504,11 +508,19 @@ func _restore_single_entity(data: Dictionary) -> int:
 
 func _configure_instance_visuals(instance: Node2D) -> void:
 	instance.z_index = preview_sprite.z_index - 1
-	for child in instance.get_children():
+	_center_sprites_recursive(instance)
+
+func _center_sprites_recursive(node: Node) -> void:
+	for child in node.get_children():
 		if child is Sprite2D:
 			child.centered = true
+			child.position = Vector2.ZERO
+			child.offset = Vector2.ZERO
 		elif child is AnimatedSprite2D:
 			child.centered = true
+			child.position = Vector2.ZERO
+			child.offset = Vector2.ZERO
+		_center_sprites_recursive(child)
 
 func _normalize_footprint_offsets(footprint_offsets: Array) -> Array[Vector2i]:
 	var normalized: Array[Vector2i] = []

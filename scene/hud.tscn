@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://5nx80apmymd" path="res://script/HUD.gd" id="1_hud"]
 [ext_resource type="Script" uid="uid://cei88ve3rwm6c" path="res://script/MinimapOverlay.gd" id="2_minimap_overlay"]
 [ext_resource type="Texture2D" uid="uid://ulirfg2pcl7w" path="res://asset/combiner.png" id="3_pvgpj"]
-[ext_resource type="Texture2D" uid="uid://dbqdsqvqjpkl2" path="res://asset/conveyer belt allleft-0001.png" id="4_nhyt6"]
 [ext_resource type="Texture2D" uid="uid://cu363bj51l0e2" path="res://asset/conveyer belt alldown-0001.png" id="4_qy82l"]
 [ext_resource type="Texture2D" uid="uid://lnaf8pwox26k" path="res://asset/conveyer belt allright-0001.png" id="5_sjh6b"]
 [ext_resource type="Texture2D" uid="uid://ccaqnqjeqfwxj" path="res://asset/conveyer belt alltop-0001.png" id="6_xphas"]

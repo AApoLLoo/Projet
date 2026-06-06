@@ -65,6 +65,7 @@ animations = [{
 script = ExtResource("1_turbineentity")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1501720407]
+scale = Vector2(0.9, 0.9)
 sprite_frames = SubResource("SpriteFrames_l10q4")
 autoplay = ""
 
