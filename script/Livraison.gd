@@ -5,7 +5,7 @@ const JOB_EXPORT: String = "export"
 const EXPORT_MARGIN_FACTOR: float = 0.28
 const EXPORT_ENERGY_COST_PER_KW_MINUTE: float = 0.25
 const EXPORT_TIME_COST_PER_SECOND: float = 1.5
-
+@export var delivery_offset: Vector2 = Vector2(60,110)  # décalage à gauche
 const ORDERABLE_RESOURCE_ORDER: Array[String] = [
 	"charbon",
 	"gaz",
@@ -214,12 +214,12 @@ func _start_delivery(order: Dictionary) -> void:
 	_delivery_in_progress = true
 	delivery_state_changed.emit(true, get_current_order())
 	delivery_started.emit(get_current_order())
-
+	
 	var point_state: Dictionary = order.get("delivery_point", {})
 	var target_position: Vector2 = Vector2(
 		float(point_state.get("world_x", 0.0)),
 		float(point_state.get("world_y", 0.0))
-	)
+	) + delivery_offset
 
 	var tween: Tween = create_tween()
 	tween.tween_property(truck_instance, "global_position", target_position, drive_time) \
@@ -242,25 +242,37 @@ func _start_delivery(order: Dictionary) -> void:
 func _set_truck_unloading_state(truck_instance: Node2D, unloading: bool) -> void:
 	var bar: ProgressBar = truck_instance.get_node_or_null("Truck/loadingbar") as ProgressBar
 	var anim: AnimatedSprite2D = truck_instance.get_node_or_null("Truck") as AnimatedSprite2D
+	# ── Ajoute cette ligne pour la porte ──
+	var door: AnimatedSprite2D = truck_instance.get_node_or_null("DoorSprite") as AnimatedSprite2D
+	# ──────────────────────────────────────
+	
+
 	if bar:
 		if unloading:
 			bar.value = 0
 			bar.max_value = 100
 			bar.show()
 			bar.z_index = 100
-			# Anime la barre de 0 à 100 sur toute la durée du déchargement
 			var bar_tween: Tween = create_tween()
 			bar_tween.tween_property(bar, "value", 100.0, unload_time)
 		else:
 			bar.hide()
 			bar.value = 0
+	
 	if anim:
 		if unloading:
 			anim.play("default")
 		else:
 			anim.stop()
 			anim.frame = 0
-
+	
+	# ── Contrôle de la porte ──
+	if door:
+		if unloading:
+			door.play("open")
+		else:
+			door.play_backwards("open")
+	# ──────────────────────────
 # ─── MODIFIÉ : spawn des matériaux au point de livraison ───────────────────────
 # Dans Projet/script/Livraison.gd
 

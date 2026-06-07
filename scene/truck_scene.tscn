@@ -1,6 +1,19 @@
 [gd_scene format=3 uid="uid://nkh2ijoou82c"]
 
 [ext_resource type="Texture2D" uid="uid://ol5x3gks7flm" path="res://asset/3.png" id="1_84xpb"]
+[ext_resource type="Shader" uid="uid://bg3757v3m71fk" path="res://scene/truck_scene.gdshader" id="1_mi8px"]
+[ext_resource type="Texture2D" uid="uid://bbk1ubpw3i0y8" path="res://asset/Palette.png" id="2_xrpq1"]
+[ext_resource type="Texture2D" uid="uid://cap84qdw0jjoi" path="res://asset/4.png" id="3_xrpq1"]
+[ext_resource type="Texture2D" uid="uid://dytual2wgrble" path="res://asset/10.png" id="4_dsg64"]
+[ext_resource type="Texture2D" uid="uid://gytbebfpuh3i" path="res://asset/10_2.png" id="6_dpoqo"]
+[ext_resource type="Texture2D" uid="uid://d1rixcpf2bdue" path="res://asset/10_3.png" id="7_m3en0"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dpoqo"]
+shader = ExtResource("1_mi8px")
+shader_parameter/palette_texture = ExtResource("2_xrpq1")
+shader_parameter/palette_index = 9
+shader_parameter/palette_width = 10
+shader_parameter/palette_height = 10
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kl1xb"]
 atlas = ExtResource("1_84xpb")
@@ -15,14 +28,104 @@ animations = [{
 "loop": true,
 "name": &"default",
 "speed": 5.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"new_animation",
+"speed": 5.0
+}]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dsg64"]
+shader = ExtResource("1_mi8px")
+shader_parameter/palette_texture = ExtResource("2_xrpq1")
+shader_parameter/palette_index = 6
+shader_parameter/palette_width = 10
+shader_parameter/palette_height = 10
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m3en0"]
+atlas = ExtResource("3_xrpq1")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yrge5"]
+atlas = ExtResource("3_xrpq1")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k4ft7"]
+atlas = ExtResource("3_xrpq1")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8ahf8"]
+atlas = ExtResource("3_xrpq1")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_tuirj"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m3en0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yrge5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k4ft7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8ahf8")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_m3en0"]
+shader = ExtResource("1_mi8px")
+shader_parameter/palette_texture = ExtResource("2_xrpq1")
+shader_parameter/palette_index = 6
+shader_parameter/palette_width = 10
+shader_parameter/palette_height = 10
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yrge5"]
+shader = ExtResource("1_mi8px")
+shader_parameter/palette_texture = ExtResource("2_xrpq1")
+shader_parameter/palette_index = 6
+shader_parameter/palette_width = 10
+shader_parameter/palette_height = 10
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_k4ft7"]
+shader = ExtResource("1_mi8px")
+shader_parameter/palette_texture = ExtResource("2_xrpq1")
+shader_parameter/palette_index = 9
+shader_parameter/palette_width = 10
+shader_parameter/palette_height = 10
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_yrge5"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_dsg64")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_dpoqo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_m3en0")
+}],
+"loop": false,
+"name": &"open",
+"speed": 2.0
 }]
 
 [node name="Pauste_Truck" type="Node2D" unique_id=1323926010]
+z_index = 10
+z_as_relative = false
 
 [node name="Truck" type="AnimatedSprite2D" parent="." unique_id=1261176419]
 z_index = 1
-position = Vector2(46, 0)
+material = SubResource("ShaderMaterial_dpoqo")
+position = Vector2(11, -21)
 sprite_frames = SubResource("SpriteFrames_0oiqc")
+frame_progress = 0.9375016
 
 [node name="loadingbar" type="ProgressBar" parent="Truck" unique_id=1770336814]
 visible = false
@@ -33,3 +136,45 @@ offset_top = -153.0
 offset_right = 85.0
 offset_bottom = -89.0
 step = 10.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1144389603]
+material = SubResource("ShaderMaterial_dsg64")
+position = Vector2(-64, 0)
+sprite_frames = SubResource("SpriteFrames_tuirj")
+autoplay = "default"
+frame_progress = 0.64842945
+
+[node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="." unique_id=277231137]
+z_index = 1
+material = SubResource("ShaderMaterial_m3en0")
+sprite_frames = SubResource("SpriteFrames_tuirj")
+autoplay = "default"
+frame_progress = 0.010791434
+
+[node name="AnimatedSprite2D3" type="AnimatedSprite2D" parent="." unique_id=616847149]
+material = SubResource("ShaderMaterial_yrge5")
+position = Vector2(24, 0)
+sprite_frames = SubResource("SpriteFrames_tuirj")
+autoplay = "default"
+frame_progress = 0.62904394
+
+[node name="AnimatedSprite2D4" type="AnimatedSprite2D" parent="." unique_id=844377165]
+z_index = 2
+material = SubResource("ShaderMaterial_yrge5")
+position = Vector2(-81, 0)
+sprite_frames = SubResource("SpriteFrames_tuirj")
+autoplay = "default"
+frame_progress = 0.14759125
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2068742358]
+z_index = 1
+material = SubResource("ShaderMaterial_k4ft7")
+position = Vector2(-52, -18)
+texture = ExtResource("4_dsg64")
+
+[node name="DoorSprite" type="AnimatedSprite2D" parent="." unique_id=1188194815]
+position = Vector2(-54, -18)
+sprite_frames = SubResource("SpriteFrames_yrge5")
+animation = &"open"
+frame = 2
+frame_progress = 1.0

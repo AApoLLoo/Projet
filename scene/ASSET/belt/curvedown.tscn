@@ -27,7 +27,7 @@ animations = [{
 
 [node name="curvedown" type="Node2D" unique_id=736027828]
 script = ExtResource("1_conveyorentity")
-conveyor_kind = "curve_down"
+conveyor_kind = "belt_down"
 input_offset = Vector2i(1, -1)
 output_offset = Vector2i(1, 1)
 
