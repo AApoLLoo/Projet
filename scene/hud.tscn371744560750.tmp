@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://ulirfg2pcl7w" path="res://asset/combiner.png" id="3_pvgpj"]
 [ext_resource type="Texture2D" uid="uid://cu363bj51l0e2" path="res://asset/conveyer belt alldown-0001.png" id="4_qy82l"]
 [ext_resource type="Texture2D" uid="uid://lnaf8pwox26k" path="res://asset/conveyer belt allright-0001.png" id="5_sjh6b"]
+[ext_resource type="Texture2D" uid="uid://ccaqnqjeqfwxj" path="res://asset/conveyer belt alltop-0001.png" id="6_xphas"]
 
 [node name="HUD" type="CanvasLayer" unique_id=745135006]
 script = ExtResource("1_hud")
@@ -597,6 +598,14 @@ icon = ExtResource("5_sjh6b")
 [node name="Curve_left" type="Button" parent="Menu_Belt" unique_id=546413980]
 layout_mode = 2
 
+[node name="Belt_droit" type="Button" parent="Menu_Belt" unique_id=1001744654]
+layout_mode = 2
+icon = ExtResource("6_xphas")
+
+[node name="Belt_left" type="Button" parent="Menu_Belt" unique_id=1980610375]
+layout_mode = 2
+text = "🡴"
+
 [node name="Belt_West" type="Button" parent="Menu_Belt" unique_id=1062400150]
 layout_mode = 2
 text = "🡴"
@@ -604,9 +613,3 @@ text = "🡴"
 [node name="Belt_North" type="Button" parent="Menu_Belt" unique_id=107389716]
 layout_mode = 2
 text = "🡴"
-
-[node name="Belt_East" type="Button" parent="Menu_Belt" unique_id=1004790705]
-layout_mode = 2
-
-[node name="Belt_South" type="Button" parent="Menu_Belt" unique_id=130327982]
-layout_mode = 2

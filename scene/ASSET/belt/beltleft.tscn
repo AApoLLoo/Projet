@@ -19,13 +19,13 @@ region = Rect2(64, 128, 32, 32)
 atlas = ExtResource("2_ymtvf")
 region = Rect2(96, 128, 32, 32)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_3jyov"]
-atlas = ExtResource("2_ymtvf")
-region = Rect2(160, 128, 32, 32)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_ogaei"]
 atlas = ExtResource("2_ymtvf")
 region = Rect2(128, 128, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3jyov"]
+atlas = ExtResource("2_ymtvf")
+region = Rect2(160, 128, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_w12qj"]
 atlas = ExtResource("2_ymtvf")
@@ -51,10 +51,10 @@ animations = [{
 "texture": SubResource("AtlasTexture_pqggy")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_3jyov")
+"texture": SubResource("AtlasTexture_ogaei")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ogaei")
+"texture": SubResource("AtlasTexture_3jyov")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_w12qj")
@@ -67,11 +67,11 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="beltend" type="Node2D" unique_id=1135212051]
+[node name="beltleft" type="Node2D" unique_id=1135212051]
 script = ExtResource("1_conveyorentity")
-conveyor_kind = "belt_left"
-input_offset = Vector2i(1, -1)
-output_offset = Vector2i(-1, 1)
+conveyor_kind = "belt_west"
+input_offset = Vector2i(1, 0)
+output_offset = Vector2i(-1, 0)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1121658579]
 scale = Vector2(1.75, 1.736)

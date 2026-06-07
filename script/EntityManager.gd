@@ -6,8 +6,9 @@ extends Node
 # Recalcule les totaux énergie / CO2 et notifie GameManager.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Dictionnaire entity_id -> Entity
-var entities: Dictionary = {}
+var entities: Dictionary = {}       # entity_id → Entity
+var _cell_index: Dictionary = {}    # Vector2i → Entity
+
 const CARDINAL_NEIGHBOR_OFFSETS: Array[Vector2i] = [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -15,31 +16,59 @@ const CARDINAL_NEIGHBOR_OFFSETS: Array[Vector2i] = [
 	Vector2i(-1, 0),
 ]
 
-# Émis quand les totaux changent
-# energy_total : kW net (négatif = production nette, positif = consommation nette)
-# co2_total    : g/min total
 signal totals_changed(energy_total: float, co2_total: float)
 
 # ─── API ─────────────────────────────────────────────────────────────────────
 
 func register_entity(entity: Entity) -> void:
-	print("EntityManager : Enregistrement de ", entity.entity_type, " à ", entity.cell_position)
 	entities[entity.entity_id] = entity
+	_cell_index[entity.cell_position] = entity
 	recalculate_totals()
+
+func update_entity_cell(entity: Entity, old_pos: Vector2i, new_pos: Vector2i) -> void:
+	if _cell_index.get(old_pos) == entity:
+		_cell_index.erase(old_pos)
+	_cell_index[new_pos] = entity
+
+func get_entity_at_cell(cell_pos: Vector2i) -> Entity:
+	var entity = _cell_index.get(cell_pos, null)
+	if entity != null and not is_instance_valid(entity):
+		_cell_index.erase(cell_pos)
+		return null
+	return entity
 
 func unregister_entity(entity_id: String, expected_entity: Entity = null) -> void:
 	if expected_entity != null:
 		var registered_entity: Variant = entities.get(entity_id)
 		if registered_entity != null and registered_entity != expected_entity:
 			return
+		# Nettoyer le cell_index pour cette entité
+		if is_instance_valid(expected_entity):
+			var cell = expected_entity.cell_position
+			if _cell_index.get(cell) == expected_entity:
+				_cell_index.erase(cell)
+		else:
+			# Entité déjà libérée : balayage défensif
+			var stale_cells: Array = []
+			for cell in _cell_index.keys():
+				if not is_instance_valid(_cell_index[cell]):
+					stale_cells.append(cell)
+			for cell in stale_cells:
+				_cell_index.erase(cell)
+	else:
+		var entity = entities.get(entity_id)
+		if entity != null and is_instance_valid(entity):
+			var cell = entity.cell_position
+			if _cell_index.get(cell) == entity:
+				_cell_index.erase(cell)
 	entities.erase(entity_id)
 	recalculate_totals()
 
 func clear_entities() -> void:
 	entities.clear()
+	_cell_index.clear()
 	recalculate_totals()
 
-# Somme toutes les contributions énergie et CO2 des entités actives.
 func recalculate_totals() -> void:
 	var energy_total: float = 0.0
 	var co2_total: float = 0.0
@@ -51,43 +80,19 @@ func recalculate_totals() -> void:
 			continue
 		energy_total += entity.get_energy_delta()
 		co2_total += entity.get_co2_rate()
-	# Nettoyer les références périmées
 	for id in stale:
 		entities.erase(id)
 	totals_changed.emit(energy_total, co2_total)
 
-# Retourne toutes les entités d'un type donné
 func get_entities_of_type(entity_type: String) -> Array:
 	var result: Array = []
 	for entity in entities.values():
-		if entity.entity_type == entity_type:
+		if is_instance_valid(entity) and entity.entity_type == entity_type:
 			result.append(entity)
 	return result
 
-# Retourne le nombre total d'entités enregistrées
 func count() -> int:
 	return entities.size()
-
-func get_entity_at_cell(cell_pos: Vector2i) -> Entity:
-	for id in entities:
-		var entity = entities[id]
-		
-		if not is_instance_valid(entity):
-			continue
-			
-		# DEBUG TRÈS PRÉCIS
-		if entity.cell_position == cell_pos:
-			return entity # Succès !
-		else:
-			# On vérifie si par hasard ce n'est pas un problème de Vector2 vs Vector2i
-			# (Si les valeurs sont identiques mais le type diffère, le == peut échouer)
-			if Vector2i(entity.cell_position) == cell_pos:
-				# Si ça rentre ici, c'est que ton objet a une position qui ressemble à un Vector2
-				# alors qu'il devrait être un Vector2i
-				print("DEBUG : Position correspondante trouvée mais type différent. Entité : ", entity.cell_position, " Cherché : ", cell_pos)
-				return entity
-	
-	return null
 
 func get_adjacent_entities(cell_pos: Vector2i) -> Array:
 	var neighbors: Array = []
@@ -97,9 +102,6 @@ func get_adjacent_entities(cell_pos: Vector2i) -> Array:
 			neighbors.append(neighbor)
 	return neighbors
 
-# Retourne l'électricité disponible (kW) à une cellule donnée,
-# en sommant toutes les turbines actives dont la zone couvre cette cellule.
-# Plusieurs turbines dans la même zone s'additionnent.
 func get_electricity_at_cell(cell_pos: Vector2i) -> float:
 	var total: float = 0.0
 	for entity in entities.values():

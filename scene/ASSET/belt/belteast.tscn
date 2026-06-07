@@ -5,35 +5,35 @@
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_be0"]
 atlas = ExtResource("2_beltall")
-region = Rect2(0, 32, 32, 32)
+region = Rect2(0, 192, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_be1"]
 atlas = ExtResource("2_beltall")
-region = Rect2(32, 32, 32, 32)
+region = Rect2(32, 192, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_be2"]
 atlas = ExtResource("2_beltall")
-region = Rect2(64, 32, 32, 32)
+region = Rect2(64, 192, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_be3"]
 atlas = ExtResource("2_beltall")
-region = Rect2(96, 32, 32, 32)
+region = Rect2(96, 192, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_be4"]
 atlas = ExtResource("2_beltall")
-region = Rect2(128, 32, 32, 32)
+region = Rect2(128, 192, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_be5"]
 atlas = ExtResource("2_beltall")
-region = Rect2(160, 32, 32, 32)
+region = Rect2(160, 192, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_be6"]
 atlas = ExtResource("2_beltall")
-region = Rect2(192, 32, 32, 32)
+region = Rect2(192, 192, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_be7"]
 atlas = ExtResource("2_beltall")
-region = Rect2(224, 32, 32, 32)
+region = Rect2(224, 192, 32, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_belteast"]
 animations = [{
@@ -70,9 +70,8 @@ animations = [{
 [node name="belteast" type="Node2D" unique_id=7001]
 script = ExtResource("1_conveyorentity")
 conveyor_kind = "belt_east"
-input_offset = Vector2i(-1, 0)
-output_offset = Vector2i(1, 0)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=7002]
+scale = Vector2(1.75, 1.736)
 sprite_frames = SubResource("SpriteFrames_belteast")
 autoplay = "default"

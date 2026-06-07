@@ -55,10 +55,10 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var curve_down: Button = $Menu_Belt/Curve_Down
 @onready var curve_right: Button = $Menu_Belt/Curve_Right
 @onready var curve_left: Button = $Menu_Belt/Curve_left
-@onready var belt_droit: Button = $Menu_Belt/Belt_droit
-@onready var belt_left: Button = $Menu_Belt/Belt_left
 @onready var belt_east: Button = $Menu_Belt/Belt_East
 @onready var belt_south: Button = $Menu_Belt/Belt_South
+@onready var belt_north: Button = $Menu_Belt/Belt_North
+@onready var belt_west: Button = $Menu_Belt/Belt_West
 @onready var belt_merger: Button = $Menu_Belt/Belt_Merger
 @onready var belt_splitter: Button = $Menu_Belt/Belt_Splitter
 
@@ -111,31 +111,14 @@ var buildings_data = {
 		"footprint_offsets": [Vector2i.ZERO, Vector2i(1, 0)]
 	},
 
-	# --- TAPIS DROITS ---
-	"belt_right": {
-		"scene": preload("res://scene/ASSET/belt/beltmid.tscn"),
-		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
-		"texture_region": Rect2(0, 0, 32, 32),
-		"cost": 50.0,
-		"frames": 1,
-		"preview_scale": Vector2(1.75, 1.75),
-		"footprint_offsets": [Vector2i.ZERO]
-	},
-	"belt_left": {
-		"scene": preload("res://scene/ASSET/belt/beltleft.tscn"),
-		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
-		"texture_region": Rect2(0, 128, 32, 32),
-		"cost": 50.0,
-		"frames": 1,
-		"preview_scale": Vector2(1.75, 1.75),
-		"footprint_offsets": [Vector2i.ZERO]
-	},
+	
+	
 
 	# --- TAPIS CARDINAUX SUPPLEMENTAIRES ---
 	"belt_east": {
 		"scene": preload("res://scene/ASSET/belt/belteast.tscn"),
 		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
-		"texture_region": Rect2(0, 32, 32, 32),
+		"texture_region": Rect2(0, 192, 32, 32),
 		"cost": 50.0,
 		"frames": 1,
 		"preview_scale": Vector2(1.75, 1.75),
@@ -145,6 +128,24 @@ var buildings_data = {
 		"scene": preload("res://scene/ASSET/belt/beltsouth.tscn"),
 		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
 		"texture_region": Rect2(0, 64, 32, 32),
+		"cost": 50.0,
+		"frames": 1,
+		"preview_scale": Vector2(1.75, 1.75),
+		"footprint_offsets": [Vector2i.ZERO]
+	},
+	"belt_north": {
+		"scene": preload("res://scene/ASSET/belt/beltnorth.tscn"),
+		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
+		"texture_region": Rect2(0, 0, 32, 32),
+		"cost": 50.0,
+		"frames": 1,
+		"preview_scale": Vector2(1.75, 1.75),
+		"footprint_offsets": [Vector2i.ZERO]
+	},
+	"belt_west": {
+		"scene": preload("res://scene/ASSET/belt/beltleft.tscn"),
+		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
+		"texture_region": Rect2(0, 128, 32, 32),
 		"cost": 50.0,
 		"frames": 1,
 		"preview_scale": Vector2(1.75, 1.75),
@@ -276,20 +277,9 @@ func _ready() -> void:
 	TimeManager.time_changed.connect(_on_time_changed)
 	TimeManager.day_changed.connect(_on_day_changed)
 	
-	# Exemple pour les tapis droits
-	if belt_droit:
-		belt_droit.pressed.connect(func():
-			_start_building_process("belt_right")
-			menu_belt.hide()
-		)
-	else:
-		push_error("belt_droit est null ! Vérifier le nom du nœud dans la scène HUD.")
-		
-	if belt_left:
-		belt_left.pressed.connect(func():
-			_start_building_process("belt_left")
-			menu_belt.hide()
-		)
+	
+	
+	
 	# Exemple pour vos courbes (Curves)
 	if curve_top:
 		curve_top.pressed.connect(func():
@@ -319,6 +309,16 @@ func _ready() -> void:
 	if belt_south:
 		belt_south.pressed.connect(func():
 			_start_building_process("belt_south")
+			menu_belt.hide()
+		)
+	if belt_north:
+		belt_north.pressed.connect(func():
+			_start_building_process("belt_north")
+			menu_belt.hide()
+		)
+	if belt_west:
+		belt_west.pressed.connect(func():
+			_start_building_process("belt_west")
 			menu_belt.hide()
 		)
 	if belt_merger:
@@ -418,20 +418,25 @@ func _ready() -> void:
 	else:
 		add_child(destroy_button)
 
-		destroy_button.toggled.connect(func(pressed):
-			var bm = get_tree().current_scene.find_child("BuildingManager", true, false)
-			if bm:
-				if pressed and bm.has_method("start_destroying"):
-					bm.start_destroying()
-				elif not pressed and bm.has_method("stop_destroying"):
-					bm.stop_destroying()
-		)
+	destroy_button.toggled.connect(func(pressed: bool) -> void:
+		var bm = get_tree().current_scene.find_child("BuildingManager", true, false)
+		if bm:
+			if pressed and bm.has_method("start_destroying"):
+				bm.start_destroying()
+				for btn in get_tree().get_nodes_in_group("build_buttons"):
+					if btn is Button:
+						btn.set_pressed(false)
+			elif not pressed and bm.has_method("stop_destroying"):
+				bm.stop_destroying()
+	)
 
-		if _building_manager.has_signal("destroy_mode_changed"):
-			_building_manager.destroy_mode_changed.connect(func(enabled):
-				destroy_button.set_pressed(enabled)
-			)
-		destroy_button.set_pressed(_building_manager.is_destroying)
+	if _building_manager != null and _building_manager.has_signal("destroy_mode_changed"):
+		_building_manager.destroy_mode_changed.connect(func(enabled: bool) -> void:
+			destroy_button.set_pressed_no_signal(enabled)
+		)
+	if _building_manager != null:
+		destroy_button.set_pressed_no_signal(_building_manager.is_destroying)
+
 
 	# --- BOUTON AFFICHAGE ZONE ÉLECTRIQUE ---
 	var elec_overlay_button: Button = Button.new()
@@ -533,7 +538,7 @@ func _style_hud() -> void:
 		UITheme.style_button(button, UITheme.ACCENT_GOLD, UITheme.INK_DARK, true, true)
 	for button in [btn_build_belt, btn_build_turbine, btn_build_factory]:
 		button.custom_minimum_size = Vector2(200.0, 32.0)
-	for button in [curve_top, curve_down, curve_right, curve_left, belt_droit, belt_left, belt_east, belt_south]:
+	for button in [curve_top, curve_down, curve_right, curve_left, belt_east, belt_south, belt_north, belt_west]:
 		UITheme.style_button(button, Color("#E9EEF1"), UITheme.INK_DARK, false, true)
 	for button in [belt_merger, belt_splitter]:
 		UITheme.style_button(button, Color("#6E8A9E"), UITheme.INK_DARK, false, true)
@@ -1486,10 +1491,10 @@ func _has_physical_key(events: Array[InputEvent], keycode: int) -> bool:
 func _setup_belt_button_icons() -> void:
 	# Associe chaque bouton du sous-menu au sprite correspondant dans buildings_data
 	var belt_button_map: Dictionary = {
-		belt_droit:    "belt_right",
-		belt_left:     "belt_left",
 		belt_east:     "belt_east",
 		belt_south:    "belt_south",
+		belt_north:    "belt_north",
+		belt_west:     "belt_west",
 		curve_top:     "curve_top",
 		curve_down:    "curve_down",
 		curve_right:   "curve_right",

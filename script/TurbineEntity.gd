@@ -69,6 +69,6 @@ func update_neighbors():
 			
 			if ent != null:
 				var type = str(ent.get("entity_type"))
-				if "belt" in type:
+				if ent is ConveyorEntity:
 					if ent.has_method("set_powered"):
 						ent.set_powered(is_active)
