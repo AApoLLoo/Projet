@@ -27,6 +27,7 @@ var _delivery_point_marker: Node2D
 var _order_delivery_preview_marker: Node2D
 var _delivery_point_hover_marker: Node2D
 var _marker_pulse_time: float = 0.0
+var _electricity_overlay: Node2D = null
 
 func set_preview_mode(enabled: bool) -> void:
 	_preview_mode = enabled
@@ -48,6 +49,7 @@ func _ready() -> void:
 
 	_apply_start_state()
 	_setup_delivery_point_marker()
+	_setup_electricity_overlay()
 	if _preview_mode:
 		var hud = get_node_or_null("HUD")
 		if hud:
@@ -57,6 +59,21 @@ func _ready() -> void:
 
 	_build_pause_ui()
 	TimeManager.is_time_running = true
+
+func _setup_electricity_overlay() -> void:
+	if _electricity_overlay == null:
+		_electricity_overlay = ElectricityOverlay.new()
+		_electricity_overlay.name = "ElectricityOverlay"
+		add_child(_electricity_overlay)
+
+func toggle_electricity_overlay() -> void:
+	if _electricity_overlay == null:
+		return
+	if _electricity_overlay.visible:
+		_electricity_overlay.hide()
+	else:
+		_electricity_overlay.show()
+		_electricity_overlay.queue_redraw()
 
 func _setup_delivery_point_marker() -> void:
 	if _delivery_point_marker == null:

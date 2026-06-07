@@ -7,6 +7,8 @@ var inventory: Dictionary = {}
 func _ready():
 	add_to_group("entrepot")
 	entity_type = "entrepot"
+	# Les entrepôts ne consomment pas d'électricité
+	electricity_need = 0.0
 	super._ready()
 
 # Quand un tapis dépose une ressource : ajout au stock LOCAL de cet entrepôt uniquement

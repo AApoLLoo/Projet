@@ -1,38 +1,24 @@
 [gd_scene format=3 uid="uid://c0a78lx1lnx6e"]
 
 [ext_resource type="Script" uid="uid://dwlkmwtnf317r" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
-[ext_resource type="Texture2D" uid="uid://by50cr7gadnc4" path="res://asset/convoyer/Corners/Curve_0003.png" id="2_hdah6"]
+[ext_resource type="Texture2D" uid="uid://bjbji2tvswhju" path="res://asset/convoyer/curves.png" id="2_curves"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ymel5"]
-atlas = ExtResource("2_hdah6")
-region = Rect2(172, 0, 172, 171)
+[sub_resource type="AtlasTexture" id="AtlasTexture_cl0"]
+atlas = ExtResource("2_curves")
+region = Rect2(0, 96, 32, 32)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_rd7cn"]
-atlas = ExtResource("2_hdah6")
-region = Rect2(344, 0, 172, 171)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_yxksl"]
-atlas = ExtResource("2_hdah6")
-region = Rect2(516, 0, 172, 171)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3piwa"]
-atlas = ExtResource("2_hdah6")
-region = Rect2(0, 0, 172, 171)
+[sub_resource type="AtlasTexture" id="AtlasTexture_cl1"]
+atlas = ExtResource("2_curves")
+region = Rect2(32, 96, 32, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_curveleft"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ymel5")
+"texture": SubResource("AtlasTexture_cl0")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_rd7cn")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_yxksl")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3piwa")
+"texture": SubResource("AtlasTexture_cl1")
 }],
 "loop": true,
 "name": &"default",
@@ -46,7 +32,8 @@ input_offset = Vector2i(1, 1)
 output_offset = Vector2i(-1, 1)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=208625960]
-position = Vector2(1, 1)
+position = Vector2(0, -1)
+scale = Vector2(1.75, 1.75)
 sprite_frames = SubResource("SpriteFrames_curveleft")
 autoplay = "default"
-offset = Vector2(16, -3)
+offset = Vector2(16.5, -0.5)

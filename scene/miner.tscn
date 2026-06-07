@@ -74,9 +74,9 @@ script = ExtResource("1_minerentity")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1002]
 y_sort_enabled = true
+scale = Vector2(0.9, 0.9)
 sprite_frames = SubResource("SpriteFrames_miner")
 autoplay = "default"
-scale = Vector2(0.7, 0.7)
 
 [node name="WhitePuffVfx" parent="." unique_id=1003 instance=ExtResource("3_whitepuffvfx")]
 position = Vector2(0, -30)

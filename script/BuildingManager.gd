@@ -9,6 +9,10 @@ const _ENTITY_SCENES: Dictionary = {
 	"miner": preload("res://scene/miner.tscn"),
 	"belt_right": preload("res://scene/ASSET/belt/beltmid.tscn"),
 	"belt_left": preload("res://scene/ASSET/belt/beltleft.tscn"),
+	"belt_east": preload("res://scene/ASSET/belt/belteast.tscn"),
+	"belt_south": preload("res://scene/ASSET/belt/beltsouth.tscn"),
+	"merger": preload("res://scene/ASSET/belt/merger.tscn"),
+	"splitter": preload("res://scene/ASSET/belt/splitter.tscn"),
 	"curve_top": preload("res://scene/ASSET/beltcurvetop.tscn"),
 	"curve_down": preload("res://scene/ASSET/belt/curvedown.tscn"),
 	"curve_left": preload("res://scene/ASSET/belt/curveleft.tscn"),
@@ -66,11 +70,17 @@ func _ready() -> void:
 const BUILDING_CELL_SIZE: int = 64
 
 func get_grid_pos(world_pos: Vector2) -> Vector2i:
-	return Vector2i(int(floor(world_pos.x / BUILDING_CELL_SIZE)), int(floor(world_pos.y / BUILDING_CELL_SIZE)))
+	return Vector2i(
+		int(floor(world_pos.x / float(BUILDING_CELL_SIZE))),
+		int(floor(world_pos.y / float(BUILDING_CELL_SIZE)))
+	)
 
 func get_world_pos(cell_pos: Vector2i) -> Vector2:
-	return Vector2(cell_pos.x * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0, cell_pos.y * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0)
-
+	return Vector2(
+		float(cell_pos.x) * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0,
+		float(cell_pos.y) * BUILDING_CELL_SIZE + BUILDING_CELL_SIZE / 2.0
+	)
+	
 func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_count: int = 1, footprint_offsets: Array = [Vector2i.ZERO], preview_scale: Vector2 = Vector2.ONE) -> void:
 	if is_selecting_delivery_point:
 		stop_delivery_point_selection()
@@ -92,7 +102,7 @@ func start_building(scene: PackedScene, cost: float, texture: Texture2D, frames_
 	is_building = true
 
 	# Reset scale / modulate au cas où
-	preview_sprite.scale = Vector2(1.75, 1.75)
+	preview_sprite.scale = preview_scale  # utilise la scale transmise par HUD (propre à chaque bâtiment)
 	preview_sprite.modulate = Color(1,1,1,0.6)
 	
 func stop_building() -> void:
@@ -100,67 +110,76 @@ func stop_building() -> void:
 	preview_sprite.visible = false
 	_current_build_footprint_offsets = [Vector2i.ZERO]
 
+func _input(event: InputEvent) -> void:
+	if is_destroying:
+
+		if get_viewport().gui_get_hovered_control() != null:
+			return
+
+		if event.is_action_pressed("ui_cancel"):
+			stop_destroying()
+			get_viewport().set_input_as_handled()
+			return
+
+		if event is InputEventMouseButton \
+		and event.button_index == MOUSE_BUTTON_LEFT \
+		and event.pressed:
+			_try_destroy_at_mouse()
+			get_viewport().set_input_as_handled()
+			return
+			
 func _unhandled_input(event: InputEvent) -> void:
 	if is_selecting_delivery_point:
 		if event.is_action_pressed("ui_cancel") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed):
 			stop_delivery_point_selection()
 			get_viewport().set_input_as_handled()
 			return
-
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			_select_delivery_point_at_mouse()
 			get_viewport().set_input_as_handled()
 			return
 
-	# Gestion du mode destruction (prioritaire)
-	if is_destroying:
-		# Clic droit ou Echap pour annuler le mode destruction
-		if event.is_action_pressed("ui_cancel") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed):
-			stop_destroying()
-			get_viewport().set_input_as_handled()
-			return
-
-		# Clic gauche pour détruire un bâtiment sous la souris
-		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			_try_destroy_at_mouse()
-			get_viewport().set_input_as_handled()
-			return
+	
 
 	if not is_building:
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 			if _try_pickup_conveyor_item_at_mouse():
 				get_viewport().set_input_as_handled()
 				return
-		# ── Mode sélection : détecter les clics sur les bâtiments existants ──
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				_mouse_press_pos = event.position
 			else:
-				# Release : vérifier si c'est un clic court (pas un drag caméra)
 				var delta: float = (event as InputEventMouseButton).position.distance_to(_mouse_press_pos)
 				if delta < _CLICK_THRESHOLD:
 					_try_select_entity_at_mouse()
 					get_viewport().set_input_as_handled()
-			return
+		return
 
-	# Clic droit ou Echap pour annuler la construction
+	# --- Mode construction actif ---
+
+	# Echap ou clic droit : annuler
 	if event.is_action_pressed("ui_cancel") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed):
+		# Clic droit : vérifier d'abord si c'est un entrepôt sous la souris
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			var mouse_pos := get_global_mouse_position()
+			var cell_pos := get_grid_pos(mouse_pos)
+			if occupied_cells.has(cell_pos):
+				var inst = occupied_cells[cell_pos].get("instance")
+				if is_instance_valid(inst) and inst.is_in_group("entrepot"):
+					entrepot_inspected.emit(inst)
+					get_viewport().set_input_as_handled()
+					return
 		stop_building()
 		get_viewport().set_input_as_handled()
-		
-	# Clic gauche pour placer l'usine
+		return
+
+	# Clic gauche : placer
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_try_place_building()
 		get_viewport().set_input_as_handled()
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-		var mouse_pos = get_global_mouse_position()
-		var cell_pos = get_grid_pos(mouse_pos)
+		return
 		
-		if occupied_cells.has(cell_pos):
-			var inst = occupied_cells[cell_pos].get("instance")
-			if is_instance_valid(inst) and inst.is_in_group("entrepot"):
-				entrepot_inspected.emit(inst)
-				get_viewport().set_input_as_handled()
 func _process(_delta: float) -> void:
 	if is_selecting_delivery_point:
 		_update_delivery_point_hover_preview()
@@ -189,10 +208,9 @@ func _update_delivery_point_hover_preview() -> void:
 func _update_preview() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	
-	# --- MODIFICATION ICI : Calcul de position isométrique ---
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
-	preview_sprite.global_position = get_world_pos(cell_pos)
-	# ---------------------------------------------------------
+	var snap_pos: Vector2 = get_world_pos(cell_pos)
+	preview_sprite.global_position = snap_pos
 	
 	if _can_build(cell_pos):
 		preview_sprite.modulate = Color(0, 1, 0, 0.6) # Vert semi-transparent si plaçable
@@ -202,7 +220,7 @@ func _update_preview() -> void:
 func _try_place_building() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
-	
+	var snap_pos: Vector2 = get_world_pos(cell_pos)
 	if _can_build(cell_pos):
 		GameManager.add_credits(-factory_cost)
 		var factory_instance: Node2D = factory_scene.instantiate()
@@ -211,20 +229,14 @@ func _try_place_building() -> void:
 			factory_instance.cell_position = cell_pos
 			factory_instance.build_cost = factory_cost
 		
-		# ── Configurer les offsets AVANT add_child (avant _ready) ──
-		if factory_instance is ConveyorEntity:
-			_configure_conveyor_direction(factory_instance)
-			#factory_instance.is_powered = true
-		# ───────────────────────────────────────────────────────────
 
-		# ENSUITE seulement on ajoute à l'arbre → _ready() se déclenche ici
 		if buildings_node:
 			buildings_node.add_child(factory_instance)
 		else:
 			add_child(factory_instance)
-		# 4. Positionnement visuel
-		factory_instance.global_position = preview_sprite.global_position
+		# 4. Positionnement visuel : centrer les sprites D'ABORD, puis positionner
 		_configure_instance_visuals(factory_instance)
+		factory_instance.global_position = get_world_pos(cell_pos)
 			
 		# 5. Enregistrement des cellules
 		var occupied_by_build: Array[Vector2i] = _get_occupied_cells_for_build(cell_pos, _current_build_footprint_offsets)
@@ -329,14 +341,9 @@ func _select_delivery_point_at_mouse() -> void:
 		if is_instance_valid(inst) and inst.is_in_group("entrepot"):
 			entrepot_inst = inst
 
-	# Fallback : cherche dans toutes les cellules occupées par un entrepôt
 	if entrepot_inst == null:
-		for key in occupied_cells.keys():
-			var data = occupied_cells[key]
-			var inst = data.get("instance")
-			if is_instance_valid(inst) and inst.is_in_group("entrepot"):
-				entrepot_inst = inst
-				break
+		delivery_point_error.emit("⚠ Aucun entrepôt à cet endroit.")
+		return
 
 	if entrepot_inst != null:
 		# Snapper le point au centre exact de l'entrepôt, peu importe où on clique
@@ -376,6 +383,9 @@ func _try_destroy_at_mouse() -> void:
 	if _last_built.size() > 0 and _last_built.get("instance") == inst:
 		_last_built.clear()
 		last_build_state_changed.emit(false)
+	_refresh_turbines_around(cell_pos)
+	_refresh_conveyors_around(cell_pos)
+
 	# Fermer le panneau entité si c'est elle qui vient d'être détruite
 	entity_selected.emit(null)
 
@@ -475,22 +485,22 @@ func _restore_single_entity(data: Dictionary) -> int:
 	var scene: PackedScene = _ENTITY_SCENES[entity_type]
 	var instance: Node2D = scene.instantiate()
 
+	# ── Définir cell_position AVANT add_child pour que register_entity() l'ait ──
+	if instance is Entity:
+		instance.cell_position = cell_pos
+		instance.build_cost = float(data.get("build_cost", 0.0))
+
 	if buildings_node:
 		buildings_node.add_child(instance)
 	else:
 		add_child(instance)
 
-	# --- MODIFICATION ICI : Calcul de position isométrique ---
 	instance.global_position = get_world_pos(cell_pos)
-	# ---------------------------------------------------------
 
 	var cost: float = float(data.get("build_cost", 0.0))
 	_register_occupied_cells(instance, occupied_for_build, cell_pos, cost)
 
-	# Restaurer l'état de l'entité (recette, taux, actif…)
 	if instance is Entity:
-		instance.cell_position = cell_pos
-		instance.build_cost = cost
 		_configure_instance_visuals(instance)
 		instance.deserialize(data)
 		return 1
@@ -498,14 +508,30 @@ func _restore_single_entity(data: Dictionary) -> int:
 	push_warning("La scene restauree n'herite pas de Entity: %s" % entity_type)
 	return 0
 
+func _refresh_conveyors_around(pos: Vector2i) -> void:
+	var rayon := 12
+	for x in range(-rayon, rayon + 1):
+		for y in range(-rayon, rayon + 1):
+			var check_pos := pos + Vector2i(x, y)
+			var ent := EntityManager.get_entity_at_cell(check_pos)
+			if ent != null and ent is ConveyorEntity:
+				(ent as ConveyorEntity).refresh_power_state()
+				
 func _configure_instance_visuals(instance: Node2D) -> void:
 	instance.z_index = preview_sprite.z_index - 1
-	for child in instance.get_children():
+	_center_sprites_recursive(instance)
+
+func _center_sprites_recursive(node: Node) -> void:
+	for child in node.get_children():
 		if child is Sprite2D:
 			child.centered = true
-			child.region_enabled = false
-		#elif child is AnimatedSprite2D:
-			#child.centered = true
+			child.position = Vector2.ZERO
+			child.offset = Vector2.ZERO
+		elif child is AnimatedSprite2D:
+			child.centered = true
+			child.position = Vector2.ZERO
+			child.offset = Vector2.ZERO
+		_center_sprites_recursive(child)
 
 func _normalize_footprint_offsets(footprint_offsets: Array) -> Array[Vector2i]:
 	var normalized: Array[Vector2i] = []
@@ -554,8 +580,8 @@ func _get_default_footprint_offsets(entity_type: String) -> Array[Vector2i]:
 		_:
 			return [Vector2i.ZERO]
 func _refresh_turbines_around(pos: Vector2i):
-	# Même rayon de 2 que dans la turbine !
-	var rayon = 2
+	# Même rayon que la zone de turbine pour que les turbines proches rescannent leurs voisins
+	var rayon = 20
 	
 	for x in range(-rayon, rayon + 1):
 		for y in range(-rayon, rayon + 1):
@@ -569,18 +595,12 @@ func _refresh_turbines_around(pos: Vector2i):
 const CONVEYOR_DIRECTIONS: Dictionary = {
 	"belt_right":  { "input": Vector2i(-1,  0), "output": Vector2i( 1,  0) },
 	"belt_left":   { "input": Vector2i( 1,  0), "output": Vector2i(-1,  0) },
-	"belt_up":     { "input": Vector2i( 0,  1), "output": Vector2i( 0, -1) },
-	"belt_down":   { "input": Vector2i( 0, -1), "output": Vector2i( 0,  1) },
+	"belt_east":   { "input": Vector2i( 0, -1), "output": Vector2i( 0,  1) },
+	"belt_south":  { "input": Vector2i( 0, -1), "output": Vector2i( 0,  1) },
 	"curve_top":   { "input": Vector2i( 0,  1), "output": Vector2i( 1,  0) },
 	"curve_down":  { "input": Vector2i(-1,  0), "output": Vector2i( 0,  1) },
 	"curve_left":  { "input": Vector2i( 0, -1), "output": Vector2i(-1,  0) },
 	"curve_right": { "input": Vector2i( 1,  0), "output": Vector2i( 0, -1) },
-
+	"merger":      { "input": Vector2i(-1,  0), "output": Vector2i( 1,  0) },
+	"splitter":    { "input": Vector2i(-1,  0), "output": Vector2i( 1,  0) },
 }
-
-func _configure_conveyor_direction(conveyor: ConveyorEntity) -> void:
-	var kind: String = conveyor.conveyor_kind
-	if CONVEYOR_DIRECTIONS.has(kind):
-		var dir: Dictionary = CONVEYOR_DIRECTIONS[kind]
-		conveyor.input_offset  = dir["input"]
-		conveyor.output_offset = dir["output"]

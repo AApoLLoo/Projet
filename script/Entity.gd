@@ -29,6 +29,10 @@ var current_recipe: Dictionary = {}
 # Taux de production : 0.0 (arrêt) → 1.0 (100%)
 var production_rate: float = 1.0
 
+# Besoin en électricité (kW). 0.0 = pas de besoin (tapis, entrepôts, turbines).
+# La turbine la plus proche doit produire au moins cette valeur pour que la machine fonctionne.
+var electricity_need: float = 10.0
+
 # Coût de construction (assigné par BuildingManager, utilisé pour la sauvegarde)
 var build_cost: float = 0.0
 
@@ -224,6 +228,8 @@ func get_status_text() -> String:
 		return "Arret"
 	if current_recipe.is_empty():
 		return "Aucune recette"
+	if electricity_need > 0.0 and EntityManager.get_electricity_at_cell(cell_position) < electricity_need:
+		return "Pas d'electricite"
 	if not _has_output_capacity_for_recipe():
 		return "Sortie bloquee"
 	var inputs: Dictionary = current_recipe.get("inputs", {})
@@ -334,10 +340,10 @@ func _can_operate_now() -> bool:
 		return false
 	if not _has_output_capacity_for_recipe():
 		return false
-	# Vérifier que le réseau a assez d'énergie pour les bâtiments consommateurs
-	var energy_needed: float = current_recipe.get("energy_delta", 0.0)
-	if energy_needed > 0.0:  # Ce bâtiment consomme de l'énergie
-		if GameManager.energy_usage > 500.0:  # Réseau surchargé (déficit > 500kW)
+	# Vérifier que la zone a suffisamment d'électricité pour faire fonctionner ce bâtiment
+	if electricity_need > 0.0:
+		var available: float = EntityManager.get_electricity_at_cell(cell_position)
+		if available < electricity_need:
 			return false
 	var inputs: Dictionary = current_recipe.get("inputs", {})
 	if inputs.is_empty():

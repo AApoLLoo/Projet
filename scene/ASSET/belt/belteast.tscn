@@ -1,0 +1,77 @@
+[gd_scene format=3 uid="uid://c4nb2ox3aelbt"]
+
+[ext_resource type="Script" uid="uid://dwlkmwtnf317r" path="res://script/ConveyorEntity.gd" id="1_conveyorentity"]
+[ext_resource type="Texture2D" uid="uid://bn74nd1vnggtb" path="res://asset/convoyer/conveyer belt all-0001.png" id="2_beltall"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_be0"]
+atlas = ExtResource("2_beltall")
+region = Rect2(0, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_be1"]
+atlas = ExtResource("2_beltall")
+region = Rect2(32, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_be2"]
+atlas = ExtResource("2_beltall")
+region = Rect2(64, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_be3"]
+atlas = ExtResource("2_beltall")
+region = Rect2(96, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_be4"]
+atlas = ExtResource("2_beltall")
+region = Rect2(128, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_be5"]
+atlas = ExtResource("2_beltall")
+region = Rect2(160, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_be6"]
+atlas = ExtResource("2_beltall")
+region = Rect2(192, 192, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_be7"]
+atlas = ExtResource("2_beltall")
+region = Rect2(224, 192, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_belteast"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_be0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_be1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_be2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_be3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_be4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_be5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_be6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_be7")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="belteast" type="Node2D" unique_id=7001]
+script = ExtResource("1_conveyorentity")
+conveyor_kind = "belt_east"
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=7002]
+scale = Vector2(1.75, 1.736)
+sprite_frames = SubResource("SpriteFrames_belteast")
+autoplay = "default"

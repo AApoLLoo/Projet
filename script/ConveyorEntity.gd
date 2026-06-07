@@ -53,13 +53,9 @@ func _check_neighbor_turbines():
 			var pos = cell_position + Vector2i(x, y)
 			var entity = EntityManager.get_entity_at_cell(pos)
 			if entity != null and entity.entity_type == "turbine" and entity.is_active:
-				print("Trouvé entité : ", entity.entity_type, " en ", pos, " distance=", Vector2(x,y).length())
-				print("Turbine trouvée, is_active = ", entity.is_active, " type=", typeof(entity.is_active))
-				print("Test condition finale : ", entity != null, " / ", entity.entity_type == "turbine", " / ", entity.is_active)
-				if entity.is_active:
-					print(">>> set_powered(true) va être appelé !")
+				if entity != null and entity.entity_type == "turbine" and entity.is_active:
 					set_powered(true)
-				return
+					return
 	
 	set_powered(false)# ← crucial : aucune turbine trouvée = pas alimenté
 		
@@ -231,8 +227,6 @@ func eject_carried_item() -> bool:
 	else:
 		material_instance.set("destination", String(ejected_item.get("resource_id", "")))
 		material_instance.set("quantity", int(ejected_item.get("amount", 0)))
-	if material_instance.has_method("prepare_ground_spawn"):
-		material_instance.call("prepare_ground_spawn", item_world_position)
 	if material_instance is Node2D:
 		(material_instance as Node2D).global_position = item_world_position
 	current_scene.add_child(material_instance)
@@ -552,11 +546,16 @@ func _offset_to_marker_position(offset: Vector2i) -> Vector2:
 	return Vector2.ZERO
 # Dans ConveyorEntity.gd
 
+func refresh_power_state() -> void:
+	_check_neighbor_turbines.call_deferred()
+	
 func set_powered(active: bool) -> void:
-	print("set_powered appelé avec : ", active)
-	is_powered = active  # plus de garde
+	is_powered = active
+	var anim: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if anim == null:
+		return
 	if is_powered:
-		$AnimatedSprite2D.play()
+		anim.play()
 	else:
-		$AnimatedSprite2D.stop()
-		$AnimatedSprite2D.frame = 0
+		anim.stop()
+		anim.frame = 0

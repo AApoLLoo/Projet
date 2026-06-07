@@ -55,8 +55,12 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var curve_down: Button = $Menu_Belt/Curve_Down
 @onready var curve_right: Button = $Menu_Belt/Curve_Right
 @onready var curve_left: Button = $Menu_Belt/Curve_left
-@onready var belt_droit: Button = $Menu_Belt/Belt_droit
-@onready var belt_left: Button = $Menu_Belt/Belt_left
+@onready var belt_east: Button = $Menu_Belt/Belt_East
+@onready var belt_south: Button = $Menu_Belt/Belt_South
+@onready var belt_north: Button = $Menu_Belt/Belt_North
+@onready var belt_west: Button = $Menu_Belt/Belt_West
+@onready var belt_merger: Button = $Menu_Belt/Belt_Merger
+@onready var belt_splitter: Button = $Menu_Belt/Belt_Splitter
 
 @onready var orders_panel: PanelContainer = %OrdersPanel
 @onready var orders_title_label: Label = $OrdersPanel/MarginContainer/VBoxContainer/TitleLabel
@@ -90,78 +94,135 @@ var _contract_just_failed: bool = false
 # --- DICTIONNAIRE MIS À JOUR AVEC DIRECTIONS ET VIRAGES ---
 var buildings_data = {
 	"factory": {
-	"scene": preload("res://scene/factory.tscn"),
-	"texture": preload("res://asset/usine.png"),
-	"cost": 200.0,
-	"frames": 1,
-	"preview_scale": Vector2(0.4, 0.4),
-	"footprint_offsets": [Vector2i.ZERO]
-},
+		"scene": preload("res://scene/factory.tscn"),
+		"texture": preload("res://asset/usine.png"),
+		"cost": 200.0,
+		"frames": 1,
+		"preview_scale": Vector2(0.55, 0.55),  # aligné sur scale du Sprite2D dans factory.tscn
+		"footprint_offsets": [Vector2i.ZERO]
+	},
 	"turbine": {
 		"scene": preload("res://scene/turbine_2d.tscn"),
-		"texture": preload("res://asset/Turbine Animation base.png"),
+		"texture": preload("res://asset/Turbine Animation 0006.png"),
+		"texture_region": Rect2(0, 0, 149, 108),
 		"cost": 500.0,
 		"frames": 1,
+		"preview_scale": Vector2(0.9, 0.9),  # aligné sur scale AnimatedSprite2D turbine_2d.tscn
 		"footprint_offsets": [Vector2i.ZERO, Vector2i(1, 0)]
 	},
+
 	
-	# --- TAPIS DROITS (Exemples de directions si vous séparez les scènes) ---
-	"belt_right": {
-		"scene": preload("res://scene/ASSET/belt/beltmid.tscn"), # À adapter si vous créez une scène par direction
-		"texture": preload("res://asset/belt-midNO.png"),
+	
+
+	# --- TAPIS CARDINAUX SUPPLEMENTAIRES ---
+	"belt_east": {
+		"scene": preload("res://scene/ASSET/belt/belteast.tscn"),
+		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
+		"texture_region": Rect2(0, 192, 32, 32),
 		"cost": 50.0,
-		"frames": 4,
+		"frames": 1,
+		"preview_scale": Vector2(1.75, 1.75),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
-	"belt_left": {
-		"scene": preload("res://scene/ASSET/belt/beltleft.tscn"), 
-		"texture": preload("res://asset/belt-mid.png"),
+	"belt_south": {
+		"scene": preload("res://scene/ASSET/belt/beltsouth.tscn"),
+		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
+		"texture_region": Rect2(0, 64, 32, 32),
 		"cost": 50.0,
-		"frames": 4,
+		"frames": 1,
+		"preview_scale": Vector2(1.75, 1.75),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
-	
-	# --- VIRAGES / COURBES (Curves 1 à 4 basées sur vos assets) ---
+	"belt_north": {
+		"scene": preload("res://scene/ASSET/belt/beltnorth.tscn"),
+		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
+		"texture_region": Rect2(0, 0, 32, 32),
+		"cost": 50.0,
+		"frames": 1,
+		"preview_scale": Vector2(1.75, 1.75),
+		"footprint_offsets": [Vector2i.ZERO]
+	},
+	"belt_west": {
+		"scene": preload("res://scene/ASSET/belt/beltleft.tscn"),
+		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
+		"texture_region": Rect2(0, 128, 32, 32),
+		"cost": 50.0,
+		"frames": 1,
+		"preview_scale": Vector2(1.75, 1.75),
+		"footprint_offsets": [Vector2i.ZERO]
+	},
+	# --- MERGEUR / SPLITTER ---
+	"merger": {
+		"scene": preload("res://scene/ASSET/belt/merger.tscn"),
+		"texture": preload("res://asset/convoyer/combiner.png"),
+		"texture_region": Rect2(0, 64, 64, 64),
+		"cost": 80.0,
+		"frames": 1,
+		"preview_scale": Vector2(1.0, 1.0),  # frame 64x64 = cellule 64px
+		"footprint_offsets": [Vector2i.ZERO]
+	},
+	"splitter": {
+		"scene": preload("res://scene/ASSET/belt/splitter.tscn"),
+		"texture": preload("res://asset/convoyer/combiner.png"),
+		"texture_region": Rect2(0, 0, 64, 64),
+		"cost": 80.0,
+		"frames": 1,
+		"preview_scale": Vector2(1.0, 1.0),  # frame 64x64 = cellule 64px
+		"footprint_offsets": [Vector2i.ZERO]
+	},
+	# --- VIRAGES / COURBES ---
 	"curve_top": {
-		"scene": preload("res://scene/ASSET/beltcurvetop.tscn"), # Votre scène existante !
-		"texture": preload("res://asset/Curve_0001.png"),   # Texture correspondante
+		"scene": preload("res://scene/ASSET/beltcurvetop.tscn"),
+		"texture": preload("res://asset/convoyer/curves.png"),
+		"texture_region": Rect2(0, 0, 32, 32),
 		"cost": 60.0,
-		"frames": 4, # Mettez le nombre de frames d'animation si elles sont animées
+		"frames": 1,
+		"preview_scale": Vector2(1.75, 1.75),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"curve_down": {
-		"scene": preload("res://scene/ASSET/belt/curvedown.tscn"), # À créer sur le modèle de beltcurvetop
-		"texture": preload("res://asset/Curve_0002.png"),
+		"scene": preload("res://scene/ASSET/belt/curvedown.tscn"),
+		"texture": preload("res://asset/convoyer/curves.png"),
+		"texture_region": Rect2(0, 64, 32, 32),
 		"cost": 60.0,
-		"frames": 4,
+		"frames": 1,
+		"preview_scale": Vector2(1.75, 1.75),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"curve_left": {
 		"scene": preload("res://scene/ASSET/belt/curveleft.tscn"),
-		"texture": preload("res://asset/Curve_0003.png"),
+		"texture": preload("res://asset/convoyer/curves.png"),
+		"texture_region": Rect2(0, 96, 32, 32),
 		"cost": 60.0,
-		"frames": 4,
+		"frames": 1,
+		"preview_scale": Vector2(1.75, 1.75),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"curve_right": {
 		"scene": preload("res://scene/ASSET/belt/curveright.tscn"),
-		"texture": preload("res://asset/Curve_0004.png"),
+		"texture": preload("res://asset/convoyer/curves.png"),
+		"texture_region": Rect2(0, 32, 32, 32),
 		"cost": 60.0,
-		"frames": 4,
+		"frames": 1,
+		"preview_scale": Vector2(1.75, 1.75),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
-	"entrepot":{
+	"entrepot": {
 		"scene": preload("res://scene/entrepot.tscn"),
 		"texture": preload("res://asset/image-removebg-preview.png"),
+		"texture_region": Rect2(0, 0, 132, 186),
 		"cost": 1000.0,
 		"frames": 1,
+		"preview_scale": Vector2(0.6, 0.6),  # aligné sur scale AnimatedSprite2D entrepot.tscn
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"miner": {
 		"scene": preload("res://scene/miner.tscn"),
 		"texture": preload("res://asset/Miner/miner-one/north-east/mining-animation.png"),
+		"texture_region": Rect2(0, 0, 64, 92),
 		"cost": 300.0,
-		"frames": 8,
+		"frames": 1,
+		"preview_scale": Vector2(0.9, 0.9),  # aligné sur scale AnimatedSprite2D miner.tscn
 		"footprint_offsets": [Vector2i.ZERO]
 	}
 }
@@ -209,39 +270,68 @@ func _ready() -> void:
 		orders_panel.hide()
 
 	# On s'assure que le menu est caché au démarrage
-	menu_belt.hide()
+	if menu_belt:
+		menu_belt.hide()
 	
 	# Connexion aux signaux du TimeManager
 	TimeManager.time_changed.connect(_on_time_changed)
 	TimeManager.day_changed.connect(_on_day_changed)
 	
-	# Exemple pour les tapis droits
-	belt_droit.pressed.connect(func():
-		_start_building_process("belt_right")
-		menu_belt.hide()
-	)
-	belt_left.pressed.connect(func():
-		_start_building_process("belt_left")
-		menu_belt.hide()
-	)
-	# Exemple pour vos courbes (Curves)
-	curve_top.pressed.connect(func():
-		_start_building_process("curve_top")
-		menu_belt.hide()
-	)
-	curve_down.pressed.connect(func():
-		_start_building_process("curve_down")
-		menu_belt.hide()
-	)
-	curve_right.pressed.connect(func():
-		_start_building_process("curve_right")
-		menu_belt.hide()
-	)
-	curve_left.pressed.connect(func():
-		_start_building_process("curve_left")
-		menu_belt.hide()
-	)
 	
+	
+	
+	# Exemple pour vos courbes (Curves)
+	if curve_top:
+		curve_top.pressed.connect(func():
+			_start_building_process("curve_top")
+			menu_belt.hide()
+		)
+	if curve_down:
+		curve_down.pressed.connect(func():
+			_start_building_process("curve_down")
+			menu_belt.hide()
+		)
+	if curve_right:
+		curve_right.pressed.connect(func():
+			_start_building_process("curve_right")
+			menu_belt.hide()
+		)
+	if curve_left:
+		curve_left.pressed.connect(func():
+			_start_building_process("curve_left")
+			menu_belt.hide()
+		)
+	if belt_east:
+		belt_east.pressed.connect(func():
+			_start_building_process("belt_east")
+			menu_belt.hide()
+		)
+	if belt_south:
+		belt_south.pressed.connect(func():
+			_start_building_process("belt_south")
+			menu_belt.hide()
+		)
+	if belt_north:
+		belt_north.pressed.connect(func():
+			_start_building_process("belt_north")
+			menu_belt.hide()
+		)
+	if belt_west:
+		belt_west.pressed.connect(func():
+			_start_building_process("belt_west")
+			menu_belt.hide()
+		)
+	if belt_merger:
+		belt_merger.pressed.connect(func():
+			_start_building_process("merger")
+			menu_belt.hide()
+		)
+	if belt_splitter:
+		belt_splitter.pressed.connect(func():
+			_start_building_process("splitter")
+			menu_belt.hide()
+		)
+
 	if GameManager:
 		GameManager.resources_updated.connect(_on_resources_updated)
 		if GameManager.has_signal("default_delivery_point_changed"):
@@ -298,6 +388,8 @@ func _ready() -> void:
 		_start_building_process("miner")
 	)
 
+	_setup_belt_button_icons()
+
 	_style_button(btn_build_belt, Color.html("#3D6F8E"))
 	_style_button(btn_build_turbine, Color.html("#4F8F5B"))
 	_style_button(btn_build_factory, Color.html("#A66A3F"))
@@ -311,57 +403,58 @@ func _ready() -> void:
 	btn_build_entrepot.custom_minimum_size = Vector2(200.0, 32.0)
 	_style_button(btn_build_entrepot, Color.html("#69558C"))
 
-	# --- BOUTON D'ANNULATION DU DERNIER BATIMENT (créé dynamiquement) ---
-	var undo_button: Button = Button.new()
-	undo_button.name = "BtnUndoBuild"
-	undo_button.text = "Annuler (50%)"
-	undo_button.custom_minimum_size = Vector2(200.0, 32.0)
-	_style_button(undo_button, Color.html("#8A6D2E"))
-	undo_button.visible = false
-	if build_menu_container:
-		build_menu_container.add_child(undo_button)
-	else:
-		add_child(undo_button)
 
-	# Connexion du clic
-	undo_button.pressed.connect(_on_undo_build_pressed)
-
-	# Connexion au BuildingManager pour synchroniser la visibilité
-	# NOTE : _building_manager est maintenant disponible car _bind_runtime_managers() a été appelé plus haut
-	if _building_manager:
-		if _building_manager.has_signal("last_build_state_changed"):
-			_building_manager.last_build_state_changed.connect(func(available):
-				undo_button.visible = available
-			)
-		undo_button.visible = _building_manager.has_method("has_last_build") and _building_manager.has_last_build()
 
 		# --- BOUTON MODE DESTRUCTION (toggle) ---
-		var destroy_button: Button = Button.new()
-		destroy_button.name = "BtnDestroyMode"
-		destroy_button.text = "Mode destruction"
-		destroy_button.custom_minimum_size = Vector2(200.0, 32.0)
-		_style_button(destroy_button, Color.html("#8A3A3A"))
-		destroy_button.toggle_mode = true
-		destroy_button.set_pressed(false)
-		if build_menu_container:
-			build_menu_container.add_child(destroy_button)
-		else:
-			add_child(destroy_button)
+	var destroy_button: Button = Button.new()
+	destroy_button.name = "BtnDestroyMode"
+	destroy_button.text = "Mode destruction"
+	destroy_button.custom_minimum_size = Vector2(200.0, 32.0)
+	_style_button(destroy_button, Color.html("#8A3A3A"))
+	destroy_button.toggle_mode = true
+	destroy_button.set_pressed(false)
+	if build_menu_container:
+		build_menu_container.add_child(destroy_button)
+	else:
+		add_child(destroy_button)
 
-		destroy_button.toggled.connect(func(pressed):
-			var bm = get_tree().current_scene.find_child("BuildingManager", true, false)
-			if bm:
-				if pressed and bm.has_method("start_destroying"):
-					bm.start_destroying()
-				elif not pressed and bm.has_method("stop_destroying"):
-					bm.stop_destroying()
+	destroy_button.toggled.connect(func(pressed: bool) -> void:
+		var bm = get_tree().current_scene.find_child("BuildingManager", true, false)
+		if bm:
+			if pressed and bm.has_method("start_destroying"):
+				bm.start_destroying()
+				for btn in get_tree().get_nodes_in_group("build_buttons"):
+					if btn is Button:
+						btn.set_pressed(false)
+			elif not pressed and bm.has_method("stop_destroying"):
+				bm.stop_destroying()
+	)
+
+	if _building_manager != null and _building_manager.has_signal("destroy_mode_changed"):
+		_building_manager.destroy_mode_changed.connect(func(enabled: bool) -> void:
+			destroy_button.set_pressed_no_signal(enabled)
 		)
+	if _building_manager != null:
+		destroy_button.set_pressed_no_signal(_building_manager.is_destroying)
 
-		if _building_manager.has_signal("destroy_mode_changed"):
-			_building_manager.destroy_mode_changed.connect(func(enabled):
-				destroy_button.set_pressed(enabled)
-			)
-		destroy_button.set_pressed(_building_manager.is_destroying)
+
+	# --- BOUTON AFFICHAGE ZONE ÉLECTRIQUE ---
+	var elec_overlay_button: Button = Button.new()
+	elec_overlay_button.name = "BtnElectricityOverlay"
+	elec_overlay_button.text = "Zone électricité"
+	elec_overlay_button.custom_minimum_size = Vector2(200.0, 32.0)
+	elec_overlay_button.toggle_mode = true
+	elec_overlay_button.set_pressed(false)
+	_style_button(elec_overlay_button, Color.html("#2A6B4A"))
+	if build_menu_container:
+		build_menu_container.add_child(elec_overlay_button)
+	else:
+		add_child(elec_overlay_button)
+	elec_overlay_button.toggled.connect(func(_pressed: bool):
+		var level: Node = get_tree().current_scene
+		if level and level.has_method("toggle_electricity_overlay"):
+			level.toggle_electricity_overlay()
+	)
 
 	_update_contracts_display()
 
@@ -445,8 +538,10 @@ func _style_hud() -> void:
 		UITheme.style_button(button, UITheme.ACCENT_GOLD, UITheme.INK_DARK, true, true)
 	for button in [btn_build_belt, btn_build_turbine, btn_build_factory]:
 		button.custom_minimum_size = Vector2(200.0, 32.0)
-	for button in [curve_top, curve_down, curve_right, curve_left, belt_droit, belt_left]:
+	for button in [curve_top, curve_down, curve_right, curve_left, belt_east, belt_south, belt_north, belt_west]:
 		UITheme.style_button(button, Color("#E9EEF1"), UITheme.INK_DARK, false, true)
+	for button in [belt_merger, belt_splitter]:
+		UITheme.style_button(button, Color("#6E8A9E"), UITheme.INK_DARK, false, true)
 	UITheme.style_card(orders_panel, false, true)
 	UITheme.style_card(session_overview_panel, false, true)
 	_style_order_panels()
@@ -477,7 +572,7 @@ func _build_shortcut_bar() -> void:
 
 	var shortcuts: Array = [
 		["Échap", "Menu Pause"],
-		["Q", "Construction"],
+		["B", "Construction"],
 		["Tab", "Logistique"],
 		["I", "Vue usine"],
 		["P", "Pause temps"],
@@ -670,7 +765,7 @@ func _update_contracts_display() -> void:
 		contracts_label.hide()
 		return
 	contracts_label.show()
-	contracts_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	contracts_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	var parts: PackedStringArray = []
 	var current_day: int = TimeManager.current_day if TimeManager else 1
 	for c in contracts:
@@ -684,20 +779,26 @@ func _update_contracts_display() -> void:
 	var streak_text: String = ""
 	if ContractManager.completed_streak > 1:
 		streak_text = " 🔥x%d" % ContractManager.completed_streak
-	contracts_label.text = "Contrats :\n" + "\n".join(parts) + streak_text
+	contracts_label.text = "Contrats :  " + "   |   ".join(parts) + streak_text
 	
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	if building_manager:
 		var data = buildings_data[building_type]
+		var preview_tex: Texture2D = data["texture"]
+		if data.has("texture_region"):
+			var atlas_tex := AtlasTexture.new()
+			atlas_tex.atlas = data["texture"]
+			atlas_tex.region = data["texture_region"]
+			preview_tex = atlas_tex
 		building_manager.start_building(
-	data["scene"],
-	data["cost"],
-	data["texture"],
-	data.get("frames", 1),
-	data.get("footprint_offsets", [Vector2i.ZERO]),
-	data.get("preview_scale", Vector2.ONE)
-)
+			data["scene"],
+			data["cost"],
+			preview_tex,
+			1,
+			data.get("footprint_offsets", [Vector2i.ZERO]),
+			data.get("preview_scale", Vector2.ONE)
+		)
 		# Masquer les panneaux entité quand on entre en mode construction
 		if _entity_panel:
 			_entity_panel.hide()
@@ -1363,7 +1464,7 @@ func _format_energy_value(value: float) -> String:
 func _ensure_input_actions() -> void:
 	_ensure_action_with_keys(ACTION_TOGGLE_ORDER_PANEL, [KEY_TAB])
 	_ensure_action_with_keys(ACTION_TOGGLE_SESSION_OVERVIEW, [KEY_I])
-	_ensure_action_with_keys(ACTION_TOGGLE_BUILD_MENU, [KEY_Q])
+	_ensure_action_with_keys(ACTION_TOGGLE_BUILD_MENU, [KEY_B])
 	_ensure_action_with_keys(&"hud_quick_save", [KEY_E])        
 	_ensure_action_with_keys(&"hud_toggle_pause", [KEY_P])
 
@@ -1387,6 +1488,38 @@ func _has_physical_key(events: Array[InputEvent], keycode: int) -> bool:
 				return true
 	return false
 
+func _setup_belt_button_icons() -> void:
+	# Associe chaque bouton du sous-menu au sprite correspondant dans buildings_data
+	var belt_button_map: Dictionary = {
+		belt_east:     "belt_east",
+		belt_south:    "belt_south",
+		belt_north:    "belt_north",
+		belt_west:     "belt_west",
+		curve_top:     "curve_top",
+		curve_down:    "curve_down",
+		curve_right:   "curve_right",
+		curve_left:    "curve_left",
+		belt_merger:   "merger",
+		belt_splitter: "splitter",
+	}
+	for btn in belt_button_map:
+		if btn == null:
+			continue
+		var key: String = belt_button_map[btn]
+		if not buildings_data.has(key):
+			continue
+		var data = buildings_data[key]
+		var icon_tex: Texture2D = data["texture"]
+		if data.has("texture_region"):
+			var atlas := AtlasTexture.new()
+			atlas.atlas = data["texture"]
+			atlas.region = data["texture_region"]
+			icon_tex = atlas
+		btn.icon = icon_tex
+		btn.expand_icon = true
+		btn.custom_minimum_size = Vector2(56, 56)
+		btn.text = ""  # supprime le texte pour ne garder que l'icône
+		
 func _on_menu_belt_pressed() -> void:
 	if menu_belt.visible:
 		menu_belt.hide()

@@ -22,9 +22,10 @@ func _process(delta):
 func _input_event(viewport, event, shape_idx):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			var bm = get_tree().current_scene.get_node_or_null("BuildingManager")
+			if bm and bool(bm.get("is_destroying")):
+				return
 			dragging = true
-			offset = global_position - get_global_mouse_position()
-			z_index = 100
 
 
 func _input(event):
