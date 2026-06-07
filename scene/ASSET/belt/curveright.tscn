@@ -69,7 +69,6 @@ animations = [{
 
 [node name="curveright" type="Node2D" unique_id=1712766572]
 script = ExtResource("1_conveyorentity")
-conveyor_kind = "curve_right"
 input_offset = Vector2i(-1, -1)
 output_offset = Vector2i(1, -1)
 

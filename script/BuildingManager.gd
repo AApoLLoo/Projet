@@ -569,10 +569,13 @@ func _refresh_turbines_around(pos: Vector2i):
 const CONVEYOR_DIRECTIONS: Dictionary = {
 	"belt_right":  { "input": Vector2i(-1,  0), "output": Vector2i( 1,  0) },
 	"belt_left":   { "input": Vector2i( 1,  0), "output": Vector2i(-1,  0) },
+	"belt_up":     { "input": Vector2i( 0,  1), "output": Vector2i( 0, -1) },
+	"belt_down":   { "input": Vector2i( 0, -1), "output": Vector2i( 0,  1) },
 	"curve_top":   { "input": Vector2i( 0,  1), "output": Vector2i( 1,  0) },
 	"curve_down":  { "input": Vector2i(-1,  0), "output": Vector2i( 0,  1) },
 	"curve_left":  { "input": Vector2i( 0, -1), "output": Vector2i(-1,  0) },
 	"curve_right": { "input": Vector2i( 1,  0), "output": Vector2i( 0, -1) },
+
 }
 
 func _configure_conveyor_direction(conveyor: ConveyorEntity) -> void:
