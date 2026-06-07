@@ -300,24 +300,28 @@ func _try_push_to_output() -> bool:
 		return false
 	return downstream_entity.deposit_input(resource_id, amount) == amount
 func _find_upstream_entity(preferred_cell: Vector2i) -> Entity:
+	# 1. Recherche exacte sur la cellule cible
 	var preferred_entity: Entity = EntityManager.get_entity_at_cell(preferred_cell)
 	if preferred_entity != null:
 		return preferred_entity
-
+		
+	# 2. Recherche élargie
 	for offset in NEIGHBOR_SEARCH_OFFSETS:
-		var neighbor: Entity = EntityManager.get_entity_at_cell(cell_position + offset)
+		var neighbor_cell: Vector2i = preferred_cell + offset
+		var neighbor: Entity = EntityManager.get_entity_at_cell(neighbor_cell)
 		if neighbor == null or neighbor == self:
 			continue
+			
 		if neighbor is ConveyorEntity:
-			var neighbor_conveyor: ConveyorEntity = neighbor
-			if neighbor_conveyor.is_output_target(cell_position):
-				return neighbor_conveyor
+			var nc: ConveyorEntity = neighbor
+			# CORRECTION : On vérifie si ce tapis nous cible comme SA sortie
+			if nc.is_output_target(cell_position):
+				return nc
 		else:
-			# Bâtiment non-tapis adjacent : valide comme source si pas du côté sortie
-			if cell_position + offset != cell_position + output_offset:
+			# Bâtiment non-tapis (entrepôt, usine) : accepte s'il n'est pas derrière nous
+			if neighbor_cell != cell_position + input_offset:
 				return neighbor
 	return null
-
 func _find_downstream_entity(preferred_cell: Vector2i) -> Entity:
 	# 1. Recherche exacte sur la cellule cible
 	var preferred_entity: Entity = EntityManager.get_entity_at_cell(preferred_cell)

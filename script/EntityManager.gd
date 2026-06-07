@@ -8,7 +8,9 @@ extends Node
 
 var entities: Dictionary = {}       # entity_id → Entity
 var _cell_index: Dictionary = {}    # Vector2i → Entity
-
+var global_power_capacity: float = 0.0
+var global_power_demand: float = 0.0
+var power_satisfaction: float = 1.0 # 1.0 = 100% de puissance, 0.5 = 50% de puissance
 const CARDINAL_NEIGHBOR_OFFSETS: Array[Vector2i] = [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -72,16 +74,35 @@ func clear_entities() -> void:
 func recalculate_totals() -> void:
 	var energy_total: float = 0.0
 	var co2_total: float = 0.0
+	global_power_capacity = 0.0
+	global_power_demand = 0.0
 	var stale: Array = []
+	
 	for id in entities:
 		var entity = entities[id]
 		if not is_instance_valid(entity):
 			stale.append(id)
 			continue
+			
+		# Calcul Capacité vs Demande (On regarde si la machine est allumée)
+		if entity.is_active:
+			if entity.entity_type == "turbine":
+				global_power_capacity += entity.get("electricity_output") if entity.get("electricity_output") != null else 100.0
+			elif entity.get("electricity_need") != null and entity.electricity_need > 0.0:
+				global_power_demand += entity.electricity_need
+
 		energy_total += entity.get_energy_delta()
 		co2_total += entity.get_co2_rate()
+		
 	for id in stale:
 		entities.erase(id)
+		
+	# Calcul du ratio de satisfaction électrique (bridé à 1.0 maximum)
+	if global_power_demand > 0.0:
+		power_satisfaction = minf(1.0, global_power_capacity / global_power_demand)
+	else:
+		power_satisfaction = 1.0
+		
 	totals_changed.emit(energy_total, co2_total)
 
 func get_entities_of_type(entity_type: String) -> Array:

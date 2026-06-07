@@ -48,7 +48,9 @@ var is_active: bool = false :
 
 var _production_timer: float = 0.0
 var _hitbox_area: Area2D = null
-
+# Limite de stockage par type d'objet
+@export var max_input_stock: int = 50
+@export var max_output_stock: int = 50
 # ─── Signaux ─────────────────────────────────────────────────────────────────
 
 # Émis quand l'entité est cliquée (non utilisé directement ici, géré par BuildingManager)
@@ -228,8 +230,12 @@ func get_status_text() -> String:
 		return "Arret"
 	if current_recipe.is_empty():
 		return "Aucune recette"
-	if electricity_need > 0.0 and EntityManager.get_electricity_at_cell(cell_position) < electricity_need:
-		return "Pas d'electricite"
+	# Vérifications Électriques
+	if electricity_need > 0.0:
+		if EntityManager.get_electricity_at_cell(cell_position) == 0.0:
+			return "Pas d'electricite (hors zone)"
+		if EntityManager.power_satisfaction < 1.0:
+			return "Reseau sature (" + str(int(EntityManager.power_satisfaction * 100)) + "%)"
 	if not _has_output_capacity_for_recipe():
 		return "Sortie bloquee"
 	var inputs: Dictionary = current_recipe.get("inputs", {})
@@ -371,7 +377,8 @@ func _get_cycle_duration() -> float:
 	var friction_t: float = friction / 5.0
 	var friction_factor: float = lerpf(0.5, 2.0, friction_t)
 	var adjusted_duration: float = base_duration * gravity_factor * friction_factor
-	return adjusted_duration / maxf(production_rate, 0.01)
+	var actual_rate = maxf(production_rate * EntityManager.power_satisfaction, 0.01)
+	return adjusted_duration / actual_rate
 
 func _run_production_cycle() -> bool:
 	var inputs: Dictionary = current_recipe.get("inputs", {})
