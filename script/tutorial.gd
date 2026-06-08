@@ -275,10 +275,10 @@ const STEPS: Array[Dictionary] = [
 		"title": "Vue d'ensemble et condition de victoire",
 		"body":
 			"Le bouton [b]I[/b] (Vue d'ensemble) résume ta session en temps réel :\n" +
-			"machines actives, taux de production, consommation électrique, CO₂…\n\n" +
-			"[b]Conditions de fin de partie :[/b]\n" +
+			"machines actives, taux de production, consommation électrique, CO₂…\n" +
+			"[b]Conditions de fin de partie :[/b]" +
 			"  🏆 [b]Victoire[/b] — Atteins 1 000 000 € de crédits\n" +
-			"  💀 [b]Défaite[/b] — Tu tombes à 0 € (ou en dessous du seuil)\n\n" +
+			"  💀 [b]Défaite[/b] — Tu tombes à 0 € (ou en dessous du seuil)\n" +
 			"[b]Stratégie recommandée :[/b]\n" +
 			"  1. Matière brute → Pièce de base → Export (rentable dès le départ)\n" +
 			"  2. Ajoute des turbines au charbon/gaz pour booster la production\n" +
@@ -613,7 +613,19 @@ func _go_to(index: int) -> void:
 		_objective_panel.show()
 
 	_apply_reveals(step)
-
+	
+	if step.get("highlight", "") == "minimap":
+		# panneau à gauche
+		_panel.anchor_left = 0.0
+		_panel.anchor_right = 0.0
+		_panel.offset_left = 20.0
+		_panel.offset_right = 400.0
+	else:
+		# panneau à droite (comportement normal)
+		_panel.anchor_left = 1.0
+		_panel.anchor_right = 1.0
+		_panel.offset_left = -400.0
+		_panel.offset_right = -20.0
 	if _next_callable.is_valid() and _next_btn.pressed.is_connected(_next_callable):
 		_next_btn.pressed.disconnect(_next_callable)
 
