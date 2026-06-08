@@ -15,6 +15,7 @@ var _last_generated_day: int = -1
 var _day_connected: bool = false
 # Suivi du streak de contrats réussis consécutifs
 var completed_streak: int = 0
+var failed_streak: int = 0
 
 func _ready() -> void:
 	if TimeManager:
@@ -74,6 +75,7 @@ func try_fulfill_contracts(resource_id: String, amount: int) -> int:
 
 func _complete_contract(contract: Dictionary) -> void:
 	contract["completed"] = true
+	failed_streak = 0
 	completed_streak += 1
 	var streak_bonus: float = minf(float(completed_streak - 1) * 0.05, 0.50)
 	var final_reward: float = float(contract["reward"]) * (1.0 + streak_bonus)
@@ -214,8 +216,11 @@ func _check_expired_contracts(current_day: int) -> void:
 		if int(contract["day_deadline"]) < current_day:
 			contract["failed"] = true
 			completed_streak = 0  # Reset du streak en cas d'échec
+			failed_streak += 1
 			if GameManager:
 				GameManager.add_credits(-float(contract["penalty"]))
+				if failed_streak >= 2:
+					GameManager.trigger_defeat("Deux contrats ont echoue d'affilee.")
 			contract_failed.emit(contract.duplicate(true))
 	# Nettoyer les vieux contrats résolus
 	active_contracts = active_contracts.filter(func(c):
@@ -226,11 +231,13 @@ func reset() -> void:
 	active_contracts.clear()
 	_last_generated_day = -1
 	completed_streak = 0
+	failed_streak = 0
 
 func start_new_game() -> void:
 	active_contracts.clear()
 	_last_generated_day = -1
 	completed_streak = 0
+	failed_streak = 0
 	await get_tree().process_frame
 	var start_day: int = TimeManager.current_day if TimeManager else 1
 	_generate_contract(start_day)
@@ -239,12 +246,14 @@ func get_save_state() -> Dictionary:
 	return {
 		"active_contracts": active_contracts.duplicate(true),
 		"completed_streak": completed_streak,
+		"failed_streak": failed_streak,
 		"last_generated_day": _last_generated_day,
 	}
 
 func apply_save_state(data: Dictionary) -> void:
 	active_contracts.clear()
 	completed_streak = int(data.get("completed_streak", 0))
+	failed_streak = int(data.get("failed_streak", 0))
 	_last_generated_day = int(data.get("last_generated_day", -1))
 	var raw_contracts: Variant = data.get("active_contracts", [])
 	if raw_contracts is Array:

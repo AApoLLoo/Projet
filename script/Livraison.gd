@@ -291,7 +291,12 @@ func _apply_delivery_payload(order: Dictionary) -> void:
 	if job_type == JOB_EXPORT:
 		# Export : ressources déjà consommées dans _prepare_job_for_dispatch
 		# On ajoute les crédits ET on valide les contrats
-		GameManager.add_credits(float(order.get("total_cost", 0.0)))
+		GameManager.complete_export(
+			resource_id,
+			String(order.get("resource_label", get_resource_label(resource_id))),
+			quantity,
+			float(order.get("total_cost", 0.0))
+		)
 		if ContractManager:
 			ContractManager.try_fulfill_contracts(resource_id, quantity)
 		return

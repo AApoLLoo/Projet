@@ -1,5 +1,7 @@
 extends Node
 
+const END_GAME_SCREEN_SCENE: PackedScene = preload("res://scene/end_game_screen.tscn")
+
 const DEFAULT_RESOURCE_STOCK: Dictionary = {
 	"charbon": 0,
 	"gaz": 0,
@@ -10,6 +12,10 @@ const DEFAULT_RESOURCE_STOCK: Dictionary = {
 }
 const MAX_EXPORT_HISTORY_ENTRIES: int = 5
 
+@export var credits_required_for_victory: int = 1000000
+@export var victory_export_resource_id: String = "machine_ultime"
+@export var credits_loss_threshold: float = -1.0
+
 # Ressources globales (Maquette HUD)
 var credits: float = 12500.0
 var energy_usage: float = 0.0  # en kW (positif = consommation nette, négatif = production nette)
@@ -19,14 +25,18 @@ var has_default_delivery_point: bool = false
 var default_delivery_cell: Vector2i = Vector2i.ZERO
 var default_delivery_position: Vector2 = Vector2.ZERO
 var export_history: Array[Dictionary] = []
+var _end_state: String = ""
+var _end_screen: CanvasLayer = null
 
 # Signaux pour mettre à jour l'UI automatiquement
 signal resources_updated
 signal stock_changed(stock_snapshot)
 signal default_delivery_point_changed(has_point, cell_pos, world_pos)
 signal export_history_changed(history)
+signal end_state_changed(end_state, title, message)
 
 func _ready() -> void:
+	reset_end_state()
 	# Synchroniser les totaux énergie/CO2 depuis l'EntityManager
 	if EntityManager and not EntityManager.totals_changed.is_connected(_on_totals_changed):
 		EntityManager.totals_changed.connect(_on_totals_changed)
@@ -37,16 +47,20 @@ func _on_totals_changed(energy_total: float, co2_total: float) -> void:
 	resources_updated.emit()
 
 func apply_saved_state(saved_credits: float, saved_stock: Dictionary = {}, saved_delivery_point: Dictionary = {}, saved_export_history: Array = []) -> void:
+	reset_end_state()
 	credits = saved_credits
 	_set_resource_stock_bulk(saved_stock)
 	_restore_default_delivery_point(saved_delivery_point)
 	export_history = _sanitize_export_history(saved_export_history)
 	_emit_resource_signals(true)
 	export_history_changed.emit(get_export_history())
+	_check_credit_end_conditions()
 
-func add_credits(amount: float) -> void:
+func add_credits(amount: float, evaluate_end_conditions: bool = true) -> void:
 	credits += amount
 	resources_updated.emit()
+	if evaluate_end_conditions:
+		_check_credit_end_conditions()
 
 func update_energy(amount: float) -> void:
 	energy_usage += amount
@@ -130,6 +144,14 @@ func get_default_delivery_point_state() -> Dictionary:
 func get_export_history() -> Array[Dictionary]:
 	return export_history.duplicate(true)
 
+func complete_export(resource_id: String, resource_label: String, quantity: int, total_value: float) -> void:
+	add_credits(total_value, false)
+	record_export_gain(resource_id, resource_label, quantity, total_value)
+	if _end_state.is_empty() and not victory_export_resource_id.is_empty() and resource_id == victory_export_resource_id and quantity > 0:
+		_trigger_victory("Machine ultime exportee !")
+	if _end_state.is_empty():
+		_check_credit_end_conditions()
+
 func record_export_gain(resource_id: String, resource_label: String, quantity: int, total_value: float) -> void:
 	var hour: int = 0
 	var minute: int = 0
@@ -149,6 +171,66 @@ func record_export_gain(resource_id: String, resource_label: String, quantity: i
 	while export_history.size() > MAX_EXPORT_HISTORY_ENTRIES:
 		export_history.pop_back()
 	export_history_changed.emit(get_export_history())
+
+func has_ended() -> bool:
+	return not _end_state.is_empty()
+
+func get_end_state() -> String:
+	return _end_state
+
+func reset_end_state() -> void:
+	_end_state = ""
+	if _end_screen != null and is_instance_valid(_end_screen):
+		_end_screen.queue_free()
+	_end_screen = null
+	if get_tree() != null:
+		get_tree().paused = false
+
+func trigger_defeat(message: String = "Banqueroute.") -> void:
+	_trigger_end_state("defeat", "Defaite", message)
+
+func _check_credit_end_conditions() -> void:
+	if has_ended():
+		return
+	if credits >= float(credits_required_for_victory):
+		_trigger_victory("Objectif financier atteint !")
+		return
+	if credits <= credits_loss_threshold:
+		trigger_defeat("L'entreprise est en banqueroute.")
+
+func _trigger_victory(message: String) -> void:
+	_trigger_end_state("victory", "Victoire !", message)
+
+func _trigger_end_state(end_state: String, title: String, message: String) -> void:
+	if has_ended():
+		return
+	_end_state = end_state
+	if TimeManager:
+		TimeManager.is_time_running = false
+	_show_end_screen(end_state == "victory", title, message)
+	if get_tree() != null:
+		get_tree().paused = true
+	end_state_changed.emit(end_state, title, message)
+
+func _show_end_screen(is_victory: bool, title: String, message: String) -> void:
+	if END_GAME_SCREEN_SCENE == null or get_tree() == null:
+		return
+	if _end_screen != null and is_instance_valid(_end_screen):
+		_end_screen.queue_free()
+	var screen_instance: Node = END_GAME_SCREEN_SCENE.instantiate()
+	if screen_instance == null:
+		return
+	if screen_instance is CanvasLayer:
+		_end_screen = screen_instance as CanvasLayer
+	else:
+		_end_screen = null
+	if screen_instance.has_method("configure"):
+		screen_instance.call("configure", is_victory, title, message, _build_end_summary())
+	get_tree().root.add_child(screen_instance)
+
+func _build_end_summary() -> String:
+	var day_text: String = "Jour %d" % (TimeManager.current_day if TimeManager else 1)
+	return "%s | Credits: %.0f" % [day_text, credits]
 
 func _set_resource_stock_bulk(saved_stock: Dictionary) -> void:
 	resource_stock = DEFAULT_RESOURCE_STOCK.duplicate(true)

@@ -1364,13 +1364,6 @@ func _on_delivery_started(order: Dictionary) -> void:
 
 func _on_delivery_completed(order: Dictionary) -> void:
 	if String(order.get("job_type", ORDER_MODE_IMPORT)) == ORDER_MODE_EXPORT:
-		if GameManager:
-			GameManager.record_export_gain(
-				String(order.get("resource_id", "")),
-				String(order.get("resource_label", "Ressource")),
-				int(order.get("quantity", 0)),
-				float(order.get("total_cost", 0.0))
-			)
 		orders_status_label.text = "Export termine: %s x%d, gain %s" % [
 			order.get("resource_label", "Ressource"),
 			int(order.get("quantity", 0)),
