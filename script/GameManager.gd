@@ -22,6 +22,7 @@ const MAX_EXPORT_HISTORY_ENTRIES: int = 5
 var credits: float = 12500.0
 var energy_usage: float = 0.0  # en kW (positif = consommation nette, négatif = production nette)
 var co2_emissions: float = 0.0 # en g/min
+const CO2_LIMIT: float = 30.0
 var resource_stock: Dictionary = DEFAULT_RESOURCE_STOCK.duplicate(true)
 var has_default_delivery_point: bool = false
 var default_delivery_cell: Vector2i = Vector2i.ZERO
@@ -274,3 +275,11 @@ func _emit_resource_signals(include_stock_signal: bool) -> void:
 		stock_changed.emit(get_resource_stock_snapshot())
 	if EntityManager:
 		EntityManager.recalculate_totals()
+
+func apply_co2_penalty() -> float:
+	var excess: float = co2_emissions - CO2_LIMIT
+	if excess <= 0.0:
+		return 0.0
+	var penalty: float = excess * 50.0  # 50€ par g/min de dépassement
+	add_credits(-penalty)
+	return penalty

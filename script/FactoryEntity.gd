@@ -1,6 +1,8 @@
 extends Entity
 class_name FactoryEntity
 
+const FACTORY_MAX_STOCK_PER_RESOURCE: int = 16
+
 # ─────────────────────────────────────────────────────────────────────────────
 # FactoryEntity – Entité usine.
 # Point d'extension pour la logique spécifique aux usines (animations, etc.)
@@ -12,6 +14,8 @@ class_name FactoryEntity
 
 func _ready() -> void:
 	entity_type = "factory"
+	max_input_stock = FACTORY_MAX_STOCK_PER_RESOURCE
+	max_output_stock = FACTORY_MAX_STOCK_PER_RESOURCE
 	super._ready()
 	# Démarre automatiquement à la pose ; désactivé si restauré depuis une sauvegarde
 	if not is_active:

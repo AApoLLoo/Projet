@@ -1,6 +1,7 @@
 extends Node
 
 signal contract_arrived(contract: Dictionary)
+signal contract_progressed(contract: Dictionary)
 signal contract_completed(contract: Dictionary)
 signal contract_failed(contract: Dictionary)
 
@@ -70,6 +71,8 @@ func try_fulfill_contracts(resource_id: String, amount: int) -> int:
 		var needed: int = int(contract["quantity"]) - int(contract["delivered"])
 		var delivered_now: int = mini(needed, remaining)
 		contract["delivered"] = int(contract["delivered"]) + delivered_now
+		if delivered_now > 0:
+			contract_progressed.emit(contract.duplicate(true))
 		remaining -= delivered_now
 		if int(contract["delivered"]) >= int(contract["quantity"]):
 			_complete_contract(contract)

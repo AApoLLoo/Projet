@@ -468,7 +468,7 @@ func _ensure_item_marker_count(required_count: int) -> void:
 func _advance_items(delta: float) -> void:
 	if carried_items.is_empty():
 		return
-	var progress_delta: float = delta / maxf(travel_time, 0.01)
+	var progress_delta: float = delta / _get_effective_travel_time()
 	for index in range(carried_items.size()):
 		var item: Dictionary = carried_items[index]
 		var max_progress: float = 1.0
@@ -516,6 +516,18 @@ func _serialize_carried_items() -> Array[Dictionary]:
 			"progress": clampf(float(item.get("progress", 0.0)), 0.0, 1.0),
 		})
 	return serialized_items
+
+func _get_effective_travel_time() -> float:
+	var settings: Dictionary = SettingsManager.get_settings()
+	var friction: float = SettingsManager._to_float(settings.get("physics_friction", 1.0), 1.0)
+	var friction_factor: float = 1.0
+	if friction <= 1.0:
+		var low_friction_t: float = inverse_lerp(0.0, 1.0, friction)
+		friction_factor = lerpf(0.65, 1.0, low_friction_t)
+	else:
+		var high_friction_t: float = inverse_lerp(1.0, 5.0, friction)
+		friction_factor = lerpf(1.0, 1.85, high_friction_t)
+	return maxf(travel_time * friction_factor, 0.01)
 
 func _restore_carried_items(data: Dictionary) -> void:
 	carried_items.clear()
