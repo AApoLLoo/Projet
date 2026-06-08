@@ -275,3 +275,11 @@ func _emit_resource_signals(include_stock_signal: bool) -> void:
 		stock_changed.emit(get_resource_stock_snapshot())
 	if EntityManager:
 		EntityManager.recalculate_totals()
+
+func apply_co2_penalty() -> float:
+	var excess: float = co2_emissions - CO2_LIMIT
+	if excess <= 0.0:
+		return 0.0
+	var penalty: float = excess * 50.0  # 50€ par g/min de dépassement
+	add_credits(-penalty)
+	return penalty
