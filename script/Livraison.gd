@@ -371,7 +371,26 @@ func _is_resource_available_for_job(resource_id: String, job_type: String) -> bo
 	var resource_entry: Dictionary = RESOURCE_CATALOG.get(resource_id, {})
 	if job_type == JOB_EXPORT:
 		return bool(resource_entry.get("can_export", false))
-	return bool(resource_entry.get("can_import", false))
+	if not bool(resource_entry.get("can_import", false)):
+		return false
+	return not _is_mineable_resource(resource_id)
+
+func _is_mineable_resource(resource_id: String) -> bool:
+	return _get_mineable_resource_ids().has(resource_id)
+
+func _get_mineable_resource_ids() -> Array[String]:
+	var mineable_resources: Array[String] = []
+	for recipe_variant in RecipeDatabase.get_recipes("miner"):
+		if not (recipe_variant is Dictionary):
+			continue
+		var recipe: Dictionary = recipe_variant
+		var outputs: Dictionary = recipe.get("outputs", {})
+		for output_variant in outputs.keys():
+			var output_id: String = String(output_variant)
+			if output_id.is_empty() or mineable_resources.has(output_id):
+				continue
+			mineable_resources.append(output_id)
+	return mineable_resources
 
 func _get_job_label(job_type: String) -> String:
 	if job_type == JOB_EXPORT:

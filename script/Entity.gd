@@ -272,6 +272,8 @@ func can_accept_input(resource_id: String, amount: int = 1) -> bool:
 		return false
 	if not _expects_input_resource(resource_id):
 		return false
+	if get_buffer_amount("input", resource_id) + amount > max_input_stock:
+		return false
 	return _get_buffer_load(input_buffer) + amount <= input_buffer_capacity
 
 func deposit_input(resource_id: String, amount: int = 1) -> int:
@@ -421,21 +423,31 @@ func _store_cycle_outputs(outputs: Dictionary) -> bool:
 		var amount: int = int(outputs[resource_id])
 		if amount <= 0:
 			continue
+		if get_buffer_amount("output", resource_key) + amount > max_output_stock:
+			return false
 		if _get_buffer_load(output_buffer) + amount > output_buffer_capacity:
 			return false
 		output_buffer[resource_key] = get_buffer_amount("output", resource_key) + amount
 	return true
 
 func _has_output_capacity_for_recipe() -> bool:
+	if current_recipe.is_empty():
+		return false
+		
 	var outputs: Dictionary = current_recipe.get("outputs", {})
-	if outputs.is_empty():
-		return true
-	var projected_load: int = _get_buffer_load(output_buffer)
-	for resource_id in outputs.keys():
-		if resource_id == "energie":
+	for item_id in outputs:
+		if item_id == "energie":
 			continue
-		projected_load += int(outputs[resource_id])
-	return projected_load <= output_buffer_capacity
+		var resource_id: String = String(item_id)
+		var current_amount: int = get_buffer_amount("output", resource_id)
+		var amount_produced: int = int(outputs[item_id])
+		
+		# Limite atteinte
+		if current_amount + amount_produced > max_output_stock:
+			return false
+		if _get_buffer_load(output_buffer) + amount_produced > output_buffer_capacity:
+			return false
+	return true
 
 func _expects_input_resource(resource_id: String) -> bool:
 	var inputs: Dictionary = current_recipe.get("inputs", {})
@@ -461,7 +473,19 @@ func _sanitize_buffer(buffer_data: Dictionary) -> Dictionary:
 
 func _emit_logistics_update() -> void:
 	entity_updated.emit(self)
+# Vérifie si l'entité peut recevoir cet objet spécifique
 
+func can_accept_item(item_id: String) -> bool:
+	if current_recipe.is_empty():
+		return false
+		
+	# 1. Vérifier si l'objet fait bien partie des ingrédients de la recette
+	var inputs: Dictionary = current_recipe.get("inputs", {})
+	if not inputs.has(item_id):
+		return false
+		
+	# 2. Vérifier si la limite de stock est atteinte
+	return can_accept_input(item_id, 1)
 # ─── Interne ─────────────────────────────────────────────────────────────────
 
 static func _generate_id() -> String:
