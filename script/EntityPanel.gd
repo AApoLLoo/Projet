@@ -36,7 +36,6 @@ func _ready() -> void:
 	_style_panel()
 	close_btn.pressed.connect(_on_close)
 	recipe_selector.item_selected.connect(_on_recipe_selected)
-	rate_slider.value_changed.connect(_on_rate_changed)
 	active_toggle.toggled.connect(_on_active_toggled)
 	repair_button.pressed.connect(_on_repair_pressed)
 	if GameManager:
@@ -138,11 +137,6 @@ func _on_recipe_selected(index: int) -> void:
 		current_entity.set_recipe(recipes[index])
 		_refresh_recipe_details()
 
-func _on_rate_changed(value: float) -> void:
-	if current_entity == null:
-		return
-	rate_label.text = "%d%%" % roundi(value * 100.0)
-	current_entity.set_production_rate(value)
 
 func _on_active_toggled(pressed: bool) -> void:
 	if current_entity == null:
@@ -280,8 +274,8 @@ func _apply_entity_mode() -> void:
 	var hide_factory_ui: bool = is_conveyor or is_warehouse
 	recipe_label.visible = not hide_factory_ui
 	recipe_selector.visible = not hide_factory_ui
-	rate_title_label.visible = not hide_factory_ui
-	rate_box.visible = not hide_factory_ui
+	rate_title_label.hide()
+	rate_box.hide()
 	
 	# Labels personnalisés
 	if is_warehouse:
@@ -295,8 +289,8 @@ func _apply_entity_mode() -> void:
 		output_label.text = "Sorties"
 	recipe_label.visible = not is_conveyor
 	recipe_selector.visible = not is_conveyor
-	rate_title_label.visible = not is_conveyor
-	rate_box.visible = not is_conveyor
+	rate_title_label.hide()
+	rate_box.hide()
 	input_label.text = "Entree" if is_conveyor else "Entrees"
 	output_label.text = "Sortie" if is_conveyor else "Sorties"
 	var show_stock: bool = not is_conveyor

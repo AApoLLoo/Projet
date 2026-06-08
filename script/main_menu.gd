@@ -2,7 +2,6 @@ extends Control
 
 const LEVEL_SCENE: String = "res://scene/level.tscn"
 const SETTINGS_SCENE: String = "res://scene/settings.tscn"
-const ACHIEVEMENTS_SCENE: String = "res://scene/achivements.tscn"
 const TUTORIAL_SCENE: GDScript = preload("res://script/tutorial.gd")
 
 
@@ -16,7 +15,6 @@ const TUTORIAL_SCENE: GDScript = preload("res://script/tutorial.gd")
 @onready var _lab_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/LabButton
 @onready var _tutorial_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/TutorialButton
 @onready var _settings_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/SettingsButton
-@onready var _achievements_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/AchievementsButton
 @onready var _quit_button: Button = $MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons/QuitButton
 @onready var _left_panel: PanelContainer = $BottomLeftPanel
 @onready var _right_panel: PanelContainer = $BottomRightPanel
@@ -46,7 +44,7 @@ func _ready() -> void:
 	_menu_description_label.custom_minimum_size = Vector2(0, 105)
 	_menu_description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	for btn in [_start_button, _load_button, _lab_button, _tutorial_button,
-				_settings_button, _achievements_button, _quit_button]:
+				_settings_button, _quit_button]:
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 
 func _style_buttons() -> void:
@@ -55,7 +53,6 @@ func _style_buttons() -> void:
 	_apply_button_style(_lab_button,          Color("#8B7EC8"), UITheme.TEXT_LIGHT)  # violet
 	_apply_button_style(_tutorial_button, Color("#E8A87C"), UITheme.TEXT_LIGHT)  # orange doux	
 	_apply_button_style(_settings_button,     Color("#7AAB8A"), UITheme.TEXT_LIGHT)  # vert sauge
-	_apply_button_style(_achievements_button, Color("#C4956E"), UITheme.TEXT_LIGHT)  # brun chaud
 	_apply_button_style(_quit_button,         Color("#C86B57"), UITheme.TEXT_LIGHT)  # rouge
 	
 func _update_physics_panel() -> void:
@@ -77,7 +74,6 @@ func _connect_actions() -> void:
 	_lab_button.pressed.connect(_on_lab_pressed)
 	_tutorial_button.pressed.connect(_on_tutorial_pressed)
 	_settings_button.pressed.connect(_on_settings_pressed)
-	_achievements_button.pressed.connect(_on_achievements_pressed)
 	_quit_button.pressed.connect(_on_quit_pressed)
 
 func _apply_button_style(button: Button, base_color: Color, text_color: Color) -> void:
@@ -97,7 +93,6 @@ func _configure_menu_descriptions() -> void:
 		_lab_button: "Passe dans le laboratoire pour regler les parametres de simulation avant de jouer.",
 		_tutorial_button: "Accede au futur parcours guide pour prendre en main les bases de l'automatisation.",
 		_settings_button: "Ajuste l'affichage, l'audio et les options de confort depuis un ecran unifie.",
-		_achievements_button: "Consulte les objectifs de progression et ce qui reste a debloquer.",
 		_quit_button: "Ferme le jeu proprement apres avoir sauvegarde ta progression."
 	}
 	for button_variant in _menu_descriptions.keys():
@@ -148,8 +143,6 @@ func _on_settings_pressed() -> void:
 	SettingsManager.set_return_target("res://scene/main_menu.tscn")
 	_change_scene(SETTINGS_SCENE)
 
-func _on_achievements_pressed() -> void:
-	_change_scene(ACHIEVEMENTS_SCENE)
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
@@ -202,7 +195,7 @@ func _update_responsive_layout() -> void:
 		button_width = 244.0
 	if viewport_size.x < 940.0:
 		button_width = 216.0
-	for button in [_start_button, _load_button, _lab_button, _tutorial_button, _settings_button, _achievements_button, _quit_button]:
+	for button in [_start_button, _load_button, _lab_button, _tutorial_button, _settings_button, _quit_button]:
 		button.custom_minimum_size = Vector2(button_width, 50.0 if compact_layout else 54.0)
 	_menu_card.custom_minimum_size = Vector2(button_width + 44.0, 0.0)
 	_left_panel.visible = not tiny_layout

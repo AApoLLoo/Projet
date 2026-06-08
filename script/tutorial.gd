@@ -16,99 +16,68 @@ var _extra_speed_nodes: Array = []
 # ── Définition des étapes ────────────────────────────────────────────────────
 const STEPS: Array[Dictionary] = [
 	# ── 0 ── Bienvenue ───────────────────────────────────────────────────────
+	
 	{
 		"tag": "Bienvenue",
 		"title": "Bienvenue dans Factory Manager !",
 		"body":
 			"Tu hérites d'une usine à construire de zéro.\n\n" +
-			"Ton objectif : bâtir une chaîne industrielle rentable en\n" +
-			"• extrayant des ressources,\n" +
-			"• les transformant en produits vendables,\n" +
-			"• honorant des contrats pour empocher des crédits.\n\n" +
+			"Ton objectif est de produire, transformer et vendre des ressources afin de développer une industrie rentable.\n\n" +
 			"Tu démarres avec [b]12 500 €[/b]. Gère bien ton budget !",
 		"objective": "",
 		"check": "",
 		"skip": true,
-   		"reveals": ["day_time"],
+		"reveals": ["day_time"],
 		"highlight": "",
 	},
-	# ── 1 ── Déplacement ─────────────────────────────────────────────────────
-	{
-		"tag": "Navigation",
-		"title": "Se déplacer sur la carte",
-		"body":
-			"[b]ZQSD[/b] (ou flèches) — déplacer la caméra\n" +
-			"[b]Molette[/b] — zoomer / dézoomer\n\n" +
-			"[b]Raccourcis utiles :[/b]\n" +
-			"  [b]B[/b] — ouvrir/fermer le menu Construction\n" +
-			"  [b]Tab[/b] — ouvrir/fermer les Commandes\n" +
-			"  [b]I[/b] — Vue d'ensemble session\n" +
-			"  [b]P[/b] — Pause / reprendre le temps\n" +
-			"  [b]E[/b] — Sauvegarde rapide",
-		"objective": "",
-		"check": "",
-		"skip": true,
-		"reveals": ["speed_btns", "day_time"],
-		"highlight": "",
-	},
-	# ── 2 ── Ouvrir le menu Construction ─────────────────────────────────────
 	{
 		"tag": "Étape 1 — Construction",
 		"title": "Ouvre le menu Construction",
 		"body":
 			"Le bouton [b]Construction[/b] vient d'apparaître en haut.\n\n" +
-			"Clique dessus (ou appuie sur [b]B[/b]) pour voir tous les\n" +
-			"bâtiments disponibles.\n\n" +
-			"[i]Objectif : ouvre le menu Construction.[/i]",
+			"Clique dessus (ou appuie sur [b]B[/b]) pour voir tous les bâtiments disponibles.",
 		"objective": "Ouvrir le menu Construction",
 		"check": "build_menu_opened",
 		"skip": false,
 		"reveals": ["speed_btns", "day_time", "build_btn"],
 		"highlight": "build_btn",
 	},
-	# ── 3 ── Poser un Extracteur ─────────────────────────────────────────────
+
 	{
 		"tag": "Étape 2 — Extraction",
 		"title": "Pose un Extracteur (300 €)",
 		"body":
-			"L'[b]Extracteur[/b] puise des ressources directement dans le sol.\n\n" +
-			"Construction → [b]Extraction[/b] → clique sur la carte pour le placer.\n\n" +
-			"Une fois posé, clique dessus pour choisir sa [b]recette[/b] :\n" +
-			"  • Matière brute (3 s/cycle, 30 kW)\n" +
-			"  • Charbon (5 s/cycle, 40 kW)\n" +
-			"  • Métal brut (8 s/cycle, 50 kW)\n\n" +
-			"💡 Les machines consomment de l'électricité — tu auras besoin d'une turbine !",
+			"L'Extracteur récupère des ressources directement dans le sol.\n\n" +
+			"Construction → Extraction → place-le sur la carte.\n\n" +
+			"Clique ensuite dessus pour choisir la ressource à produire.\n\n",
 		"objective": "Poser au moins 1 Extracteur",
 		"check": "has_miner",
 		"skip": false,
 		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu"],
 		"highlight": "build_btn",
 	},
-	# ── 4 ── Poser une Turbine ───────────────────────────────────────────────
+
 	{
 		"tag": "Étape 3 — Énergie",
 		"title": "Pose une Turbine (500 €)",
 		"body":
-			"Sans électricité, tes machines s'arrêtent.\n\n" +
-			"Construction → [b]Energie[/b] → place la turbine sur la grille.\n\n" +
-			"[b]3 recettes disponibles :[/b]\n" +
-			"  • Turbine à vapeur — 100 kW gratuit (mais 5 g/min CO₂)\n" +
-			"  • Turbine au charbon — 250 kW (consomme 1 charbon/2 s)\n" +
-			"  • Turbine au gaz — 400 kW (consomme 1 gaz/2 s, moins polluant)\n\n" +
-			"💡 La turbine à vapeur suffit pour débuter. Clique dessus après placement pour choisir.",
+			"Les turbines produisent l'électricité nécessaire à ton usine.\n\n" +
+			"Construction → Énergie → place une turbine.\n\n"+
+			"Le bouton 'zone électricité' sert à voir quelles machines la turbine alimente\n\n"+
+			"💡 Une turbine suffit pour démarrer ton activité.",
 		"objective": "Poser au moins 1 Turbine",
 		"check": "has_turbine",
 		"skip": false,
 		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu"],
 		"highlight": "build_btn",
 	},
-	# ── 5 ── Poser une Usine ─────────────────────────────────────────────────
+
 	{
 		"tag": "Étape 4 — Production",
 		"title": "Pose une Usine (200 €)",
 		"body":
-			"L'[b]Usine[/b] transforme des ressources en produits vendables.\n\n" +
-			"Construction → [b]Production[/b] → place-la sur la grille.\n\n" +
+			"L'Usine transforme les ressources en produits vendables.\n\n" +
+			"Construction → Production → place-la sur la grille.\n\n" +
 			"Clique sur l'usine après placement pour sélectionner une recette.",
 		"objective": "Poser au moins 1 Usine",
 		"check": "has_factory",
@@ -116,174 +85,118 @@ const STEPS: Array[Dictionary] = [
 		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu"],
 		"highlight": "build_btn",
 	},
-	# ── 6 ── Connecter avec des tapis ────────────────────────────────────────
+
 	{
 		"tag": "Étape 5 — Convoyeurs",
-		"title": "Relie tes bâtiments avec des tapis",
+		"title": "Relie tes bâtiments",
 		"body":
-			"Les [b]convoyeurs[/b] transportent les ressources de bâtiment en bâtiment.\n\n" +
-			"Construction → [b]Convoyeurs[/b] → choisis une direction :\n" +
-			"  • Tapis cardinaux : Nord, Sud, Est, Ouest\n" +
-			"  • Virages : 4 courbes disponibles\n" +
-			"Relie l'Extracteur → l'Usine avec au moins 3 tapis.\n\n" +
-			"💡 La sortie d'un bâtiment alimente automatiquement l'entrée du suivant.",
+			"Les convoyeurs transportent automatiquement les ressources.\n\n" +
+			"Relie ton Extracteur à ton Usine avec quelques tapis.\n\n" +
+			"💡 Les ressources avancent automatiquement d'un bâtiment à l'autre.",
 		"objective": "Placer au moins 3 tapis",
 		"check": "has_belts_3",
 		"skip": false,
 		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu"],
 		"highlight": "build_btn",
 	},
-	# ── 7 ── Comprendre la grille d'énergie ──────────────────────────────────
+
 	{
-		"tag": "Étape 6 — Réseau électrique",
-		"title": "Surveille ta consommation d'énergie",
+		"tag": "Étape 6 — Utilisation des Batiments",
+		"title": "Surveille la santé de tes bâtiments",
 		"body":
-			"Chaque machine consomme des kW. Si la production est insuffisante,\n" +
-			"les machines ralentissent ou s'arrêtent.\n\n" +
-			"[b]Voir la zone couverte :[/b]\n" +
-			"Construction → [b]Zone électricité[/b] (bouton toggle)\n\n" +
-			"[b]Règle générale :[/b]\n" +
-			"  1 Turbine vapeur (100 kW) couvre :\n" +
-			"  → 3 Extracteurs (30 kW chacun)\n" +
-			"  → ou 2 Usines basiques (50 kW chacune)\n\n" +
-			"Le panneau CO₂ (coin bas droite) apparaîtra bientôt — surveille\n" +
-			"ton impact environnemental pour éviter les pénalités de fin de partie.",
+			"Toutes les machines actives consomment une partie de leur santé.\n\n" +
+			"Si elles sont fonctionnent pendant trop longtemps, elle cassent.\n\n" +
+			"Tu peux commander un kit de reparation (voir plus tard), ou simplement remplacer la machine cassée.\n\n"+
+			"Appuie sur le bouton 'mode destruction' pour supprimer un ou plusieurs bâtiments.",
+
 		"objective": "",
 		"check": "",
 		"skip": true,
 		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu", "resources"],
 		"highlight": "resources",
 	},
-	# ── 8 ── Poser un entrepôt ───────────────────────────────────────────────
+
 	{
-		"tag": "Étape 7 — Entrepôt",
+		"tag": "Étape 7 — Environnement",
+		"title": "Les arbres réduisent le CO₂",
+		"body":
+			"Plus le nombre de machines actives est élevé, plus ton impact carbone est fort.\n\n" +
+			"Attention, il y a une limite à ne pas dépasser !.\n\n" +
+			"Mais les arbres absorbent une partie de la pollution générée par ton usine.\n\n" +
+			"Chaque arbre réduit le CO₂ produit par tes bâtiments.\n\n" +
+			"💡 Plus ton usine devient grande, plus les arbres deviennent utiles.",
+		"objective": "",
+		"check": "",
+		"skip": true,
+		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu", "resources", "co2"],
+		"highlight": "resources",
+	},
+
+	{
+		"tag": "Étape 8 — Entrepôt",
 		"title": "Pose un Entrepôt (1 000 €)",
 		"body":
-			"L'[b]Entrepôt[/b] est obligatoire pour importer et exporter des marchandises.\n\n" +
-			"Construction → [b]Entrepôt[/b] → place-le sur la grille.\n\n" +
-			"Il sert de point de dépôt pour :\n" +
-			"  • Les ressources importées par camion\n" +
-			"  • Les produits finis à expédier\n\n" +
-			"💡 Clique sur un entrepôt placé pour voir son stock et le gérer.",
+			"L'Entrepôt sert à stocker les ressources et les produits.\n\n" +
+			"Il est nécessaire pour les opérations d'import et d'export.\n\n" +
+			"💡 Clique sur un entrepôt pour consulter son stock.",
 		"objective": "Poser au moins 1 Entrepôt",
 		"check": "has_entrepot",
 		"skip": false,
-		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu", "resources"],
+		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu", "resources", "co2"],
 		"highlight": "build_btn",
 	},
-	# ── 9 ── Importer des ressources ─────────────────────────────────────────
+
 	{
-		"tag": "Étape 8 — Import",
-		"title": "Importe des ressources",
+		"tag": "Étape 9 — Import",
+		"title": "Importer des ressources",
 		"body":
-			"Tu peux acheter des ressources directement par camion.\n\n" +
-			"[b]Commandes[/b] (ou [b]Tab[/b]) → onglet [b]Import[/b] :\n" +
-			"  • Choisis une ressource dans la liste\n" +
-			"  • Ajuste la quantité\n" +
-			"  • Définis un point de livraison sur la carte\n" +
-			"  • Clique [b]Commander[/b]\n\n" +
-			"[b]Tarifs d'import :[/b]\n" +
-			"  • Charbon : 45 €/u | Gaz : 70 €/u\n" +
-			"  • Matière brute : 55 €/u | Métal : 95 €/u\n\n" +
-			"Le camion arrive automatiquement et décharge à la destination choisie.",
+			"Tu peux acheter des ressources directement depuis le menu Commandes.\n\n" +
+			"Onglet Import → choisis une ressource → indique une quantité → commande.\n\n" +
+			"Le camion livrera automatiquement les marchandises.",
 		"objective": "Lancer une commande d'import",
 		"check": "has_imported",
 		"skip": false,
-		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn"],
+		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn", "co2"],
 		"highlight": "orders_btn",
 	},
-	# ── 10 ── Exporter pour gagner de l'argent ───────────────────────────────
+
 	{
-		"tag": "Étape 9 — Export",
-		"title": "Exporte ta production pour gagner des crédits",
+		"tag": "Étape 10 — Export",
+		"title": "Exporter pour gagner de l'argent",
 		"body":
-			"La vente de produits finis est ta principale source de revenus.\n\n" +
-			"[b]Commandes[/b] → onglet [b]Export[/b] :\n" +
-			"  • Sélectionne le produit à vendre\n" +
-			"  • Fixe la quantité (vérifie ton stock)\n" +
-			"  • Valide — le camion vient chercher la marchandise\n\n" +
-			"[b]Valeurs d'export :[/b]\n" +
-			"  • Gaz raffiné : 165 €/u | Pièce de base : 180 €/u\n" +
-			"  • Métal : 90 €/u | Pièce avancée : 420 €/u\n\n" +
-			"💡 Le panneau affiche aussi la marge nette après coûts de production.",
+			"Les produits fabriqués peuvent être vendus pour gagner des crédits.\n\n" +
+			"Onglet Export → choisis un produit → indique une quantité → valide.\n\n" +
+			"💡 Produire et vendre est la principale source de revenus du jeu.",
 		"objective": "Lancer un export",
-		"check": "has_exported",
-		"skip": false,
-		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn"],
+		"skip": true,
+		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn", "co2"],
 		"highlight": "orders_btn",
 	},
-	# ── 11 ── Contrats ───────────────────────────────────────────────────────
+
 	{
-		"tag": "Étape 10 — Contrats",
-		"title": "Honore les contrats pour des bonus",
+		"tag": "Étape 11 — Contrats",
+		"title": "Remplis des contrats",
 		"body":
-			"Chaque jour, des [b]contrats[/b] arrivent automatiquement (max 2 actifs).\n" +
-			"Ils demandent une quantité précise avant une [b]deadline[/b].\n\n" +
-			"[b]Si tu livres à temps :[/b] récompense + bonus de streak (5% par contrat enchaîné, jusqu'à +50%)\n" +
-			"[b]Si tu rates :[/b] pénalité financière déduite immédiatement\n\n" +
-			"[b]Contrats possibles :[/b]\n" +
-			"  • Gaz raffiné : 2–5 unités, deadline 2 jours\n" +
-			"  • Pièce de base : 3–8 unités, deadline 2 jours\n" +
-			"  • Pièce avancée : 1–2 unités, deadline 3 jours\n\n" +
-			"Les contrats actifs s'affichent en haut de l'écran.",
+			"Des contrats apparaissent régulièrement.\n\n" +
+			"Produis et livre les marchandises demandées avant la date limite.\n\n" +
+			"Les contrats rapportent des bonus importants et accélèrent ta progression.\n\n"+
+			"Mais attention ! Si tu ne les remplis pas dans les temps tu auras une pénalité et tu perdras de l'argent...",
+
 		"objective": "",
 		"check": "",
 		"skip": true,
-		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn"],
+		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn", "co2"],
 		"highlight": "",
 	},
-	# ── 12 ── Usure et pannes ────────────────────────────────────────────────
+
 	{
-		"tag": "Étape 11 — Maintenance",
-		"title": "Gère l'usure de tes machines",
+		"tag": "Étape 12 — Objectif final",
+		"title": "Développe ton empire industriel",
 		"body":
-			"Chaque cycle de production use tes machines ([b]-0,35 PV[/b] par cycle).\n\n" +
-			"En dessous de [b]20 PV[/b] de santé, une machine peut tomber en panne\n" +
-			"avec 8% de chance par cycle — elle s'arrête alors complètement.\n\n" +
-			"[b]Pour réparer :[/b] clique sur la machine → bouton Réparer\n" +
-			"(nécessite un [b]repair_kit[/b] dans ton stock)\n\n" +
-			"💡 Tu peux importer des repair_kits via le menu Commandes.\n" +
-			"Surveille la santé de tes machines pour éviter les interruptions de production.",
-		"objective": "",
-		"check": "",
-		"skip": true,
-		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn"],
-		"highlight": "",
-	},
-	# ── 13 ── Mode destruction et déplacement ────────────────────────────────
-	{
-		"tag": "Étape 12 — Gestion avancée",
-		"title": "Détruire et déplacer des bâtiments",
-		"body":
-			"Tu peux reorganiser ta factory à tout moment.\n\n" +
-			"[b]Mode Destruction[/b] :\n" +
-			"Construction → [b]Mode destruction[/b] (toggle)\n" +
-			"Clic gauche sur un bâtiment pour le supprimer et récupérer une partie du coût.\n\n" +
-			"[b]Déplacer un bâtiment :[/b]\n" +
-			"Maintiens le clic gauche sur un bâtiment placé → glisse-le vers sa nouvelle case.\n\n" +
-			"💡 La grille est grande (1000×1000 cases). Utilise la [b]minimap[/b] en bas à droite\n" +
-			"pour naviguer et cliquer directement pour te téléporter.",
-		"objective": "",
-		"check": "",
-		"skip": true,
-		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn", "overview_btn"],
-		"highlight": "minimap",
-	},
-	# ── 14 ── Vue d'ensemble et victoire ─────────────────────────────────────
-	{
-		"tag": "Étape 13 — Objectif final",
-		"title": "Vue d'ensemble et condition de victoire",
-		"body":
-			"Le bouton [b]I[/b] (Vue d'ensemble) résume ta session en temps réel :\n" +
-			"machines actives, taux de production, consommation électrique, CO₂…\n" +
-			"[b]Conditions de fin de partie :[/b]" +
-			"  🏆 [b]Victoire[/b] — Atteins 1 000 000 € de crédits\n" +
-			"  💀 [b]Défaite[/b] — Tu tombes à 0 € (ou en dessous du seuil)\n" +
-			"[b]Stratégie recommandée :[/b]\n" +
-			"  1. Matière brute → Pièce de base → Export (rentable dès le départ)\n" +
-			"  2. Ajoute des turbines au charbon/gaz pour booster la production\n" +
-			"  3. Enchaîne les contrats pour les bonus de streak\n" +
-			"  4. Passe aux Pièces avancées (420 €/u) pour la ligne droite vers la victoire\n\n" +
+			"Ton objectif est de construire une usine toujours plus rentable.\n\n" +
+			"Produis, transforme, exporte et remplis des contrats pour gagner de l'argent.\n\n" +
+			"🏆 [b]Victoire[/b] : atteindre 1 000 000 €\n" +
+			"💀 [b]Défaite[/b] : ne plus avoir assez d'argent pour continuer.\n\n" +
 			"Bonne chance !",
 		"objective": "",
 		"check": "",
@@ -291,20 +204,20 @@ const STEPS: Array[Dictionary] = [
 		"reveals": ["speed_btns", "day_time", "build_btn", "orders_btn", "overview_btn", "minimap", "resources", "co2", "build_menu"],
 		"highlight": "",
 	},
-	# ── 15 ── Fin ────────────────────────────────────────────────────────────
+
 	{
 		"tag": "Terminé !",
 		"title": "Tu es prêt à jouer 🎉",
 		"body":
-			"Tu maîtrises maintenant toutes les bases :\n\n" +
-			"✓ Extraire → Transformer → Vendre\n" +
-			"✓ Gérer l'énergie (turbines)\n" +
-			"✓ Connecter avec des convoyeurs\n" +
-			"✓ Importer / Exporter par camion\n" +
-			"✓ Honorer les contrats\n" +
-			"✓ Gérer l'usure et les pannes\n\n" +
-			"Tout le HUD est maintenant débloqué.\n" +
-			"Construis ta fortune — le million t'attend !",
+			"Tu maîtrises maintenant les bases :\n\n" +
+			"✓ Extraire\n" +
+			"✓ Produire\n" +
+			"✓ Transporter\n" +
+			"✓ Gérer l'énergie\n" +
+			"✓ Importer et exporter\n" +
+			"✓ Réduire le CO₂ grâce aux arbres\n\n" +
+			"Tout le HUD est maintenant débloqué.\n\n" +
+			"Construis la plus grande usine possible !",
 		"objective": "",
 		"check": "",
 		"skip": true,

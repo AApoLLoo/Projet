@@ -103,11 +103,6 @@ custom_minimum_size = Vector2(300, 54)
 layout_mode = 2
 text = "Reglages"
 
-[node name="AchievementsButton" type="Button" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=124663486]
-custom_minimum_size = Vector2(300, 54)
-layout_mode = 2
-text = "Achievements"
-
 [node name="QuitButton" type="Button" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=39767664]
 custom_minimum_size = Vector2(300, 54)
 layout_mode = 2

@@ -10,8 +10,10 @@ const ORDER_MODE_EXPORT: String = "export"
 
 @onready var day_label: Label = %DayLabel
 @onready var time_label: Label = %TimeLabel
+@onready var co2_status: Label = %CO2Status
 @onready var money_label: Label = %MoneyLabel
 @onready var co2_label: Label = %CO2Label
+@onready var co2_progress: ProgressBar = %CO2Progress
 @onready var top_hud_background: ColorRect = $MarginContainer/ColorRect
 @onready var minimap_background: ColorRect = $MinimapContainer/ColorRect
 @onready var minimap_surface: Control = %MinimapSurface
@@ -1052,7 +1054,35 @@ func _update_co2_display() -> void:
 		return
 	var val: float = GameManager.co2_emissions
 	var limit: float = GameManager.CO2_LIMIT
-	co2_label.text = "%.1f / %.0f g/min CO2" % [val, limit]
+
+	var percent: float = clampf((val / limit) * 100.0, 0.0, 100.0)
+	co2_progress.value = percent
+	var fill := StyleBoxFlat.new()
+	if percent < 50:
+		co2_status.text = "✓ Situation stable"
+		co2_status.modulate = Color(0.2, 0.8, 0.3) # vert
+
+	elif percent < 80:
+		co2_status.text = "⚠ Pollution élevée"
+		co2_status.modulate = Color(1.0, 0.7, 0.0) # orange
+	
+	elif percent < 100:
+		co2_status.text = "☠ Limite presque atteinte"
+		co2_status.modulate = Color(1.0, 0.2, 0.2) # rouge
+	else:
+		co2_status.text = "☠ Limite atteinte : Plante des arbres !"
+		co2_status.modulate = Color(1.0, 0.2, 0.2) # rouge
+	if percent < 50:
+		fill.bg_color = Color(0.2, 0.8, 0.3)
+
+	elif percent < 80:
+		fill.bg_color = Color(1.0, 0.7, 0.0)
+
+	else:
+		fill.bg_color = Color(1.0, 0.2, 0.2)
+
+	co2_progress.add_theme_stylebox_override("fill", fill)
+	co2_label.text = "%.0f / %.0f g/min" % [val, limit]
 	if val >= limit:
 		co2_label.add_theme_color_override("font_color", Color(0.9, 0.2, 0.2))
 	elif val >= limit * 0.75:
