@@ -221,17 +221,26 @@ func eject_carried_item() -> bool:
 	if current_scene == null:
 		material_instance.queue_free()
 		return false
-	var item_world_position: Vector2 = global_position + _offset_to_marker_position(output_offset) * 0.6
+	var resource_id: String = String(ejected_item.get("resource_id", ""))
+	var amount: int = int(ejected_item.get("amount", 0))
 	if material_instance.has_method("set_resource"):
-		material_instance.call("set_resource", String(ejected_item.get("resource_id", "")), int(ejected_item.get("amount", 0)))
+		material_instance.call("set_resource", resource_id, amount)
 	else:
-		material_instance.set("destination", String(ejected_item.get("resource_id", "")))
-		material_instance.set("quantity", int(ejected_item.get("amount", 0)))
+		material_instance.set("destination", resource_id)
+		material_instance.set("quantity", amount)
+	# Position initiale = souris (le drag commence immédiatement)
+	var mouse_world_pos: Vector2 = get_global_mouse_position()
 	if material_instance is Node2D:
-		(material_instance as Node2D).global_position = item_world_position
+		(material_instance as Node2D).global_position = mouse_world_pos
 	current_scene.add_child(material_instance)
-	if material_instance.has_method("prepare_ground_spawn"):
-		material_instance.call("prepare_ground_spawn", item_world_position)
+	# Lance directement le drag sous la souris
+	if material_instance.has_method("pickup_from_belt"):
+		material_instance.call("pickup_from_belt", mouse_world_pos)
+	else:
+		# Fallback pour compatibilité : spawn au sol sur le tapis
+		var belt_pos: Vector2 = global_position + _offset_to_marker_position(output_offset) * 0.6
+		if material_instance.has_method("prepare_ground_spawn"):
+			material_instance.call("prepare_ground_spawn", belt_pos)
 	_clear_carried_item()
 	return true
 

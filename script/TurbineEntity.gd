@@ -23,8 +23,15 @@ func _ready() -> void:
 	if not is_active:
 		is_active = true
 
-# Dans TurbineEntity._on_active_changed() :
 func _on_active_changed(active: bool) -> void:
+	# ← AJOUTER ces lignes au début
+	if _anim_sprite != null:
+		if active:
+			_anim_sprite.play("default")
+		else:
+			_anim_sprite.stop()
+	
+	# Le code existant pour les voisins...
 	var rayon = 20
 	for x in range(-rayon, rayon + 1):
 		for y in range(-rayon, rayon + 1):
