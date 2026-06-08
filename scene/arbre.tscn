@@ -11,16 +11,20 @@ script = ExtResource("1_flxmm")
 
 [node name="ArbreSpriteVertF" type="Sprite2D" parent="." unique_id=1484472616]
 unique_name_in_owner = true
+scale = Vector2(1.5, 1.5)
 texture = ExtResource("1_eatbf")
 
 [node name="ArbreSpriteVert" type="Sprite2D" parent="." unique_id=1123622979]
 unique_name_in_owner = true
+scale = Vector2(1.5, 1.5)
 texture = ExtResource("3_225dk")
 
 [node name="ArbreSpriteRouge" type="Sprite2D" parent="." unique_id=72128725]
 unique_name_in_owner = true
+scale = Vector2(1.5, 1.5)
 texture = ExtResource("4_gori7")
 
 [node name="ArbreSpriteBlanc" type="Sprite2D" parent="." unique_id=1394447210]
 unique_name_in_owner = true
+scale = Vector2(1.5, 1.5)
 texture = ExtResource("5_vh321")

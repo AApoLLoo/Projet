@@ -105,7 +105,7 @@ var buildings_data = {
 		"texture": preload("res://asset/usine.png"),
 		"cost": 200.0,
 		"frames": 1,
-		"preview_scale": Vector2(0.55, 0.55),
+		"preview_scale": Vector2(1,1),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"turbine": {
@@ -114,7 +114,7 @@ var buildings_data = {
 		"texture_region": Rect2(0, 0, 149, 108),
 		"cost": 500.0,
 		"frames": 1,
-		"preview_scale": Vector2(0.9, 0.9),
+		"preview_scale": Vector2(1.5, 1.5),
 		"footprint_offsets": [Vector2i.ZERO, Vector2i(1, 0)]
 	},
 	"belt_east": {
@@ -123,7 +123,7 @@ var buildings_data = {
 		"texture_region": Rect2(0, 192, 32, 32),
 		"cost": 50.0,
 		"frames": 1,
-		"preview_scale": Vector2(1.75, 1.75),
+		"preview_scale": Vector2(2, 2),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"belt_south": {
@@ -132,7 +132,7 @@ var buildings_data = {
 		"texture_region": Rect2(0, 64, 32, 32),
 		"cost": 50.0,
 		"frames": 1,
-		"preview_scale": Vector2(1.75, 1.75),
+		"preview_scale": Vector2(2, 2),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"belt_north": {
@@ -141,7 +141,7 @@ var buildings_data = {
 		"texture_region": Rect2(0, 0, 32, 32),
 		"cost": 50.0,
 		"frames": 1,
-		"preview_scale": Vector2(1.75, 1.75),
+		"preview_scale": Vector2(2,2),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"belt_west": {
@@ -150,7 +150,7 @@ var buildings_data = {
 		"texture_region": Rect2(0, 128, 32, 32),
 		"cost": 50.0,
 		"frames": 1,
-		"preview_scale": Vector2(1.75, 1.75),
+		"preview_scale": Vector2(2,2),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"merger": {
@@ -213,7 +213,7 @@ var buildings_data = {
 		"texture_region": Rect2(0, 0, 132, 186),
 		"cost": 1000.0,
 		"frames": 1,
-		"preview_scale": Vector2(0.6, 0.6),
+		"preview_scale": Vector2(1,1),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"miner": {
@@ -222,48 +222,48 @@ var buildings_data = {
 		"texture_region": Rect2(0, 0, 64, 92),
 		"cost": 300.0,
 		"frames": 1,
-		"preview_scale": Vector2(0.9, 0.9),
+		"preview_scale": Vector2(1.5,1.5),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"arbre_1": {
 	"scene": preload("res://scene/arbre.tscn"),
 	"texture": preload("res://asset/Trees+(5).png"),
-	"cost": 50.0,
+	"cost": 50000.0,          # ← modifier
 	"frames": 1,
-	"preview_scale": Vector2(1.0, 1.0),
+	"preview_scale": Vector2(1.5, 1.5),
 	"footprint_offsets": [Vector2i.ZERO],
-	"co2_absorption": 2.0,
-	"arbre_variant": "vert",      # ← ajouter cette ligne
+	"co2_absorption": 0.2,    # ← modifier
+	"arbre_variant": "ArbreSpriteVert",
 },
 "arbre_2": {
 	"scene": preload("res://scene/arbre.tscn"),
 	"texture": preload("res://asset/Trees+(2).png"),
-	"cost": 120.0,
+	"cost": 120000.0,         # ← modifier
 	"frames": 1,
-	"preview_scale": Vector2(1.0, 1.0),
+	"preview_scale": Vector2(1.5, 1.5),
 	"footprint_offsets": [Vector2i.ZERO],
-	"co2_absorption": 5.0,
-	"arbre_variant": "vertF",     # ← ajouter cette ligne
+	"co2_absorption": 0.6,    # ← modifier
+	"arbre_variant": "ArbreSpriteVertF",
 },
 "arbre_3": {
 	"scene": preload("res://scene/arbre.tscn"),
 	"texture": preload("res://asset/Trees+(3).png"),
-	"cost": 250.0,
+	"cost": 250000.0,         # ← modifier
 	"frames": 1,
-	"preview_scale": Vector2(1.0, 1.0),
+	"preview_scale": Vector2(1.5, 1.5),
 	"footprint_offsets": [Vector2i.ZERO],
-	"co2_absorption": 10.0,
-	"arbre_variant": "rouge",     # ← ajouter cette ligne
+	"co2_absorption": 1.5,    # ← modifier
+	"arbre_variant": "ArbreSpriteRouge",
 },
 "arbre_4": {
 	"scene": preload("res://scene/arbre.tscn"),
 	"texture": preload("res://asset/Trees+(4).png"),
-	"cost": 500.0,
+	"cost": 500000.0,         # ← modifier
 	"frames": 1,
-	"preview_scale": Vector2(1.0, 1.0),
+	"preview_scale": Vector2(1.5, 1.5),
 	"footprint_offsets": [Vector2i.ZERO],
-	"co2_absorption": 20.0,
-	"arbre_variant": "blanc",     # ← ajouter cette ligne
+	"co2_absorption": 4.0,    # ← modifier
+	"arbre_variant": "ArbreSpriteBlanc",
 },
 }
 
