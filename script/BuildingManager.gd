@@ -44,7 +44,7 @@ signal delivery_point_hovered(cell_pos, world_pos)
 signal delivery_point_selection_changed(enabled)
 signal delivery_point_error(message: String)
 signal entrepot_inspected(entrepot_instance)
-signal co2_blocked
+signal co2_penalty_applied(penalty: float)
 var is_destroying: bool = false
 var is_selecting_delivery_point: bool = false
 
@@ -256,8 +256,7 @@ func _try_place_building() -> void:
 			tmp.queue_free()
 		var co2_cost: float = float(raw) if raw != null else 0.0
 		if GameManager.co2_emissions + co2_cost > GameManager.CO2_LIMIT:
-			co2_blocked.emit()
-		return
+			return
 	if _can_build(cell_pos):
 		GameManager.add_credits(-factory_cost)
 		var factory_instance: Node2D = factory_scene.instantiate()
@@ -289,6 +288,10 @@ func _try_place_building() -> void:
 		}
 		last_build_state_changed.emit(true)
 		
+		# Pénalité CO2 si dépassement
+		var penalty: float = GameManager.apply_co2_penalty()
+		if penalty > 0.0:
+			co2_penalty_applied.emit(penalty)
 		# --- ICI : On appelle la fonction de rafraîchissement ---
 		# Comme on est dans _try_place_building, cell_pos est connu !
 		_refresh_turbines_around(cell_pos)
@@ -298,14 +301,6 @@ func _can_build(cell_pos: Vector2i) -> bool:
 			return false
 	# 2. Vérification des fonds disponibles
 	if GameManager.credits < factory_cost:
-		return false
-	var raw = null
-	if factory_scene:
-		var tmp = factory_scene.instantiate()
-		raw = tmp.get("build_co2_cost")
-		tmp.queue_free()
-	var co2_cost: float = float(raw) if raw != null else 0.0
-	if GameManager.co2_emissions + co2_cost > GameManager.CO2_LIMIT:
 		return false
 	return true
 

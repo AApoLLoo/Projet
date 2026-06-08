@@ -1119,8 +1119,8 @@ func _bind_runtime_managers() -> void:
 		# --- CORRECTION CRITIQUE : connexion du signal entity_selected ici, après que _building_manager est défini ---
 		if _building_manager.has_signal("entity_selected") and not _building_manager.entity_selected.is_connected(_on_entity_selected):
 			_building_manager.entity_selected.connect(_on_entity_selected)
-		if _building_manager.has_signal("co2_blocked") and not _building_manager.co2_blocked.is_connected(_on_co2_blocked):
-			_building_manager.co2_blocked.connect(_on_co2_blocked)
+		if _building_manager.has_signal("co2_penalty_applied") and not _building_manager.co2_penalty_applied.is_connected(_on_co2_penalty):
+			_building_manager.co2_penalty_applied.connect(_on_co2_penalty)
 	if _delivery_manager:
 		if _delivery_manager.has_signal("order_submitted") and not _delivery_manager.order_submitted.is_connected(_on_order_submitted):
 			_delivery_manager.order_submitted.connect(_on_order_submitted)
@@ -1135,37 +1135,8 @@ func _bind_runtime_managers() -> void:
 
 var _co2_toast: PanelContainer = null
 
-func _on_co2_blocked() -> void:
-	if is_instance_valid(_co2_toast):
-		return
-	var toast := PanelContainer.new()
-	_co2_toast = toast
-	toast.set_anchors_preset(Control.PRESET_CENTER)
-	toast.offset_left = -280.0
-	toast.offset_right = 280.0
-	toast.offset_top = 40.0
-	toast.offset_bottom = 80.0
-	var style := StyleBoxFlat.new()
-	style.bg_color = UITheme.ACCENT_GOLD
-	style.corner_radius_top_left = 8
-	style.corner_radius_top_right = 8
-	style.corner_radius_bottom_left = 8
-	style.corner_radius_bottom_right = 8
-	style.content_margin_left = 14.0
-	style.content_margin_right = 14.0
-	style.content_margin_top = 8.0
-	style.content_margin_bottom = 8.0
-	toast.add_theme_stylebox_override("panel", style)
-	add_child(toast)
-	var label := Label.new()
-	label.text = "⛔ Limite CO2 atteinte (30 g/min max)\nRetirez des bâtiments pour continuer."
-	label.add_theme_font_size_override("font_size", 14)
-	label.add_theme_color_override("font_color", UITheme.INK_DARK)
-	toast.add_child(label)
-	var tween := create_tween()
-	tween.tween_interval(4.0)
-	tween.tween_property(toast, "modulate:a", 0.0, 0.8)
-	tween.tween_callback(toast.queue_free)
+func _on_co2_penalty(penalty: float) -> void:
+	_show_hint_toast("⚠️ Limite CO2 dépassée\nAmende : -%.0f €" % penalty)
 	
 func _setup_order_panel() -> void:
 	if orders_panel == null or order_resource_selector == null or order_quantity_spinbox == null:
