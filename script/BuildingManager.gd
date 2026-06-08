@@ -55,6 +55,12 @@ const _CLICK_THRESHOLD: float = 5.0
 var _last_built: Dictionary = {}
 var _last_delivery_hover_cell: Vector2i = Vector2i(2147483647, 2147483647)
 
+var is_moving: bool = false
+var _moving_instance: Node2D = null
+var _moving_origin_cell: Vector2i = Vector2i.ZERO
+var _moving_cost: float = 0.0
+var _moving_footprint: Array[Vector2i] = []
+
 func _ready() -> void:
 	preview_sprite = Sprite2D.new()
 	preview_sprite.visible = false
@@ -139,11 +145,25 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 
-	
+	# --- Mode déplacement actif ---
+	if is_moving:
+		if event.is_action_pressed("ui_cancel") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed):
+			_cancel_moving()
+			get_viewport().set_input_as_handled()
+			return
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			_try_place_moved_building()
+			get_viewport().set_input_as_handled()
+			return
+		return
 
+	# --- Ni construction ni déplacement ---
 	if not is_building:
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 			if _try_pickup_conveyor_item_at_mouse():
+				get_viewport().set_input_as_handled()
+				return
+			if _try_start_moving_at_mouse():
 				get_viewport().set_input_as_handled()
 				return
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
@@ -157,10 +177,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	# --- Mode construction actif ---
-
-	# Echap ou clic droit : annuler
 	if event.is_action_pressed("ui_cancel") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed):
-		# Clic droit : vérifier d'abord si c'est un entrepôt sous la souris
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 			var mouse_pos := get_global_mouse_position()
 			var cell_pos := get_grid_pos(mouse_pos)
@@ -174,7 +191,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 
-	# Clic gauche : placer
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_try_place_building()
 		get_viewport().set_input_as_handled()
@@ -183,7 +199,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	if is_selecting_delivery_point:
 		_update_delivery_point_hover_preview()
-	if is_building:
+	if is_building or is_moving:
 		_update_preview()
 
 func _update_delivery_point_hover_preview() -> void:
@@ -207,15 +223,25 @@ func _update_delivery_point_hover_preview() -> void:
 
 func _update_preview() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
-	
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
 	var snap_pos: Vector2 = get_world_pos(cell_pos)
 	preview_sprite.global_position = snap_pos
-	
-	if _can_build(cell_pos):
-		preview_sprite.modulate = Color(0, 1, 0, 0.6) # Vert semi-transparent si plaçable
+
+	var can_place: bool = false
+	if is_moving:
+		# Vérifie que toutes les cellules du footprint déplacé sont libres
+		can_place = true
+		for offset in _moving_footprint:
+			if occupied_cells.has(cell_pos + offset):
+				can_place = false
+				break
 	else:
-		preview_sprite.modulate = Color(1, 0, 0, 0.6) # Rouge sinon
+		can_place = _can_build(cell_pos)
+
+	if can_place:
+		preview_sprite.modulate = Color(0, 1, 0, 0.6)
+	else:
+		preview_sprite.modulate = Color(1, 0, 0, 0.6)
 
 func _try_place_building() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
@@ -604,3 +630,120 @@ const CONVEYOR_DIRECTIONS: Dictionary = {
 	"merger":      { "input": Vector2i(-1,  0), "output": Vector2i( 1,  0) },
 	"splitter":    { "input": Vector2i(-1,  0), "output": Vector2i( 1,  0) },
 }
+
+func _setup_moving_preview_from_instance(instance: Node2D) -> void:
+	var visual_node: Node = _find_first_visual_node(instance)
+
+	preview_sprite.texture = null
+	preview_sprite.region_enabled = false
+	preview_sprite.hframes = 1
+	preview_sprite.vframes = 1
+	preview_sprite.frame = 0
+	preview_sprite.centered = true
+
+	if visual_node is Sprite2D:
+		var sprite := visual_node as Sprite2D
+
+		preview_sprite.texture = sprite.texture
+		preview_sprite.hframes = sprite.hframes
+		preview_sprite.vframes = sprite.vframes
+		preview_sprite.frame = sprite.frame
+		preview_sprite.region_enabled = sprite.region_enabled
+		preview_sprite.region_rect = sprite.region_rect
+		preview_sprite.scale = sprite.global_scale
+
+	elif visual_node is AnimatedSprite2D:
+		var animated_sprite := visual_node as AnimatedSprite2D
+
+		if animated_sprite.sprite_frames:
+			var animation_name: StringName = animated_sprite.animation
+			var frame_texture: Texture2D = animated_sprite.sprite_frames.get_frame_texture(animation_name, animated_sprite.frame)
+
+			preview_sprite.texture = frame_texture
+			preview_sprite.scale = animated_sprite.global_scale
+
+	preview_sprite.modulate = Color(1, 1, 1, 0.6)
+	
+func _find_first_visual_node(node: Node) -> Node:
+	for child in node.get_children():
+		if child is Sprite2D or child is AnimatedSprite2D:
+			return child
+
+		var nested_visual: Node = _find_first_visual_node(child)
+		if nested_visual != null:
+			return nested_visual
+
+	return null
+	
+func _try_start_moving_at_mouse() -> bool:
+	var mouse_pos := get_global_mouse_position()
+	var cell_pos := get_grid_pos(mouse_pos)
+	if not occupied_cells.has(cell_pos):
+		return false
+	var data = occupied_cells[cell_pos]
+	var inst = data.get("instance")
+	if not is_instance_valid(inst):
+		return false
+	
+	# Trouve toutes les cellules occupées par ce bâtiment
+	var all_cells: Array[Vector2i] = []
+	for c in occupied_cells:
+		if occupied_cells[c].get("instance") == inst:
+			all_cells.append(c)
+	var anchor: Vector2i = all_cells[0] if all_cells.size() > 0 else cell_pos
+	var footprint: Array[Vector2i] = []
+	for c in all_cells:
+		footprint.append(c - anchor)
+	# Retire toutes les cellules de la grille
+	for c in all_cells:
+		occupied_cells.erase(c)
+	_moving_instance = inst
+	_moving_origin_cell = anchor
+	_moving_cost = float(data.get("cost", 0.0))
+	_moving_footprint = footprint
+	_setup_moving_preview_from_instance(inst)
+	preview_sprite.visible = true
+	is_moving = true
+	inst.hide()
+	return true
+
+func _try_place_moved_building() -> void:
+	if not is_instance_valid(_moving_instance):
+		_stop_moving()
+		return
+	var mouse_pos := get_global_mouse_position()
+	var cell_pos := get_grid_pos(mouse_pos)
+	for offset in _moving_footprint:
+		var target = cell_pos + offset
+		if occupied_cells.has(target):
+			return
+	_moving_instance.global_position = get_world_pos(cell_pos)
+	_moving_instance.show()
+	if _moving_instance.get("cell_position") != null:
+		_moving_instance.cell_position = cell_pos
+	var new_cells: Array[Vector2i] = []
+	for offset in _moving_footprint:
+		new_cells.append(cell_pos + offset)
+	_register_occupied_cells(_moving_instance, new_cells, cell_pos, _moving_cost)
+	_stop_moving()
+
+func _cancel_moving() -> void:
+	if not is_instance_valid(_moving_instance):
+		_stop_moving()
+		return
+	_moving_instance.global_position = get_world_pos(_moving_origin_cell)
+	_moving_instance.show()
+	if _moving_instance.get("cell_position") != null:
+		_moving_instance.cell_position = _moving_origin_cell
+	var restored_cells: Array[Vector2i] = []
+	for offset in _moving_footprint:
+		restored_cells.append(_moving_origin_cell + offset)
+	_register_occupied_cells(_moving_instance, restored_cells, _moving_origin_cell, _moving_cost)
+	_stop_moving()
+
+func _stop_moving() -> void:
+	is_moving = false
+	_moving_instance = null
+	preview_sprite.visible = false
+	preview_sprite.modulate = Color(1, 1, 1, 0.6)
+	_moving_footprint = []
