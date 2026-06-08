@@ -626,6 +626,32 @@ func _clear_occupied_cells_for_instance(instance: Variant, occupied_for_build: A
 	for occupied_cell in cells_to_clear:
 		occupied_cells.erase(occupied_cell)
 
+func get_belt_count() -> int:
+	var counted := {}
+	var total := 0
+
+	for cell in occupied_cells:
+		var inst = occupied_cells[cell].get("instance")
+
+		if inst == null:
+			continue
+
+		if counted.has(inst):
+			continue
+
+		counted[inst] = true
+
+		if inst is Entity:
+			var t: String = inst.entity_type
+
+			if t.begins_with("belt") \
+			or t.begins_with("curve") \
+			or t == "merger" \
+			or t == "splitter":
+				total += 1
+
+	return total
+	
 func _get_default_footprint_offsets(entity_type: String) -> Array[Vector2i]:
 	match entity_type:
 		"turbine":

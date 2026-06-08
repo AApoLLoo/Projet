@@ -15,6 +15,8 @@ const DEFAULT_CAMERA_X: float = 576.0
 const DEFAULT_CAMERA_Y: float = 324.0
 const MAX_SAVE_NAME_LENGTH: int = 32
 
+static var tutorial_mode := false
+
 var launch_mode: StringName = MODE_NEW
 var _active_slot_id: String = ""
 var _requested_load_slot_id: String = ""

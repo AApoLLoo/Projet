@@ -3,6 +3,8 @@ extends Control
 const LEVEL_SCENE: String = "res://scene/level.tscn"
 const SETTINGS_SCENE: String = "res://scene/settings.tscn"
 const ACHIEVEMENTS_SCENE: String = "res://scene/achivements.tscn"
+const TUTORIAL_SCENE: GDScript = preload("res://script/tutorial.gd")
+
 
 @onready var _bottom_left_label: Label = $BottomLeftPanel/BottomLeftMargin/BottomLeftLabel
 @onready var _menu_card: PanelContainer = $MenuBounds/CenterContainer/ContentStack/MenuCard
@@ -123,8 +125,25 @@ func _on_lab_pressed() -> void:
 		_show_message("Impossible d'ouvrir le Lab: " + str(error))
 
 func _on_tutorial_pressed() -> void:
-	_show_message("Le tutoriel interactif arrive bientot.")
+	var tree := get_tree()
 
+	SaveSystem.tutorial_mode = true
+
+	tree.change_scene_to_file("res://scene/level.tscn")
+
+	await tree.tree_changed
+	await tree.process_frame
+	await tree.process_frame
+	await tree.process_frame
+
+	var tutorial: CanvasLayer = TUTORIAL_SCENE.new()
+
+	tree.current_scene.add_child(tutorial)
+
+	tutorial.tutorial_closed.connect(func() -> void:
+		tree.change_scene_to_file("res://scene/main_menu.tscn")
+	)
+	
 func _on_settings_pressed() -> void:
 	SettingsManager.set_return_target("res://scene/main_menu.tscn")
 	_change_scene(SETTINGS_SCENE)

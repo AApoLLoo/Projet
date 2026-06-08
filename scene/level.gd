@@ -37,6 +37,7 @@ func set_preview_mode(enabled: bool) -> void:
 	_preview_mode = enabled
 
 func _ready() -> void:
+	var is_tutorial := SaveSystem.tutorial_mode
 	if _floor == null:
 		var err_msg: String = "Floor node not found at path: %s" % floor_path
 		push_error(err_msg)
@@ -64,6 +65,8 @@ func _ready() -> void:
 	_build_pause_ui()
 	TimeManager.is_time_running = true
 	_sync_runtime_animation_pause_state()
+	if is_tutorial:
+		_start_tutorial()
 
 func _setup_electricity_overlay() -> void:
 	if _electricity_overlay == null:
@@ -291,6 +294,8 @@ func _exit_tree() -> void:
 		_save_current_state()
 
 func _apply_start_state() -> void:
+	if SaveSystem.tutorial_mode:
+		return
 	var start_state: Dictionary = SaveSystem.get_menu_preview_state() if _preview_mode else SaveSystem.get_level_start_state()
 	if EntityManager and EntityManager.has_method("clear_entities"):
 		EntityManager.clear_entities()
@@ -609,6 +614,14 @@ func _on_save_dialog_confirmed() -> void:
 	_populate_save_slots()
 	_show_pause_message("Partie enregistree dans %s." % _display_label_for_slot(saved_slot))
 
+func _start_tutorial():
+
+	var tutorial = preload(
+		"res://scene/tutorial.tscn"
+	).instantiate()
+
+	add_child(tutorial)
+	
 func _populate_save_slots() -> void:
 	_save_slot_list.clear()
 	_save_dialog_slot_ids.clear()
