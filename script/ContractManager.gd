@@ -5,10 +5,13 @@ signal contract_completed(contract: Dictionary)
 signal contract_failed(contract: Dictionary)
 
 const CONTRACT_RULE_OVERRIDES: Dictionary = {
+	"gaz_raffine": { "qty_min": 2, "qty_max": 5, "bonus_factor": 1.25, "penalty": 220.0, "deadline_days": 2 },
 	"piece_base": { "qty_min": 3, "qty_max": 8, "bonus_factor": 1.3, "penalty": 200.0, "deadline_days": 2 },
 	"piece_avancee": { "qty_min": 1, "qty_max": 2, "bonus_factor": 1.5, "penalty": 400.0, "deadline_days": 3 },
-	"gaz": { "qty_min": 2, "qty_max": 5, "bonus_factor": 1.2, "penalty": 180.0, "deadline_days": 2 },
 }
+const CONTRACT_EXCLUDED_RESOURCE_IDS: Array[String] = [
+	"gaz",
+]
 
 var active_contracts: Array[Dictionary] = []
 var _last_generated_day: int = -1
@@ -51,6 +54,7 @@ func _generate_contract(day: int) -> void:
 
 func _get_unit_value(resource_id: String) -> float:
 	match resource_id:
+		"gaz_raffine":   return 165.0
 		"piece_base":    return 180.0
 		"piece_avancee": return 420.0
 		"metal":         return 90.0
@@ -162,6 +166,8 @@ func _get_contract_eligible_resource_ids() -> Array[String]:
 			for output_variant in outputs.keys():
 				var resource_id: String = String(output_variant)
 				if resource_id.is_empty() or resource_id == "energie":
+					continue
+				if CONTRACT_EXCLUDED_RESOURCE_IDS.has(resource_id):
 					continue
 				if mineable_resources.has(resource_id) or eligible_resources.has(resource_id):
 					continue

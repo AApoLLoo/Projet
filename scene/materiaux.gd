@@ -11,6 +11,7 @@ var _drag_origin: Vector2 = Vector2.ZERO
 const FRAMES = {
 	"charbon": 12,
 	"gaz": 61,
+	"gaz_raffine": 61,
 	"matiere_brute": 35,
 	"metal": 14,
 	"piece_base": 45,

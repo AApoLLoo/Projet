@@ -5,10 +5,12 @@ const END_GAME_SCREEN_SCENE: PackedScene = preload("res://scene/end_game_screen.
 const DEFAULT_RESOURCE_STOCK: Dictionary = {
 	"charbon": 0,
 	"gaz": 0,
+	"gaz_raffine": 0,
 	"matiere_brute": 0,
 	"metal": 0,
 	"piece_base": 0,
 	"piece_avancee": 0,
+	"repair_kit": 0,
 }
 const MAX_EXPORT_HISTORY_ENTRIES: int = 5
 

@@ -73,6 +73,15 @@ var recipes: Dictionary = {
 			"co2_rate": 3.0
 		},
 		{
+			"id": "purification_gaz",
+			"name": "Purification de gaz",
+			"inputs": { "gaz": 2 },
+			"outputs": { "gaz_raffine": 1 },
+			"production_time": 10.0,
+			"energy_delta": 75.0,
+			"co2_rate": 2.5
+		},
+		{
 			"id": "charbon_compresse",
 			"name": "Charbon compressé",
 			"inputs": { "charbon": 3 },

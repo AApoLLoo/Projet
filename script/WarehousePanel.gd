@@ -109,6 +109,7 @@ func _resource_label(resource_id: String) -> String:
 	match resource_id:
 		"charbon":       return "Charbon"
 		"gaz":           return "Gaz"
+		"gaz_raffine":   return "Gaz raffine"
 		"matiere_brute": return "Matière brute"
 		"metal":         return "Métal"
 		"piece_base":    return "Pièce de base"

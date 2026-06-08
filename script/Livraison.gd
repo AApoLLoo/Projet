@@ -9,10 +9,12 @@ const EXPORT_TIME_COST_PER_SECOND: float = 1.5
 const ORDERABLE_RESOURCE_ORDER: Array[String] = [
 	"charbon",
 	"gaz",
+	"gaz_raffine",
 	"matiere_brute",
 	"metal",
 	"piece_base",
 	"piece_avancee",
+	"repair_kit",
 ]
 
 const RESOURCE_CATALOG: Dictionary = {
@@ -29,6 +31,13 @@ const RESOURCE_CATALOG: Dictionary = {
 		"export_unit_value": 0.0,
 		"can_import": true,
 		"can_export": false,
+	},
+	"gaz_raffine": {
+		"label": "Gaz raffine",
+		"import_unit_cost": 0.0,
+		"export_unit_value": 165.0,
+		"can_import": false,
+		"can_export": true,
 	},
 	"matiere_brute": {
 		"label": "Matiere brute",
@@ -57,6 +66,13 @@ const RESOURCE_CATALOG: Dictionary = {
 		"export_unit_value": 420.0,   
 		"can_import": false,
 		"can_export": true,
+	},
+	"repair_kit": {
+		"label": "Kit de reparation",
+		"import_unit_cost": 180.0,
+		"export_unit_value": 0.0,
+		"can_import": true,
+		"can_export": false,
 	},
 }
 
