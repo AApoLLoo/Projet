@@ -349,6 +349,7 @@ func serialize() -> Dictionary:
 		"is_active": is_active,
 		"is_broken": is_broken,
 		"health": health,
+		"max_health": max_health,
 		"build_cost": build_cost,
 		"input_buffer": get_input_buffer_snapshot(),
 		"output_buffer": get_output_buffer_snapshot(),

@@ -259,11 +259,14 @@ func _ready() -> void:
 	if ContractManager:
 		if ContractManager.contract_arrived.is_connected(_on_contract_arrived):
 			ContractManager.contract_arrived.disconnect(_on_contract_arrived)
+		if ContractManager.contract_progressed.is_connected(_on_contract_progressed):
+			ContractManager.contract_progressed.disconnect(_on_contract_progressed)
 		if ContractManager.contract_completed.is_connected(_on_contract_completed):
 			ContractManager.contract_completed.disconnect(_on_contract_completed)
 		if ContractManager.contract_failed.is_connected(_on_contract_failed):
 			ContractManager.contract_failed.disconnect(_on_contract_failed)
 		ContractManager.contract_arrived.connect(_on_contract_arrived)
+		ContractManager.contract_progressed.connect(_on_contract_progressed)
 		ContractManager.contract_completed.connect(_on_contract_completed)
 		ContractManager.contract_failed.connect(_on_contract_failed)
 	if orders_panel:
@@ -471,6 +474,9 @@ func _on_contract_arrived(contract: Dictionary) -> void:
 		await get_tree().create_timer(4.8).timeout
 		_contract_just_failed = false
 	_show_hint_toast(msg)
+
+func _on_contract_progressed(_contract: Dictionary) -> void:
+	_update_contracts_display()
 
 func _on_contract_completed(contract: Dictionary) -> void:
 	_update_contracts_display()
@@ -1077,6 +1083,7 @@ func _update_session_overview() -> void:
 
 	var machine_count: int = 0
 	var active_machine_count: int = 0
+	var broken_machine_count: int = 0
 	var production_rate_total: float = 0.0
 	if EntityManager:
 		for entity_variant in EntityManager.entities.values():
@@ -1086,6 +1093,8 @@ func _update_session_overview() -> void:
 			machine_count += 1
 			if entity.is_active:
 				active_machine_count += 1
+			if entity.is_broken:
+				broken_machine_count += 1
 			production_rate_total += entity.production_rate
 
 	overview_machines_value.text = str(machine_count)
@@ -1094,7 +1103,7 @@ func _update_session_overview() -> void:
 		overview_production_rate_value.text = "%.0f%%" % [production_rate_total / float(machine_count) * 100.0]
 	else:
 		overview_production_rate_value.text = "0%"
-	overview_failures_value.text = "A venir (placeholder)"
+	overview_failures_value.text = str(broken_machine_count)
 
 func _bind_runtime_managers() -> void:
 	_building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)

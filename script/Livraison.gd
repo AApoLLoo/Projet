@@ -466,17 +466,13 @@ func _find_recipe_for_output(resource_id: String) -> Dictionary:
 	return {}
 
 func get_save_state() -> Dictionary:
-	return {
-		"pending_orders": _pending_orders.duplicate(true),
-		"current_order": _current_order.duplicate(true) if _delivery_in_progress else {},
-		"delivery_in_progress": _delivery_in_progress
-	}
 	var current_order_data: Variant = null
 	if _delivery_in_progress and not _current_order.is_empty():
 		current_order_data = _current_order.duplicate(true)
 	return {
 		"pending_orders": _pending_orders.duplicate(true),
 		"current_order": current_order_data,
+		"delivery_in_progress": _delivery_in_progress,
 	}
 
 func apply_save_state(data: Dictionary) -> void:
@@ -484,17 +480,12 @@ func apply_save_state(data: Dictionary) -> void:
 	_current_order.clear()
 	_delivery_in_progress = false
 
-	# Livraison qui était en cours au moment de la sauvegarde
+	# Une livraison en cours est refilee en tete de file au chargement.
+	# Les ressources/credits ont deja ete reserves avant le depart du camion,
+	# donc il ne faut ni recréditer, ni dupliquer la commande.
 	var current_order_data: Variant = data.get("current_order")
 	if current_order_data is Dictionary and not current_order_data.is_empty():
-		var job_type: String = String(current_order_data.get("job_type", JOB_IMPORT))
-		if job_type == JOB_EXPORT:
-			# Le stock était déjà consommé avant la sauvegarde → créditer directement
-			if GameManager:
-				GameManager.add_credits(float(current_order_data.get("total_cost", 0.0)))
-		else:
-			# Import : les crédits étaient déjà déduits → remettre en tête de file
-			_pending_orders.append(current_order_data.duplicate(true))
+		_pending_orders.push_front(current_order_data.duplicate(true))
 
 	# Commandes en attente (non encore démarrées)
 	var raw_pending: Variant = data.get("pending_orders", [])
@@ -503,11 +494,6 @@ func apply_save_state(data: Dictionary) -> void:
 			if order is Dictionary:
 				_pending_orders.append(order.duplicate(true))
 
-	var saved_current: Variant = data.get("current_order", {})
-	if saved_current is Dictionary and not saved_current.is_empty():
-		_pending_orders.push_front(saved_current.duplicate(true))
-
 	queue_changed.emit(_pending_orders.size())
 	delivery_state_changed.emit(false, {})
-	queue_changed.emit(_pending_orders.size())
 	_try_start_next_delivery()
