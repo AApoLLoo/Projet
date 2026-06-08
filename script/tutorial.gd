@@ -29,7 +29,7 @@ const STEPS: Array[Dictionary] = [
 		"objective": "",
 		"check": "",
 		"skip": true,
-		"reveals": [],
+   		"reveals": ["day_time"],
 		"highlight": "",
 	},
 	# ── 1 ── Déplacement ─────────────────────────────────────────────────────
@@ -373,11 +373,14 @@ func _find_hud() -> void:
 	if orders_panel:
 		orders_panel.hide()
 
-	var contracts_banner := _hud.get_node_or_null()
+	var contracts_banner := _hud.get_node_or_null(
+	    "MarginContainer/MarginContainer/VBoxContainer/ContractsLabel"
+	)
+
 	if contracts_banner:
 		contracts_banner.hide()
-		if orders_panel:
-			orders_panel.hide()
+	if orders_panel:
+		orders_panel.hide()
 	var hbox_path: String = "MarginContainer/MarginContainer/VBoxContainer/HBoxContainer"
 
 	_hud_groups = {
