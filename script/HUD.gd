@@ -1021,8 +1021,17 @@ func _update_money_display() -> void:
 		money_label.text = _format_money_value(GameManager.credits)
 
 func _update_co2_display() -> void:
-	if co2_label and GameManager:
-		co2_label.text = _format_rate_value(GameManager.co2_emissions, "g/min CO2")
+	if not (co2_label and GameManager):
+		return
+	var val: float = GameManager.co2_emissions
+	var limit: float = GameManager.CO2_LIMIT
+	co2_label.text = "%.1f / %.0f g/min CO2" % [val, limit]
+	if val >= limit:
+		co2_label.add_theme_color_override("font_color", Color(0.9, 0.2, 0.2))
+	elif val >= limit * 0.75:
+		co2_label.add_theme_color_override("font_color", Color(0.95, 0.65, 0.1))
+	else:
+		co2_label.add_theme_color_override("font_color", Color(0.0, 0.0, 0.0))
 
 func _close_all_panels() -> void:
 	if session_overview_panel and session_overview_panel.visible:
@@ -1119,7 +1128,8 @@ func _bind_runtime_managers() -> void:
 		# --- CORRECTION CRITIQUE : connexion du signal entity_selected ici, après que _building_manager est défini ---
 		if _building_manager.has_signal("entity_selected") and not _building_manager.entity_selected.is_connected(_on_entity_selected):
 			_building_manager.entity_selected.connect(_on_entity_selected)
-
+		if _building_manager.has_signal("co2_blocked") and not _building_manager.co2_blocked.is_connected(_on_co2_blocked):
+			_building_manager.co2_blocked.connect(_on_co2_blocked)
 	if _delivery_manager:
 		if _delivery_manager.has_signal("order_submitted") and not _delivery_manager.order_submitted.is_connected(_on_order_submitted):
 			_delivery_manager.order_submitted.connect(_on_order_submitted)
@@ -1132,6 +1142,40 @@ func _bind_runtime_managers() -> void:
 		if _delivery_manager.has_signal("queue_changed") and not _delivery_manager.queue_changed.is_connected(_on_delivery_queue_changed):
 			_delivery_manager.queue_changed.connect(_on_delivery_queue_changed)
 
+var _co2_toast: PanelContainer = null
+
+func _on_co2_blocked() -> void:
+	if is_instance_valid(_co2_toast):
+		return
+	var toast := PanelContainer.new()
+	_co2_toast = toast
+	toast.set_anchors_preset(Control.PRESET_CENTER)
+	toast.offset_left = -280.0
+	toast.offset_right = 280.0
+	toast.offset_top = 40.0
+	toast.offset_bottom = 80.0
+	var style := StyleBoxFlat.new()
+	style.bg_color = UITheme.ACCENT_GOLD
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	style.content_margin_left = 14.0
+	style.content_margin_right = 14.0
+	style.content_margin_top = 8.0
+	style.content_margin_bottom = 8.0
+	toast.add_theme_stylebox_override("panel", style)
+	add_child(toast)
+	var label := Label.new()
+	label.text = "⛔ Limite CO2 atteinte (30 g/min max)\nRetirez des bâtiments pour continuer."
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", UITheme.INK_DARK)
+	toast.add_child(label)
+	var tween := create_tween()
+	tween.tween_interval(4.0)
+	tween.tween_property(toast, "modulate:a", 0.0, 0.8)
+	tween.tween_callback(toast.queue_free)
+	
 func _setup_order_panel() -> void:
 	if orders_panel == null or order_resource_selector == null or order_quantity_spinbox == null:
 		return

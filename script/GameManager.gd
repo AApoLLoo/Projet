@@ -22,6 +22,7 @@ const MAX_EXPORT_HISTORY_ENTRIES: int = 5
 var credits: float = 12500.0
 var energy_usage: float = 0.0  # en kW (positif = consommation nette, négatif = production nette)
 var co2_emissions: float = 0.0 # en g/min
+const CO2_LIMIT: float = 30.0
 var resource_stock: Dictionary = DEFAULT_RESOURCE_STOCK.duplicate(true)
 var has_default_delivery_point: bool = false
 var default_delivery_cell: Vector2i = Vector2i.ZERO
