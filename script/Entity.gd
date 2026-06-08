@@ -42,12 +42,18 @@ var is_active: bool = false :
 		is_active = value
 		if not is_active:
 			_production_timer = 0.0
-		_on_active_changed(value)
-		entity_updated.emit(self)
-		EntityManager.recalculate_totals()
+		_refresh_runtime_state()
+
+@export var is_broken: bool = false
+@export var health: float = 100.0
+@export var max_health: float = 100.0
+@export var wear_per_cycle: float = 0.35
+@export var breakdown_threshold: float = 20.0
+@export_range(0.0, 1.0, 0.01) var breakdown_chance_per_cycle: float = 0.08
 
 var _production_timer: float = 0.0
 var _hitbox_area: Area2D = null
+var _production_bar: ProgressBar = null
 # Limite de stockage par type d'objet
 @export var max_input_stock: int = 50
 @export var max_output_stock: int = 50
@@ -65,17 +71,21 @@ func _ready() -> void:
 	#print("Entity _ready, cell_position = ", cell_position)
 	entity_id = _generate_id()
 	set_process(true)
+	_production_bar = get_node_or_null("ProductionBar") as ProgressBar
+	_update_production_bar()
 	_ensure_hitbox()
 	# La sous-classe appelle super._ready() puis définit entity_type et
 	# charge ses recettes avant d'appeler _post_ready().
 	_post_ready()
 
 func _process(delta: float) -> void:
+	_update_production_bar()
 	if not _can_operate_now():
 		return
 
 	var cycle_duration: float = _get_cycle_duration()
 	if cycle_duration <= 0.0:
+		_update_production_bar()
 		return
 
 	_production_timer += delta
@@ -84,6 +94,7 @@ func _process(delta: float) -> void:
 			_production_timer = 0.0
 			break
 		_production_timer -= cycle_duration
+	_update_production_bar()
 
 func _post_ready() -> void:
 	# Charger la première recette disponible par défaut
@@ -202,12 +213,14 @@ func get_co2_rate() -> float:
 func set_recipe(recipe: Dictionary) -> void:
 	current_recipe = recipe
 	_production_timer = 0.0
+	_update_production_bar()
 	entity_updated.emit(self)
 	EntityManager.recalculate_totals()
 
 func set_production_rate(rate: float) -> void:
 	production_rate = clampf(rate, 0.0, 1.0)
 	_production_timer = 0.0
+	_update_production_bar()
 	entity_updated.emit(self)
 	EntityManager.recalculate_totals()
 
@@ -219,15 +232,24 @@ func get_stats() -> Dictionary:
 		"recipe_id": current_recipe.get("id", ""),
 		"production_rate": production_rate,
 		"is_active": is_active,
+		"is_broken": is_broken,
+		"health": health,
 		"energy_delta": get_energy_delta(),
 		"co2_rate": get_co2_rate(),
 		"cell_position": cell_position,
 		"status_text": get_status_text()
 	}
 
+func get_health_percent() -> int:
+	if max_health <= 0.0:
+		return 0
+	return clampi(roundi((health / max_health) * 100.0), 0, 100)
+
 func get_status_text() -> String:
 	if not is_active:
 		return "Arret"
+	if is_broken:
+		return "En panne - Reparer"
 	if current_recipe.is_empty():
 		return "Aucune recette"
 	# Vérifications Électriques
@@ -272,6 +294,8 @@ func can_accept_input(resource_id: String, amount: int = 1) -> bool:
 		return false
 	if not _expects_input_resource(resource_id):
 		return false
+	if get_buffer_amount("input", resource_id) + amount > max_input_stock:
+		return false
 	return _get_buffer_load(input_buffer) + amount <= input_buffer_capacity
 
 func deposit_input(resource_id: String, amount: int = 1) -> int:
@@ -297,6 +321,22 @@ func withdraw_output(resource_id: String, amount: int = 1) -> int:
 	_emit_logistics_update()
 	return available
 
+func can_repair() -> bool:
+	return is_broken and GameManager != null and GameManager.has_resources({"repair_kit": 1})
+
+func is_operational() -> bool:
+	return is_active and not is_broken
+
+func repair_machine() -> bool:
+	if not can_repair():
+		return false
+	if not GameManager.consume_resources({"repair_kit": 1}):
+		return false
+	is_broken = false
+	health = max_health
+	_refresh_runtime_state()
+	return true
+
 # Sérialisation pour la sauvegarde future
 func serialize() -> Dictionary:
 	return {
@@ -307,6 +347,9 @@ func serialize() -> Dictionary:
 		"recipe_id": current_recipe.get("id", ""),
 		"production_rate": production_rate,
 		"is_active": is_active,
+		"is_broken": is_broken,
+		"health": health,
+		"max_health": max_health,
 		"build_cost": build_cost,
 		"input_buffer": get_input_buffer_snapshot(),
 		"output_buffer": get_output_buffer_snapshot(),
@@ -332,6 +375,9 @@ func deserialize(data: Dictionary) -> void:
 	input_buffer = _sanitize_buffer(restored_input_buffer if restored_input_buffer is Dictionary else {})
 	var restored_output_buffer: Variant = data.get("output_buffer", {})
 	output_buffer = _sanitize_buffer(restored_output_buffer if restored_output_buffer is Dictionary else {})
+	max_health = maxf(1.0, float(data.get("max_health", max_health)))
+	health = clampf(float(data.get("health", max_health)), 0.0, max_health)
+	is_broken = bool(data.get("is_broken", false))
 	# is_active en dernier pour déclencher le setter une seule fois
 	is_active = data.get("is_active", false)
 
@@ -341,8 +387,11 @@ func deserialize(data: Dictionary) -> void:
 func _on_active_changed(_active: bool) -> void:
 	pass
 
+func _on_broken_changed(_broken: bool) -> void:
+	pass
+
 func _can_operate_now() -> bool:
-	if not is_active or current_recipe.is_empty() or production_rate <= 0.0:
+	if not is_active or is_broken or current_recipe.is_empty() or production_rate <= 0.0:
 		return false
 	if not _has_output_capacity_for_recipe():
 		return false
@@ -395,6 +444,7 @@ func _run_production_cycle() -> bool:
 		EntityManager.recalculate_totals()
 		return false
 
+	_apply_wear_after_cycle()
 	entity_updated.emit(self)
 	EntityManager.recalculate_totals()
 	return true
@@ -421,21 +471,31 @@ func _store_cycle_outputs(outputs: Dictionary) -> bool:
 		var amount: int = int(outputs[resource_id])
 		if amount <= 0:
 			continue
+		if get_buffer_amount("output", resource_key) + amount > max_output_stock:
+			return false
 		if _get_buffer_load(output_buffer) + amount > output_buffer_capacity:
 			return false
 		output_buffer[resource_key] = get_buffer_amount("output", resource_key) + amount
 	return true
 
 func _has_output_capacity_for_recipe() -> bool:
+	if current_recipe.is_empty():
+		return false
+		
 	var outputs: Dictionary = current_recipe.get("outputs", {})
-	if outputs.is_empty():
-		return true
-	var projected_load: int = _get_buffer_load(output_buffer)
-	for resource_id in outputs.keys():
-		if resource_id == "energie":
+	for item_id in outputs:
+		if item_id == "energie":
 			continue
-		projected_load += int(outputs[resource_id])
-	return projected_load <= output_buffer_capacity
+		var resource_id: String = String(item_id)
+		var current_amount: int = get_buffer_amount("output", resource_id)
+		var amount_produced: int = int(outputs[item_id])
+		
+		# Limite atteinte
+		if current_amount + amount_produced > max_output_stock:
+			return false
+		if _get_buffer_load(output_buffer) + amount_produced > output_buffer_capacity:
+			return false
+	return true
 
 func _expects_input_resource(resource_id: String) -> bool:
 	var inputs: Dictionary = current_recipe.get("inputs", {})
@@ -462,6 +522,68 @@ func _sanitize_buffer(buffer_data: Dictionary) -> Dictionary:
 func _emit_logistics_update() -> void:
 	entity_updated.emit(self)
 
+func _refresh_runtime_state() -> void:
+	if not is_active:
+		_production_timer = 0.0
+	_on_active_changed(is_active and not is_broken)
+	_on_broken_changed(is_broken)
+	_update_production_bar()
+	entity_updated.emit(self)
+	EntityManager.recalculate_totals()
+
+func _apply_wear_after_cycle() -> void:
+	if is_broken:
+		return
+	health = clampf(health - wear_per_cycle, 0.0, max_health)
+	if health <= 0.0:
+		_set_broken(true)
+		return
+	if health > breakdown_threshold:
+		return
+	if randf() < breakdown_chance_per_cycle:
+		_set_broken(true)
+
+func _set_broken(value: bool) -> void:
+	if is_broken == value:
+		return
+	is_broken = value
+	if is_broken:
+		_production_timer = 0.0
+	_refresh_runtime_state()
+
+func _update_production_bar() -> void:
+	if _production_bar == null:
+		return
+	var should_show: bool = is_active and not current_recipe.is_empty()
+	_production_bar.visible = should_show
+	if not should_show:
+		_production_bar.value = 0.0
+		return
+	var cycle_duration: float = _get_cycle_duration()
+	var progress_percent: float = 0.0
+	if cycle_duration > 0.0:
+		progress_percent = clampf((_production_timer / cycle_duration) * 100.0, 0.0, 100.0)
+	_production_bar.value = progress_percent
+	if is_broken:
+		_production_bar.modulate = Color(0.95, 0.3, 0.3)
+	elif _can_operate_now():
+		_production_bar.modulate = Color(0.32, 1.0, 0.55)
+	else:
+		_production_bar.modulate = Color(0.95, 0.76, 0.22)
+
+# Vérifie si l'entité peut recevoir cet objet spécifique
+
+func can_accept_item(item_id: String) -> bool:
+	if current_recipe.is_empty():
+		return false
+		
+	# 1. Vérifier si l'objet fait bien partie des ingrédients de la recette
+	var inputs: Dictionary = current_recipe.get("inputs", {})
+	if not inputs.has(item_id):
+		return false
+		
+	# 2. Vérifier si la limite de stock est atteinte
+	return can_accept_input(item_id, 1)
 # ─── Interne ─────────────────────────────────────────────────────────────────
 
 static func _generate_id() -> String:

@@ -13,6 +13,7 @@ var zone_radius: int = 20
 
 @onready var _anim_sprite: AnimatedSprite2D = _find_anim_sprite()
 @onready var _white_puff_vfx: WhitePuffVfx = _find_white_puff_vfx()
+@onready var _black_smoke_vfx: BlackSmokeVfx = _find_black_smoke_vfx()
 
 func _ready() -> void:
 	entity_type = "turbine"
@@ -54,6 +55,22 @@ func _find_white_puff_vfx() -> WhitePuffVfx:
 		if child is WhitePuffVfx:
 			return child
 	return null
+
+func _find_black_smoke_vfx() -> BlackSmokeVfx:
+	for child in get_children():
+		if child is BlackSmokeVfx:
+			return child
+	return null
+
+func _on_broken_changed(broken: bool) -> void:
+	if _black_smoke_vfx == null:
+		_black_smoke_vfx = _find_black_smoke_vfx()
+	if _black_smoke_vfx != null:
+		_black_smoke_vfx.set_emitting(broken)
+	if _anim_sprite == null:
+		_anim_sprite = _find_anim_sprite()
+	if _anim_sprite != null:
+		_anim_sprite.modulate = Color(0.72, 0.72, 0.72) if broken else Color.WHITE
 # Dans TurbineEntity.gd
 func _on_active_toggled(value: bool):
 	is_active = value
@@ -78,4 +95,4 @@ func update_neighbors():
 				var type = str(ent.get("entity_type"))
 				if ent is ConveyorEntity:
 					if ent.has_method("set_powered"):
-						ent.set_powered(is_active)
+						ent.set_powered(is_operational())

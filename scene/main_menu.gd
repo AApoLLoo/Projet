@@ -30,7 +30,6 @@ var _menu_descriptions: Dictionary = {}
 func _ready() -> void:
 	UITheme.style_screen(self)
 	_update_physics_panel()
-	_setup_map_preview()
 	_setup_load_dialog()
 	resized.connect(_on_menu_resized)
 	_style_buttons()

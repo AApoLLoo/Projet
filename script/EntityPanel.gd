@@ -19,7 +19,9 @@ extends PanelContainer
 @onready var energy_label: Label            = %EnergyLabel
 @onready var co2_label: Label               = %Co2Label
 @onready var status_label: Label            = %StatusLabel
+@onready var health_label: Label            = %HealthLabel
 @onready var active_toggle: CheckButton     = %ActiveToggle
+@onready var repair_button: Button          = %RepairBtn
 @onready var close_btn: Button              = %CloseBtn
 @onready var stock_list: ItemList           = %StockList
 @onready var stock_title: Label             = $MarginContainer/VBoxContainer/StockTitle
@@ -36,6 +38,7 @@ func _ready() -> void:
 	recipe_selector.item_selected.connect(_on_recipe_selected)
 	rate_slider.value_changed.connect(_on_rate_changed)
 	active_toggle.toggled.connect(_on_active_toggled)
+	repair_button.pressed.connect(_on_repair_pressed)
 	if GameManager:
 		GameManager.resources_updated.connect(_on_game_resources_updated)
 	hide()
@@ -48,6 +51,7 @@ func _style_panel() -> void:
 	UITheme.style_item_list(stock_list)
 	UITheme.style_slider(rate_slider, UITheme.ACCENT_SKY)
 	UITheme.style_toggle(active_toggle, UITheme.ACCENT_TEAL)
+	UITheme.style_button(repair_button, UITheme.ACCENT_GOLD, UITheme.TEXT_LIGHT, false, true)
 	UITheme.style_button(close_btn, UITheme.ACCENT_RED, UITheme.TEXT_LIGHT, false, true)
 	UITheme.style_label(entity_name_label, "section")
 	for label in [
@@ -56,10 +60,11 @@ func _style_panel() -> void:
 		$MarginContainer/VBoxContainer/RecipeDetailsBox/InputBox/InputLabel,
 		$MarginContainer/VBoxContainer/RecipeDetailsBox/OutputBox/OutputLabel,
 		$MarginContainer/VBoxContainer/StatsBox/EnergyBox/EnergyTitle,
-		$MarginContainer/VBoxContainer/StatsBox/Co2Box/Co2Title
+		$MarginContainer/VBoxContainer/StatsBox/Co2Box/Co2Title,
+		$MarginContainer/VBoxContainer/HealthTitle
 	]:
 		UITheme.style_label(label, "caption")
-	for label in [rate_label, energy_label, co2_label, status_label]:
+	for label in [rate_label, energy_label, co2_label, status_label, health_label]:
 		UITheme.style_label(label, "body")
 	UITheme.style_label(stock_title, "caption")
 
@@ -152,6 +157,13 @@ func _on_entity_updated(_entity: Entity) -> void:
 	_refresh_stats()
 	_refresh_stock()
 
+func _on_repair_pressed() -> void:
+	if current_entity == null:
+		return
+	if current_entity.repair_machine():
+		_refresh_stats()
+		_refresh_stock()
+
 # ─── Rafraîchissement ─────────────────────────────────────────────────────────
 func _refresh_warehouse_details(warehouse: WarehouseEntity) -> void:
 	input_list.clear()
@@ -228,13 +240,29 @@ func _refresh_stats() -> void:
 	else:
 		co2_label.remove_theme_color_override("font_color")
 
-	status_label.text = current_entity.get_status_text()
-	if current_entity.get_status_text() == "Operationnel":
+	var status_text: String = current_entity.get_status_text()
+	status_label.text = status_text
+	if status_text == "Operationnel":
 		status_label.add_theme_color_override("font_color", Color(0.2, 0.9, 0.2))
-	elif current_entity.get_status_text() == "En attente de ressources":
+	elif status_text == "En attente de ressources":
 		status_label.add_theme_color_override("font_color", Color(0.95, 0.75, 0.2))
+	elif current_entity.is_broken:
+		status_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
 	else:
 		status_label.remove_theme_color_override("font_color")
+
+	health_label.text = "%d%%" % current_entity.get_health_percent()
+	if current_entity.is_broken or current_entity.health <= current_entity.breakdown_threshold:
+		health_label.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
+	elif current_entity.health <= current_entity.breakdown_threshold + 20.0:
+		health_label.add_theme_color_override("font_color", Color(0.95, 0.75, 0.2))
+	else:
+		health_label.add_theme_color_override("font_color", Color(0.2, 0.9, 0.2))
+
+	var repair_kit_stock: int = GameManager.get_resource_stock("repair_kit") if GameManager else 0
+	repair_button.visible = current_entity.is_broken
+	repair_button.disabled = not current_entity.can_repair()
+	repair_button.text = "Reparer (1 kit, stock %d)" % repair_kit_stock
 
 func _on_game_resources_updated() -> void:
 	if current_entity == null:

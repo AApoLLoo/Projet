@@ -9,7 +9,9 @@ const _ENTITY_SCENES: Dictionary = {
 	"miner": preload("res://scene/miner.tscn"),
 	"belt_right": preload("res://scene/ASSET/belt/beltmid.tscn"),
 	"belt_left": preload("res://scene/ASSET/belt/beltleft.tscn"),
+	"belt_west": preload("res://scene/ASSET/belt/beltleft.tscn"),
 	"belt_east": preload("res://scene/ASSET/belt/belteast.tscn"),
+	"belt_north": preload("res://scene/ASSET/belt/beltnorth.tscn"),
 	"belt_south": preload("res://scene/ASSET/belt/beltsouth.tscn"),
 	"merger": preload("res://scene/ASSET/belt/merger.tscn"),
 	"splitter": preload("res://scene/ASSET/belt/splitter.tscn"),
@@ -46,6 +48,7 @@ signal delivery_point_hovered(cell_pos, world_pos)
 signal delivery_point_selection_changed(enabled)
 signal delivery_point_error(message: String)
 signal entrepot_inspected(entrepot_instance)
+signal co2_blocked
 var is_destroying: bool = false
 var is_selecting_delivery_point: bool = false
 
@@ -249,6 +252,16 @@ func _try_place_building() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
 	var snap_pos: Vector2 = get_world_pos(cell_pos)
+	if not _can_build(cell_pos):
+		var raw = null
+		if factory_scene:
+			var tmp = factory_scene.instantiate()
+			raw = tmp.get("build_co2_cost")
+			tmp.queue_free()
+		var co2_cost: float = float(raw) if raw != null else 0.0
+		if GameManager.co2_emissions + co2_cost > GameManager.CO2_LIMIT:
+			co2_blocked.emit()
+		return
 	if _can_build(cell_pos):
 		GameManager.add_credits(-factory_cost)
 		var factory_instance: Node2D = factory_scene.instantiate()
@@ -299,6 +312,14 @@ func _can_build(cell_pos: Vector2i) -> bool:
 			return false
 	# 2. Vérification des fonds disponibles
 	if GameManager.credits < factory_cost:
+		return false
+	var raw = null
+	if factory_scene:
+		var tmp = factory_scene.instantiate()
+		raw = tmp.get("build_co2_cost")
+		tmp.queue_free()
+	var co2_cost: float = float(raw) if raw != null else 0.0
+	if GameManager.co2_emissions + co2_cost > GameManager.CO2_LIMIT:
 		return false
 	return true
 

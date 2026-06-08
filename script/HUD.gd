@@ -331,11 +331,14 @@ func _ready() -> void:
 	if ContractManager:
 		if ContractManager.contract_arrived.is_connected(_on_contract_arrived):
 			ContractManager.contract_arrived.disconnect(_on_contract_arrived)
+		if ContractManager.contract_progressed.is_connected(_on_contract_progressed):
+			ContractManager.contract_progressed.disconnect(_on_contract_progressed)
 		if ContractManager.contract_completed.is_connected(_on_contract_completed):
 			ContractManager.contract_completed.disconnect(_on_contract_completed)
 		if ContractManager.contract_failed.is_connected(_on_contract_failed):
 			ContractManager.contract_failed.disconnect(_on_contract_failed)
 		ContractManager.contract_arrived.connect(_on_contract_arrived)
+		ContractManager.contract_progressed.connect(_on_contract_progressed)
 		ContractManager.contract_completed.connect(_on_contract_completed)
 		ContractManager.contract_failed.connect(_on_contract_failed)
 	if orders_panel:
@@ -518,6 +521,9 @@ func _on_contract_arrived(contract: Dictionary) -> void:
 		await get_tree().create_timer(4.8).timeout
 		_contract_just_failed = false
 	_show_hint_toast(msg)
+
+func _on_contract_progressed(_contract: Dictionary) -> void:
+	_update_contracts_display()
 
 func _on_contract_completed(contract: Dictionary) -> void:
 	_update_contracts_display()
@@ -1042,8 +1048,17 @@ func _update_money_display() -> void:
 		money_label.text = _format_money_value(GameManager.credits)
 
 func _update_co2_display() -> void:
-	if co2_label and GameManager:
-		co2_label.text = _format_rate_value(GameManager.co2_emissions, "g/min CO2")
+	if not (co2_label and GameManager):
+		return
+	var val: float = GameManager.co2_emissions
+	var limit: float = GameManager.CO2_LIMIT
+	co2_label.text = "%.1f / %.0f g/min CO2" % [val, limit]
+	if val >= limit:
+		co2_label.add_theme_color_override("font_color", Color(0.9, 0.2, 0.2))
+	elif val >= limit * 0.75:
+		co2_label.add_theme_color_override("font_color", Color(0.95, 0.65, 0.1))
+	else:
+		co2_label.add_theme_color_override("font_color", Color(0.0, 0.0, 0.0))
 
 func _close_all_panels() -> void:
 	if session_overview_panel and session_overview_panel.visible:
@@ -1101,6 +1116,7 @@ func _update_session_overview() -> void:
 		overview_electricity_value.text = "Placeholder"
 	var machine_count: int = 0
 	var active_machine_count: int = 0
+	var broken_machine_count: int = 0
 	var production_rate_total: float = 0.0
 	if EntityManager:
 		for entity_variant in EntityManager.entities.values():
@@ -1110,6 +1126,8 @@ func _update_session_overview() -> void:
 			machine_count += 1
 			if entity.is_active:
 				active_machine_count += 1
+			if entity.is_broken:
+				broken_machine_count += 1
 			production_rate_total += entity.production_rate
 	overview_machines_value.text = str(machine_count)
 	overview_active_machines_value.text = "%d / %d" % [active_machine_count, machine_count]
@@ -1117,7 +1135,7 @@ func _update_session_overview() -> void:
 		overview_production_rate_value.text = "%.0f%%" % [production_rate_total / float(machine_count) * 100.0]
 	else:
 		overview_production_rate_value.text = "0%"
-	overview_failures_value.text = "A venir (placeholder)"
+	overview_failures_value.text = str(broken_machine_count)
 
 func _bind_runtime_managers() -> void:
 	_building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
@@ -1131,6 +1149,8 @@ func _bind_runtime_managers() -> void:
 			_building_manager.delivery_point_selection_changed.connect(_on_delivery_point_selection_changed)
 		if _building_manager.has_signal("entity_selected") and not _building_manager.entity_selected.is_connected(_on_entity_selected):
 			_building_manager.entity_selected.connect(_on_entity_selected)
+		if _building_manager.has_signal("co2_blocked") and not _building_manager.co2_blocked.is_connected(_on_co2_blocked):
+			_building_manager.co2_blocked.connect(_on_co2_blocked)
 	if _delivery_manager:
 		if _delivery_manager.has_signal("order_submitted") and not _delivery_manager.order_submitted.is_connected(_on_order_submitted):
 			_delivery_manager.order_submitted.connect(_on_order_submitted)
@@ -1143,6 +1163,40 @@ func _bind_runtime_managers() -> void:
 		if _delivery_manager.has_signal("queue_changed") and not _delivery_manager.queue_changed.is_connected(_on_delivery_queue_changed):
 			_delivery_manager.queue_changed.connect(_on_delivery_queue_changed)
 
+var _co2_toast: PanelContainer = null
+
+func _on_co2_blocked() -> void:
+	if is_instance_valid(_co2_toast):
+		return
+	var toast := PanelContainer.new()
+	_co2_toast = toast
+	toast.set_anchors_preset(Control.PRESET_CENTER)
+	toast.offset_left = -280.0
+	toast.offset_right = 280.0
+	toast.offset_top = 40.0
+	toast.offset_bottom = 80.0
+	var style := StyleBoxFlat.new()
+	style.bg_color = UITheme.ACCENT_GOLD
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	style.content_margin_left = 14.0
+	style.content_margin_right = 14.0
+	style.content_margin_top = 8.0
+	style.content_margin_bottom = 8.0
+	toast.add_theme_stylebox_override("panel", style)
+	add_child(toast)
+	var label := Label.new()
+	label.text = "⛔ Limite CO2 atteinte (30 g/min max)\nRetirez des bâtiments pour continuer."
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", UITheme.INK_DARK)
+	toast.add_child(label)
+	var tween := create_tween()
+	tween.tween_interval(4.0)
+	tween.tween_property(toast, "modulate:a", 0.0, 0.8)
+	tween.tween_callback(toast.queue_free)
+	
 func _setup_order_panel() -> void:
 	if orders_panel == null or order_resource_selector == null or order_quantity_spinbox == null:
 		return
@@ -1382,13 +1436,6 @@ func _on_delivery_started(order: Dictionary) -> void:
 
 func _on_delivery_completed(order: Dictionary) -> void:
 	if String(order.get("job_type", ORDER_MODE_IMPORT)) == ORDER_MODE_EXPORT:
-		if GameManager:
-			GameManager.record_export_gain(
-				String(order.get("resource_id", "")),
-				String(order.get("resource_label", "Ressource")),
-				int(order.get("quantity", 0)),
-				float(order.get("total_cost", 0.0))
-			)
 		orders_status_label.text = "Export termine: %s x%d, gain %s" % [
 			order.get("resource_label", "Ressource"),
 			int(order.get("quantity", 0)),
