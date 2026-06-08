@@ -556,7 +556,7 @@ text = "Machines en panne"
 [node name="OverviewFailuresValue" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1418545568]
 unique_name_in_owner = true
 layout_mode = 2
-text = "A venir (placeholder)"
+text = "0"
 horizontal_alignment = 2
 
 [node name="CO2Label" type="Label" parent="SessionOverviewPanel/MarginContainer/VBoxContainer/InfoGrid" unique_id=1469679323]

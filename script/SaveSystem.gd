@@ -112,6 +112,21 @@ func get_save_slots(include_new_slot: bool = false) -> Array[Dictionary]:
 
 	return slots
 
+func get_save_directory_path() -> String:
+	_ensure_save_directory()
+	return ProjectSettings.globalize_path(SAVE_DIR_PATH)
+
+func open_save_directory() -> bool:
+	var global_path: String = get_save_directory_path()
+	if global_path.is_empty():
+		return false
+	var normalized_path: String = global_path.replace("\\", "/")
+	var directory_url: String = "file:///" + normalized_path.trim_prefix("/")
+	var open_result: Error = OS.shell_open(directory_url)
+	if open_result == OK:
+		return true
+	return OS.shell_open(global_path) == OK
+
 func save_level_state(camera_position: Vector2, floor_state: Dictionary) -> String:
 	return save_level_state_to_slot(_active_slot_id, camera_position, floor_state)
 

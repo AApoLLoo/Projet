@@ -9,7 +9,9 @@ const _ENTITY_SCENES: Dictionary = {
 	"miner": preload("res://scene/miner.tscn"),
 	"belt_right": preload("res://scene/ASSET/belt/beltmid.tscn"),
 	"belt_left": preload("res://scene/ASSET/belt/beltleft.tscn"),
+	"belt_west": preload("res://scene/ASSET/belt/beltleft.tscn"),
 	"belt_east": preload("res://scene/ASSET/belt/belteast.tscn"),
+	"belt_north": preload("res://scene/ASSET/belt/beltnorth.tscn"),
 	"belt_south": preload("res://scene/ASSET/belt/beltsouth.tscn"),
 	"merger": preload("res://scene/ASSET/belt/merger.tscn"),
 	"splitter": preload("res://scene/ASSET/belt/splitter.tscn"),
@@ -22,9 +24,8 @@ const _ENTITY_SCENES: Dictionary = {
 	
 }
 
-# --- MODIFICATION ICI : Ajout du lien vers le TileMap Isométrique ---
-@onready var floor_tilemap: TileMapLayer = $"../TileMapLayer" # Si vous êtes sur Godot 4.2 ou moins, changez "TileMapLayer" en "TileMap"
-# --------------------------------------------------------------------
+# Le niveau expose actuellement le sol sous le nom "Floor".
+@onready var floor_tilemap: TileMapLayer = get_node_or_null("../Floor") as TileMapLayer
 
 @export var cell_size: int = 32 # Gardé au cas où, mais sera ignoré si floor_tilemap est assigné
 @export var buildings_node: Node2D # Nœud parent pour regrouper les usines placées
@@ -46,6 +47,7 @@ signal delivery_point_hovered(cell_pos, world_pos)
 signal delivery_point_selection_changed(enabled)
 signal delivery_point_error(message: String)
 signal entrepot_inspected(entrepot_instance)
+signal co2_penalty_applied(penalty: float)
 var is_destroying: bool = false
 var is_selecting_delivery_point: bool = false
 
@@ -249,6 +251,15 @@ func _try_place_building() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
 	var snap_pos: Vector2 = get_world_pos(cell_pos)
+	if not _can_build(cell_pos):
+		var raw = null
+		if factory_scene:
+			var tmp = factory_scene.instantiate()
+			raw = tmp.get("build_co2_cost")
+			tmp.queue_free()
+		var co2_cost: float = float(raw) if raw != null else 0.0
+		if GameManager.co2_emissions + co2_cost > GameManager.CO2_LIMIT:
+			return
 	if _can_build(cell_pos):
 		GameManager.add_credits(-factory_cost)
 		var factory_instance: Node2D = factory_scene.instantiate()
@@ -290,6 +301,10 @@ func _try_place_building() -> void:
 		}
 		last_build_state_changed.emit(true)
 		
+		# Pénalité CO2 si dépassement
+		var penalty: float = GameManager.apply_co2_penalty()
+		if penalty > 0.0:
+			co2_penalty_applied.emit(penalty)
 		# --- ICI : On appelle la fonction de rafraîchissement ---
 		# Comme on est dans _try_place_building, cell_pos est connu !
 		_refresh_turbines_around(cell_pos)

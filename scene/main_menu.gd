@@ -30,7 +30,6 @@ var _menu_descriptions: Dictionary = {}
 func _ready() -> void:
 	UITheme.style_screen(self)
 	_update_physics_panel()
-	_setup_map_preview()
 	_setup_load_dialog()
 	resized.connect(_on_menu_resized)
 	_style_buttons()
@@ -211,6 +210,7 @@ func _setup_load_dialog() -> void:
 	_load_dialog.ok_button_text = "Charger"
 	_load_dialog.confirmed.connect(_on_load_dialog_confirmed)
 	_load_dialog.custom_action.connect(_on_load_dialog_custom_action)
+	_load_dialog.add_button("Ouvrir le dossier", true, &"open_save_folder")
 	_load_dialog.add_button("Supprimer", true, &"delete_slot")
 	add_child(_load_dialog)
 
@@ -302,6 +302,12 @@ func _on_load_dialog_confirmed() -> void:
 	_change_scene(LEVEL_SCENE)
 
 func _on_load_dialog_custom_action(action: StringName) -> void:
+	if action == &"open_save_folder":
+		if SaveSystem.open_save_directory():
+			return
+		_show_message("Impossible d'ouvrir le dossier des sauvegardes.")
+		return
+
 	if action != &"delete_slot":
 		return
 

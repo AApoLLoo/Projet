@@ -170,10 +170,26 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Arret"
 
+[node name="HealthTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Sante"
+theme_override_font_sizes/font_size = 13
+
+[node name="HealthLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "100%"
+
 [node name="ActiveToggle" type="CheckButton" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Actif"
+
+[node name="RepairBtn" type="Button" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Reparer (1 kit)"
 
 [node name="HSep5" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2

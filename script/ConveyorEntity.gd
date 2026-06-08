@@ -32,6 +32,7 @@ const GROUND_MATERIAL_SCENE: PackedScene = preload("res://scene/Materiaux.tscn")
 const ITEM_FRAMES: Dictionary = {
 	"charbon": 12,
 	"gaz": 61,
+	"gaz_raffine": 61,
 	"matiere_brute": 35,
 	"metal": 14,
 	"piece_base": 45,
@@ -52,8 +53,8 @@ func _check_neighbor_turbines():
 			
 			var pos = cell_position + Vector2i(x, y)
 			var entity = EntityManager.get_entity_at_cell(pos)
-			if entity != null and entity.entity_type == "turbine" and entity.is_active:
-				if entity != null and entity.entity_type == "turbine" and entity.is_active:
+			if entity != null and entity.entity_type == "turbine" and entity.is_operational():
+				if entity != null and entity.entity_type == "turbine" and entity.is_operational():
 					set_powered(true)
 					return
 	
@@ -68,7 +69,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if not is_active or not is_powered:
+	if not is_active or is_broken or not is_powered:
 		_update_item_markers()
 		return
 
@@ -93,6 +94,9 @@ func _update_connection_color() -> void:
 	var anim_sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 	if anim_sprite == null:
 		return
+	if is_broken:
+		anim_sprite.modulate = Color(0.48, 0.35, 0.35)
+		return
 	var has_in: bool = has_input_connection()
 	var has_out: bool = has_output_connection()
 	if has_in and has_out:
@@ -106,6 +110,8 @@ func _update_connection_color() -> void:
 func get_status_text() -> String:
 	if not is_active:
 		return "Arret"
+	if is_broken:
+		return "En panne - Reparer"
 	if carried_items.is_empty():
 		return "En attente"
 	if _front_item_ready_to_exit():
@@ -462,7 +468,7 @@ func _ensure_item_marker_count(required_count: int) -> void:
 func _advance_items(delta: float) -> void:
 	if carried_items.is_empty():
 		return
-	var progress_delta: float = delta / maxf(travel_time, 0.01)
+	var progress_delta: float = delta / _get_effective_travel_time()
 	for index in range(carried_items.size()):
 		var item: Dictionary = carried_items[index]
 		var max_progress: float = 1.0
@@ -510,6 +516,18 @@ func _serialize_carried_items() -> Array[Dictionary]:
 			"progress": clampf(float(item.get("progress", 0.0)), 0.0, 1.0),
 		})
 	return serialized_items
+
+func _get_effective_travel_time() -> float:
+	var settings: Dictionary = SettingsManager.get_settings()
+	var friction: float = SettingsManager._to_float(settings.get("physics_friction", 1.0), 1.0)
+	var friction_factor: float = 1.0
+	if friction <= 1.0:
+		var low_friction_t: float = inverse_lerp(0.0, 1.0, friction)
+		friction_factor = lerpf(0.65, 1.0, low_friction_t)
+	else:
+		var high_friction_t: float = inverse_lerp(1.0, 5.0, friction)
+		friction_factor = lerpf(1.0, 1.85, high_friction_t)
+	return maxf(travel_time * friction_factor, 0.01)
 
 func _restore_carried_items(data: Dictionary) -> void:
 	carried_items.clear()
