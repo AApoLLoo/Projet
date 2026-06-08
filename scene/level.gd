@@ -28,6 +28,10 @@ var _order_delivery_preview_marker: Node2D
 var _delivery_point_hover_marker: Node2D
 var _marker_pulse_time: float = 0.0
 var _electricity_overlay: Node2D = null
+var _paused_animated_sprites: Array[AnimatedSprite2D] = []
+var _paused_animation_players: Array[AnimationPlayer] = []
+var _paused_tweens: Array[Tween] = []
+var _runtime_animations_paused: bool = false
 
 func set_preview_mode(enabled: bool) -> void:
 	_preview_mode = enabled
@@ -59,6 +63,7 @@ func _ready() -> void:
 
 	_build_pause_ui()
 	TimeManager.is_time_running = true
+	_sync_runtime_animation_pause_state()
 
 func _setup_electricity_overlay() -> void:
 	if _electricity_overlay == null:
@@ -218,6 +223,9 @@ func _on_delivery_point_selection_changed(enabled: bool) -> void:
 		_delivery_point_hover_marker.hide()
 
 func _process(delta: float) -> void:
+	_sync_runtime_animation_pause_state()
+	if _should_pause_runtime_animations():
+		return
 	_marker_pulse_time += delta
 	_animate_marker(_delivery_point_marker, 1.0, 0.08, 0.75)
 	_animate_marker(_order_delivery_preview_marker, 1.0, 0.04, 0.35)
@@ -451,6 +459,7 @@ func _build_pause_ui() -> void:
 	_save_dialog.ok_button_text = "Enregistrer"
 	_save_dialog.confirmed.connect(_on_save_dialog_confirmed)
 	_save_dialog.custom_action.connect(_on_save_dialog_custom_action)
+	_save_dialog.add_button("Ouvrir le dossier", true, &"open_save_folder")
 	_save_dialog.add_button("Supprimer", true, &"delete_slot")
 	_pause_layer.add_child(_save_dialog)
 
@@ -487,6 +496,7 @@ func _open_pause_menu() -> void:
 	_is_paused = true
 	TimeManager.is_time_running = false
 	_set_gameplay_enabled(false)
+	_sync_runtime_animation_pause_state()
 	if _pause_backdrop != null:
 		_pause_backdrop.visible = true
 	if _pause_panel != null:
@@ -496,10 +506,73 @@ func _resume_game() -> void:
 	_is_paused = false
 	TimeManager.is_time_running = true
 	_set_gameplay_enabled(true)
+	_sync_runtime_animation_pause_state()
 	if _pause_panel != null:
 		_pause_panel.visible = false
 	if _pause_backdrop != null:
 		_pause_backdrop.visible = false
+
+func _should_pause_runtime_animations() -> bool:
+	if _is_paused:
+		return true
+	return TimeManager != null and (not TimeManager.is_time_running or TimeManager.time_speed <= 0.0)
+
+func _sync_runtime_animation_pause_state() -> void:
+	var should_pause: bool = _should_pause_runtime_animations()
+	if _runtime_animations_paused == should_pause:
+		return
+	_runtime_animations_paused = should_pause
+	_set_runtime_animations_paused(should_pause)
+
+func _set_runtime_animations_paused(paused: bool) -> void:
+	if paused:
+		_pause_runtime_animations()
+		return
+	_resume_runtime_animations()
+
+func _pause_runtime_animations() -> void:
+	_paused_animated_sprites.clear()
+	_paused_animation_players.clear()
+	_paused_tweens.clear()
+
+	var scene_root: Node = get_tree().current_scene
+	if scene_root != null:
+		for node in scene_root.find_children("*", "AnimatedSprite2D", true, false):
+			var sprite: AnimatedSprite2D = node as AnimatedSprite2D
+			if sprite == null or not is_instance_valid(sprite) or not sprite.is_playing():
+				continue
+			sprite.pause()
+			_paused_animated_sprites.append(sprite)
+
+		for node in scene_root.find_children("*", "AnimationPlayer", true, false):
+			var animation_player: AnimationPlayer = node as AnimationPlayer
+			if animation_player == null or not is_instance_valid(animation_player) or not animation_player.is_playing():
+				continue
+			animation_player.pause()
+			_paused_animation_players.append(animation_player)
+
+	for tween_variant in get_tree().get_processed_tweens():
+		var tween: Tween = tween_variant as Tween
+		if tween == null or not is_instance_valid(tween):
+			continue
+		tween.pause()
+		_paused_tweens.append(tween)
+
+func _resume_runtime_animations() -> void:
+	for sprite in _paused_animated_sprites:
+		if sprite != null and is_instance_valid(sprite):
+			sprite.play()
+	_paused_animated_sprites.clear()
+
+	for animation_player in _paused_animation_players:
+		if animation_player != null and is_instance_valid(animation_player):
+			animation_player.play()
+	_paused_animation_players.clear()
+
+	for tween in _paused_tweens:
+		if tween != null and is_instance_valid(tween):
+			tween.play()
+	_paused_tweens.clear()
 
 func _on_pause_save_pressed() -> void:
 	_populate_save_slots()
@@ -595,6 +668,12 @@ func _on_sync_save_name_input_with_selection() -> void:
 	_save_name_input.text = _save_dialog_slot_names[selected_index]
 
 func _on_save_dialog_custom_action(action: StringName) -> void:
+	if action == &"open_save_folder":
+		if SaveSystem.open_save_directory():
+			return
+		_show_pause_message("Impossible d'ouvrir le dossier des sauvegardes.")
+		return
+
 	if action != &"delete_slot":
 		return
 

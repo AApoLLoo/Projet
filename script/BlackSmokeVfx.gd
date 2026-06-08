@@ -22,9 +22,13 @@ var _base_sprite_scale: Vector2 = Vector2.ONE
 var _is_emitting: bool = false
 var _sprite_frames_ready: bool = false
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var _time_flow_paused: bool = false
+var _paused_time_left: float = 0.0
+var _paused_animation_in_progress: bool = false
 
 func _ready() -> void:
 	_rng.randomize()
+	set_process(true)
 	if _sprite == null or _puff_timer == null:
 		return
 	_base_sprite_position = _sprite.position
@@ -36,12 +40,16 @@ func _ready() -> void:
 	_puff_timer.one_shot = true
 	if not _puff_timer.timeout.is_connected(_on_puff_timer_timeout):
 		_puff_timer.timeout.connect(_on_puff_timer_timeout)
+	_sync_time_flow_state(true)
+
+func _process(_delta: float) -> void:
+	_sync_time_flow_state()
 
 func set_emitting(enabled: bool) -> void:
 	if _sprite == null or _puff_timer == null:
 		return
 	if _is_emitting == enabled:
-		if enabled and _puff_timer.is_stopped() and not _sprite.is_playing():
+		if enabled and not _time_flow_paused and _puff_timer.is_stopped() and not _sprite.is_playing():
 			if start_immediately:
 				_play_puff()
 			else:
@@ -49,6 +57,8 @@ func set_emitting(enabled: bool) -> void:
 		return
 	_is_emitting = enabled
 	if _is_emitting:
+		if _time_flow_paused:
+			return
 		if _sprite.is_playing():
 			return
 		if start_immediately:
@@ -87,6 +97,8 @@ func _ensure_sprite_frames() -> void:
 func _play_puff() -> void:
 	if _sprite == null:
 		return
+	if _time_flow_paused:
+		return
 	_ensure_sprite_frames()
 	if not _sprite_frames_ready:
 		return
@@ -105,7 +117,7 @@ func _apply_puff_variation() -> void:
 	_sprite.scale = _base_sprite_scale * scale_factor
 
 func _schedule_next_puff(delay: float = -1.0) -> void:
-	if not _is_emitting or _puff_timer == null:
+	if not _is_emitting or _puff_timer == null or _time_flow_paused:
 		return
 	var next_delay: float = delay
 	if next_delay < 0.0:
@@ -125,10 +137,52 @@ func _hide_sprite() -> void:
 	_sprite.hide()
 
 func _on_puff_timer_timeout() -> void:
+	if _time_flow_paused:
+		return
 	if _is_emitting and not _sprite.is_playing():
 		_play_puff()
 
 func _on_animation_finished() -> void:
 	_hide_sprite()
-	if _is_emitting:
+	if _is_emitting and not _time_flow_paused:
 		_schedule_next_puff()
+
+func _sync_time_flow_state(force: bool = false) -> void:
+	var should_pause: bool = _should_pause_for_time_flow()
+	if not force and _time_flow_paused == should_pause:
+		return
+	_time_flow_paused = should_pause
+	if _time_flow_paused:
+		_pause_for_time_flow()
+		return
+	_resume_from_time_flow()
+
+func _should_pause_for_time_flow() -> bool:
+	return TimeManager != null and (not TimeManager.is_time_running or TimeManager.time_speed <= 0.0)
+
+func _pause_for_time_flow() -> void:
+	if _puff_timer != null and not _puff_timer.is_stopped():
+		_paused_time_left = maxf(_puff_timer.time_left, 0.0)
+		_puff_timer.stop()
+	else:
+		_paused_time_left = 0.0
+	if _sprite != null and _sprite.is_playing():
+		_sprite.pause()
+		_paused_animation_in_progress = true
+	else:
+		_paused_animation_in_progress = false
+
+func _resume_from_time_flow() -> void:
+	if _sprite != null and _paused_animation_in_progress:
+		_sprite.play()
+		_paused_animation_in_progress = false
+		return
+	if not _is_emitting or _puff_timer == null:
+		_paused_time_left = 0.0
+		return
+	if _paused_time_left > 0.0:
+		_puff_timer.start(maxf(0.05, _paused_time_left))
+		_paused_time_left = 0.0
+		return
+	if not _sprite.is_playing() and _puff_timer.is_stopped():
+		_schedule_next_puff(0.05 if start_immediately else -1.0)
