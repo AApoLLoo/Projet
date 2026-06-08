@@ -20,6 +20,8 @@ const _ENTITY_SCENES: Dictionary = {
 	"curve_left": preload("res://scene/ASSET/belt/curveleft.tscn"),
 	"curve_right": preload("res://scene/ASSET/belt/curveright.tscn"),
 	"entrepot": preload("res://scene/entrepot.tscn"),
+	"arbre": preload("res://scene/arbre.tscn"),
+	
 }
 
 # --- MODIFICATION ICI : Ajout du lien vers le TileMap Isométrique ---
@@ -267,6 +269,8 @@ func _try_place_building() -> void:
 		if factory_instance is Entity:
 			factory_instance.cell_position = cell_pos
 			factory_instance.build_cost = factory_cost
+			if factory_instance.get("co2_absorption_per_minute") != null:
+				factory_instance.co2_absorption_per_minute = _pending_co2_absorption
 		
 
 		if buildings_node:
@@ -276,7 +280,15 @@ func _try_place_building() -> void:
 		# 4. Positionnement visuel : centrer les sprites D'ABORD, puis positionner
 		_configure_instance_visuals(factory_instance)
 		factory_instance.global_position = get_world_pos(cell_pos)
-			
+		if factory_instance.get("arbre_variant") != null and _pending_arbre_variant != "":
+			factory_instance.arbre_variant = _pending_arbre_variant
+			if factory_instance.has_method("_apply_variant"):
+				factory_instance._apply_variant()
+		
+		factory_instance.global_position = get_world_pos(cell_pos)
+		
+		
+		
 		# 5. Enregistrement des cellules
 		var occupied_by_build: Array[Vector2i] = _get_occupied_cells_for_build(cell_pos, _current_build_footprint_offsets)
 		_register_occupied_cells(factory_instance, occupied_by_build, cell_pos, factory_cost)
@@ -768,3 +780,11 @@ func _stop_moving() -> void:
 	preview_sprite.visible = false
 	preview_sprite.modulate = Color(1, 1, 1, 0.6)
 	_moving_footprint = []
+var _pending_co2_absorption: float = 2.0
+
+func set_pending_co2_absorption(value: float) -> void:
+	_pending_co2_absorption = value
+var _pending_arbre_variant: String = ""
+
+func set_pending_arbre_variant(variant: String) -> void:
+	_pending_arbre_variant = variant

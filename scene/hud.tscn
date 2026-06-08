@@ -5,6 +5,10 @@
 [ext_resource type="Texture2D" uid="uid://ulirfg2pcl7w" path="res://asset/combiner.png" id="3_pvgpj"]
 [ext_resource type="Texture2D" uid="uid://cu363bj51l0e2" path="res://asset/conveyer belt alldown-0001.png" id="4_qy82l"]
 [ext_resource type="Texture2D" uid="uid://lnaf8pwox26k" path="res://asset/conveyer belt allright-0001.png" id="5_sjh6b"]
+[ext_resource type="Texture2D" uid="uid://b17n14jkapfra" path="res://asset/Trees+(5).png" id="6_xphas"]
+[ext_resource type="Texture2D" uid="uid://b6nn5go22u0p1" path="res://asset/Trees+(3).png" id="7_kc6cu"]
+[ext_resource type="Texture2D" uid="uid://bb0ubxebed34l" path="res://asset/Trees+(4).png" id="8_62he3"]
+[ext_resource type="Texture2D" uid="uid://dlemj4n2otaal" path="res://asset/Trees+(2).png" id="9_b48p2"]
 
 [node name="HUD" type="CanvasLayer" unique_id=745135006]
 script = ExtResource("1_hud")
@@ -268,6 +272,11 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 text = "Extraction"
+
+[node name="BtnArbre" type="Button" parent="BuildMenuContainer" unique_id=908608374]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Arbre"
 
 [node name="OrdersPanel" type="PanelContainer" parent="." unique_id=498211001]
 unique_name_in_owner = true
@@ -610,3 +619,25 @@ layout_mode = 2
 
 [node name="Belt_South" type="Button" parent="Menu_Belt" unique_id=130327982]
 layout_mode = 2
+
+[node name="Menu_Arbre" type="HBoxContainer" parent="." unique_id=1568897082]
+offset_left = 30.0
+offset_top = 501.0
+offset_right = 370.0
+offset_bottom = 589.0
+
+[node name="Arbre_Vert" type="Button" parent="Menu_Arbre" unique_id=817982696]
+layout_mode = 2
+icon = ExtResource("6_xphas")
+
+[node name="Arbre_Rouge" type="Button" parent="Menu_Arbre" unique_id=1080505062]
+layout_mode = 2
+icon = ExtResource("7_kc6cu")
+
+[node name="Arbre_Blanc" type="Button" parent="Menu_Arbre" unique_id=1157077106]
+layout_mode = 2
+icon = ExtResource("8_62he3")
+
+[node name="Arbre_VertF" type="Button" parent="Menu_Arbre" unique_id=1313164615]
+layout_mode = 2
+icon = ExtResource("9_b48p2")
