@@ -40,15 +40,15 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var btn_toggle_orders: Button = %BtnToggleOrders
 @onready var btn_toggle_session_overview: Button = %BtnToggleSessionOverview
 
-# --- NOUVEAUX BOUTONS DE CONSTRUCTION ---
-@onready var btn_toggle_build_menu: Button = %BtnToggleBuildMenu # Le bouton "Construction" principal
-@onready var build_menu_container: VBoxContainer = %BuildMenuContainer # Le conteneur (menu déroulant)
+@onready var btn_toggle_build_menu: Button = %BtnToggleBuildMenu
+@onready var build_menu_container: VBoxContainer = %BuildMenuContainer
 
-@onready var btn_build_factory: Button = %BtnBuildFactory 
-@onready var btn_build_belt: Button = %BtnBuildBelt       
-@onready var btn_build_turbine: Button = %BtnBuildTurbine 
-@onready var btn_build_entrepot: Button = %BtnEntrepot 
+@onready var btn_build_factory: Button = %BtnBuildFactory
+@onready var btn_build_belt: Button = %BtnBuildBelt
+@onready var btn_build_turbine: Button = %BtnBuildTurbine
+@onready var btn_build_entrepot: Button = %BtnEntrepot
 @onready var btn_build_miner: Button = %BtnBuildMiner
+
 ###BELT###
 @onready var menu_belt: HBoxContainer = $Menu_Belt
 @onready var curve_top: Button = $Menu_Belt/Curve_Top
@@ -61,6 +61,14 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var belt_west: Button = $Menu_Belt/Belt_West
 @onready var belt_merger: Button = $Menu_Belt/Belt_Merger
 @onready var belt_splitter: Button = $Menu_Belt/Belt_Splitter
+
+###ARBRE###
+@onready var btn_build_arbre: Button = %BtnArbre
+@onready var menu_arbre: HBoxContainer = $Menu_Arbre
+@onready var btn_arbre_vert: Button = $Menu_Arbre/Arbre_Vert
+@onready var btn_arbre_jaune: Button = $Menu_Arbre/Arbre_VertF 
+@onready var btn_arbre_rouge: Button = $Menu_Arbre/Arbre_Rouge
+@onready var btn_arbre_bleu: Button = $Menu_Arbre/Arbre_Blanc
 
 @onready var orders_panel: PanelContainer = %OrdersPanel
 @onready var orders_title_label: Label = $OrdersPanel/MarginContainer/VBoxContainer/TitleLabel
@@ -87,18 +95,17 @@ const ORDER_MODE_EXPORT: String = "export"
 @onready var btn_choose_order_delivery_point: Button = %BtnChooseOrderDeliveryPoint
 @onready var btn_clear_order_delivery_point: Button = %BtnClearOrderDeliveryPoint
 @onready var btn_submit_order: Button = %BtnSubmitOrder
+
 var _warehouse_panel: PanelContainer = null
 var _contract_just_failed: bool = false
 
-# --- DICTIONNAIRE MIS À JOUR ---
-# --- DICTIONNAIRE MIS À JOUR AVEC DIRECTIONS ET VIRAGES ---
 var buildings_data = {
 	"factory": {
 		"scene": preload("res://scene/factory.tscn"),
 		"texture": preload("res://asset/usine.png"),
 		"cost": 200.0,
 		"frames": 1,
-		"preview_scale": Vector2(0.55, 0.55),  # aligné sur scale du Sprite2D dans factory.tscn
+		"preview_scale": Vector2(0.55, 0.55),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"turbine": {
@@ -107,14 +114,9 @@ var buildings_data = {
 		"texture_region": Rect2(0, 0, 149, 108),
 		"cost": 500.0,
 		"frames": 1,
-		"preview_scale": Vector2(0.9, 0.9),  # aligné sur scale AnimatedSprite2D turbine_2d.tscn
+		"preview_scale": Vector2(0.9, 0.9),
 		"footprint_offsets": [Vector2i.ZERO, Vector2i(1, 0)]
 	},
-
-	
-	
-
-	# --- TAPIS CARDINAUX SUPPLEMENTAIRES ---
 	"belt_east": {
 		"scene": preload("res://scene/ASSET/belt/belteast.tscn"),
 		"texture": preload("res://asset/convoyer/conveyer belt all-0001.png"),
@@ -151,14 +153,13 @@ var buildings_data = {
 		"preview_scale": Vector2(1.75, 1.75),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
-	# --- MERGEUR / SPLITTER ---
 	"merger": {
 		"scene": preload("res://scene/ASSET/belt/merger.tscn"),
 		"texture": preload("res://asset/convoyer/combiner.png"),
 		"texture_region": Rect2(0, 64, 64, 64),
 		"cost": 80.0,
 		"frames": 1,
-		"preview_scale": Vector2(1.0, 1.0),  # frame 64x64 = cellule 64px
+		"preview_scale": Vector2(1.0, 1.0),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"splitter": {
@@ -167,10 +168,9 @@ var buildings_data = {
 		"texture_region": Rect2(0, 0, 64, 64),
 		"cost": 80.0,
 		"frames": 1,
-		"preview_scale": Vector2(1.0, 1.0),  # frame 64x64 = cellule 64px
+		"preview_scale": Vector2(1.0, 1.0),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
-	# --- VIRAGES / COURBES ---
 	"curve_top": {
 		"scene": preload("res://scene/ASSET/beltcurvetop.tscn"),
 		"texture": preload("res://asset/convoyer/curves.png"),
@@ -213,7 +213,7 @@ var buildings_data = {
 		"texture_region": Rect2(0, 0, 132, 186),
 		"cost": 1000.0,
 		"frames": 1,
-		"preview_scale": Vector2(0.6, 0.6),  # aligné sur scale AnimatedSprite2D entrepot.tscn
+		"preview_scale": Vector2(0.6, 0.6),
 		"footprint_offsets": [Vector2i.ZERO]
 	},
 	"miner": {
@@ -222,10 +222,51 @@ var buildings_data = {
 		"texture_region": Rect2(0, 0, 64, 92),
 		"cost": 300.0,
 		"frames": 1,
-		"preview_scale": Vector2(0.9, 0.9),  # aligné sur scale AnimatedSprite2D miner.tscn
+		"preview_scale": Vector2(0.9, 0.9),
 		"footprint_offsets": [Vector2i.ZERO]
-	}
+	},
+	"arbre_1": {
+	"scene": preload("res://scene/arbre.tscn"),
+	"texture": preload("res://asset/Trees+(5).png"),
+	"cost": 50.0,
+	"frames": 1,
+	"preview_scale": Vector2(1.0, 1.0),
+	"footprint_offsets": [Vector2i.ZERO],
+	"co2_absorption": 2.0,
+	"arbre_variant": "vert",      # ← ajouter cette ligne
+},
+"arbre_2": {
+	"scene": preload("res://scene/arbre.tscn"),
+	"texture": preload("res://asset/Trees+(2).png"),
+	"cost": 120.0,
+	"frames": 1,
+	"preview_scale": Vector2(1.0, 1.0),
+	"footprint_offsets": [Vector2i.ZERO],
+	"co2_absorption": 5.0,
+	"arbre_variant": "vertF",     # ← ajouter cette ligne
+},
+"arbre_3": {
+	"scene": preload("res://scene/arbre.tscn"),
+	"texture": preload("res://asset/Trees+(3).png"),
+	"cost": 250.0,
+	"frames": 1,
+	"preview_scale": Vector2(1.0, 1.0),
+	"footprint_offsets": [Vector2i.ZERO],
+	"co2_absorption": 10.0,
+	"arbre_variant": "rouge",     # ← ajouter cette ligne
+},
+"arbre_4": {
+	"scene": preload("res://scene/arbre.tscn"),
+	"texture": preload("res://asset/Trees+(4).png"),
+	"cost": 500.0,
+	"frames": 1,
+	"preview_scale": Vector2(1.0, 1.0),
+	"footprint_offsets": [Vector2i.ZERO],
+	"co2_absorption": 20.0,
+	"arbre_variant": "blanc",     # ← ajouter cette ligne
+},
 }
+
 @onready var minimap_camera: Camera2D = %MinimapCamera
 @onready var minimap_overlay: Control = %MinimapOverlay
 
@@ -235,6 +276,7 @@ const MINIMAP_TURBINE_COLOR: Color = Color(0.4, 0.88, 0.52, 0.96)
 const MINIMAP_CONVEYOR_COLOR: Color = Color(0.88, 0.9, 0.93, 0.82)
 const MINIMAP_DELIVERY_COLOR: Color = Color(1.0, 0.82, 0.24, 1.0)
 const MINIMAP_ORDER_TARGET_COLOR: Color = Color(0.35, 0.9, 1.0, 1.0)
+
 var _entity_panel: PanelContainer = null
 var _building_manager: Node = null
 var _delivery_manager: Node = null
@@ -247,9 +289,39 @@ var _minimap_world_rect: Rect2 = Rect2()
 var _minimap_viewport_size: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
+	# --- MENU ARBRE ---
+	if menu_arbre:
+		menu_arbre.hide()
+	if btn_build_arbre:
+		btn_build_arbre.pressed.connect(_on_menu_arbre_pressed)
+		_style_button(btn_build_arbre, Color.html("#2E7D32"))
+		btn_build_arbre.custom_minimum_size = Vector2(200.0, 32.0)
+	if btn_arbre_vert:
+		btn_arbre_vert.pressed.connect(func():
+			_start_building_process_with_co2("arbre_1")
+			menu_arbre.hide()
+		)
+	if btn_arbre_jaune:
+		btn_arbre_jaune.pressed.connect(func():
+			_start_building_process_with_co2("arbre_2")
+			menu_arbre.hide()
+		)
+	if btn_arbre_rouge:
+		btn_arbre_rouge.pressed.connect(func():
+			_start_building_process_with_co2("arbre_3")
+			menu_arbre.hide()
+		)
+	if btn_arbre_bleu:
+		btn_arbre_bleu.pressed.connect(func():
+			_start_building_process_with_co2("arbre_4")
+			menu_arbre.hide()
+		)
+	_setup_arbre_button_icons()
+
 	btn_build_entrepot.pressed.connect(func():
 		_start_building_process("entrepot")
 	)
+
 	_ensure_input_actions()
 	_style_hud()
 	build_menu_container.offset_top = -350.0
@@ -268,19 +340,12 @@ func _ready() -> void:
 		ContractManager.contract_failed.connect(_on_contract_failed)
 	if orders_panel:
 		orders_panel.hide()
-
-	# On s'assure que le menu est caché au démarrage
 	if menu_belt:
 		menu_belt.hide()
-	
-	# Connexion aux signaux du TimeManager
+
 	TimeManager.time_changed.connect(_on_time_changed)
 	TimeManager.day_changed.connect(_on_day_changed)
-	
-	
-	
-	
-	# Exemple pour vos courbes (Curves)
+
 	if curve_top:
 		curve_top.pressed.connect(func():
 			_start_building_process("curve_top")
@@ -341,49 +406,37 @@ func _ready() -> void:
 		_update_money_display()
 		_update_co2_display()
 
-	# --- PANNEAU ENTITÉ ---
 	_entity_panel = ENTITY_PANEL_SCENE.instantiate()
 	add_child(_entity_panel)
 	_warehouse_panel = preload("res://scene/entrepot_panel.tscn").instantiate()
 	add_child(_warehouse_panel)
-	
-	# Boutons de contrôle du temps
+
 	btn_pause.pressed.connect(func(): TimeManager.time_speed = 0.0)
 	btn_x1.pressed.connect(func(): TimeManager.time_speed = 1.0)
 	btn_x2.pressed.connect(func(): TimeManager.time_speed = 2.0)
 	btn_x4.pressed.connect(func(): TimeManager.time_speed = 4.0)
-	
-	# Initialisation avec les valeurs actuelles au lancement
+
 	_update_day_display(TimeManager.current_day)
-	
-	# Calculer manuellement l'heure pour la toute première frame
 	var hour: int = int(TimeManager.current_time)
 	var minute: int = int((TimeManager.current_time - hour) * 60)
 	_update_time_display(hour, minute)
 	_update_session_overview()
 
-	# --- CORRECTION CRITIQUE : _bind_runtime_managers() AVANT les connexions qui en dépendent ---
 	_bind_runtime_managers()
 	_setup_minimap()
 	_setup_order_panel()
 
-	# --- GESTION DU MENU DE CONSTRUCTION ---
-	# 1. Cliquer sur "Construction" affiche ou masque le conteneur
 	btn_toggle_orders.pressed.connect(_toggle_orders_panel)
 	btn_toggle_session_overview.pressed.connect(_toggle_session_overview)
 	btn_toggle_build_menu.pressed.connect(_toggle_build_menu)
 
-	# 2. Les sous-boutons lancent la construction
 	btn_build_factory.pressed.connect(func():
 		_start_building_process("factory")
 	)
-	
 	btn_build_belt.pressed.connect(_on_menu_belt_pressed)
-	
 	btn_build_turbine.pressed.connect(func():
 		_start_building_process("turbine")
 	)
-
 	btn_build_miner.pressed.connect(func():
 		_start_building_process("miner")
 	)
@@ -394,7 +447,7 @@ func _ready() -> void:
 	_style_button(btn_build_turbine, Color.html("#4F8F5B"))
 	_style_button(btn_build_factory, Color.html("#A66A3F"))
 	_style_button(btn_build_miner, Color.html("#D4A017"))
-	
+
 	btn_build_belt.custom_minimum_size = Vector2(200.0, 32.0)
 	btn_build_turbine.custom_minimum_size = Vector2(200.0, 32.0)
 	btn_build_factory.custom_minimum_size = Vector2(200.0, 32.0)
@@ -403,9 +456,7 @@ func _ready() -> void:
 	btn_build_entrepot.custom_minimum_size = Vector2(200.0, 32.0)
 	_style_button(btn_build_entrepot, Color.html("#69558C"))
 
-
-
-		# --- BOUTON MODE DESTRUCTION (toggle) ---
+	# --- BOUTON MODE DESTRUCTION ---
 	var destroy_button: Button = Button.new()
 	destroy_button.name = "BtnDestroyMode"
 	destroy_button.text = "Mode destruction"
@@ -417,7 +468,6 @@ func _ready() -> void:
 		build_menu_container.add_child(destroy_button)
 	else:
 		add_child(destroy_button)
-
 	destroy_button.toggled.connect(func(pressed: bool) -> void:
 		var bm = get_tree().current_scene.find_child("BuildingManager", true, false)
 		if bm:
@@ -429,7 +479,6 @@ func _ready() -> void:
 			elif not pressed and bm.has_method("stop_destroying"):
 				bm.stop_destroying()
 	)
-
 	if _building_manager != null and _building_manager.has_signal("destroy_mode_changed"):
 		_building_manager.destroy_mode_changed.connect(func(enabled: bool) -> void:
 			destroy_button.set_pressed_no_signal(enabled)
@@ -437,8 +486,7 @@ func _ready() -> void:
 	if _building_manager != null:
 		destroy_button.set_pressed_no_signal(_building_manager.is_destroying)
 
-
-	# --- BOUTON AFFICHAGE ZONE ÉLECTRIQUE ---
+	# --- BOUTON ZONE ÉLECTRIQUE ---
 	var elec_overlay_button: Button = Button.new()
 	elec_overlay_button.name = "BtnElectricityOverlay"
 	elec_overlay_button.text = "Zone électricité"
@@ -458,15 +506,14 @@ func _ready() -> void:
 
 	_update_contracts_display()
 
-	
 func _on_contract_arrived(contract: Dictionary) -> void:
 	_update_contracts_display()
 	var msg := "📦 Nouveau contrat : %s x%d\n+%.0f€ si livré avant J-%d" % [
-	String(contract.get("resource_label", "?")),
-	int(contract.get("quantity", 0)),
-	float(contract.get("reward", 0.0)),
-	int(contract.get("day_deadline", 0)) - int(contract.get("day_issued", 0))
-]
+		String(contract.get("resource_label", "?")),
+		int(contract.get("quantity", 0)),
+		float(contract.get("reward", 0.0)),
+		int(contract.get("day_deadline", 0)) - int(contract.get("day_issued", 0))
+	]
 	if _contract_just_failed:
 		await get_tree().create_timer(4.8).timeout
 		_contract_just_failed = false
@@ -485,7 +532,7 @@ func _on_contract_failed(contract: Dictionary) -> void:
 	_update_contracts_display()
 	_contract_just_failed = true
 	_show_hint_toast("✗ Contrat échoué : vous perdez %.0f €" % float(contract["penalty"]))
-	
+
 func _show_hint_toast(message: String) -> void:
 	var toast := PanelContainer.new()
 	toast.set_anchors_preset(Control.PRESET_CENTER)
@@ -514,7 +561,7 @@ func _show_hint_toast(message: String) -> void:
 	tween.tween_interval(4.0)
 	tween.tween_property(toast, "modulate:a", 0.0, 0.8)
 	tween.tween_callback(toast.queue_free)
-	
+
 func _style_hud() -> void:
 	UITheme.style_label(day_label, "caption")
 	UITheme.style_label(time_label, "metric")
@@ -555,7 +602,6 @@ func _build_shortcut_bar() -> void:
 	bar.anchor_bottom = 1.0
 	bar.offset_top = -32.0
 	bar.offset_bottom = -20.0
-	
 	var bar_style := StyleBoxFlat.new()
 	bar_style.bg_color = UITheme.SURFACE_GLASS
 	bar_style.bg_color.a = 0.82
@@ -564,12 +610,10 @@ func _build_shortcut_bar() -> void:
 	bar_style.content_margin_top = 2.0
 	bar_style.content_margin_bottom = 2.0
 	bar.add_theme_stylebox_override("panel", bar_style)
-
 	var hbox := HBoxContainer.new()
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox.add_theme_constant_override("separation", 6)
 	bar.add_child(hbox)
-
 	var shortcuts: Array = [
 		["Échap", "Menu Pause"],
 		["B", "Construction"],
@@ -578,7 +622,6 @@ func _build_shortcut_bar() -> void:
 		["P", "Pause temps"],
 		["E", "Sauvegarde rapide"],
 	]
-
 	for i in shortcuts.size():
 		if i > 0:
 			var sep := Label.new()
@@ -586,9 +629,7 @@ func _build_shortcut_bar() -> void:
 			sep.add_theme_font_size_override("font_size", 16)
 			sep.add_theme_color_override("font_color", UITheme.BORDER_STRONG)
 			hbox.add_child(sep)
-
 		var entry: Array = shortcuts[i]
-
 		var key_panel := PanelContainer.new()
 		var key_style := StyleBoxFlat.new()
 		key_style.bg_color = UITheme.SURFACE_DARK
@@ -607,22 +648,18 @@ func _build_shortcut_bar() -> void:
 		key_style.content_margin_bottom = 2.0
 		key_panel.add_theme_stylebox_override("panel", key_style)
 		hbox.add_child(key_panel)
-
 		var key_label := Label.new()
 		key_label.text = entry[0]
 		key_label.add_theme_font_size_override("font_size", 13)
 		key_label.add_theme_color_override("font_color", UITheme.ACCENT_GOLD)
 		key_panel.add_child(key_label)
-
 		var desc_label := Label.new()
 		desc_label.text = entry[1]
 		desc_label.add_theme_font_size_override("font_size", 14)
 		desc_label.add_theme_color_override("font_color", UITheme.INK_MUTED)
 		hbox.add_child(desc_label)
-
 	add_child(bar)
-	
-		
+
 func _style_order_panels() -> void:
 	for button in [
 		btn_order_mode_import,
@@ -744,13 +781,11 @@ func _show_toast(message: String, border_color: Color = UITheme.BORDER_STRONG) -
 	style.content_margin_bottom = 6.0
 	toast.add_theme_stylebox_override("panel", style)
 	add_child(toast)
-
 	var label := Label.new()
 	label.text = message
 	label.add_theme_font_size_override("font_size", 14)
 	label.add_theme_color_override("font_color", UITheme.INK_DARK)
 	toast.add_child(label)
-
 	var tween := create_tween()
 	tween.tween_interval(1.5)
 	tween.tween_property(toast, "modulate:a", 0.0, 0.5)
@@ -780,7 +815,7 @@ func _update_contracts_display() -> void:
 	if ContractManager.completed_streak > 1:
 		streak_text = " 🔥x%d" % ContractManager.completed_streak
 	contracts_label.text = "Contrats :  " + "   |   ".join(parts) + streak_text
-	
+
 func _start_building_process(building_type: String) -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	if building_manager:
@@ -799,13 +834,11 @@ func _start_building_process(building_type: String) -> void:
 			data.get("footprint_offsets", [Vector2i.ZERO]),
 			data.get("preview_scale", Vector2.ONE)
 		)
-		# Masquer les panneaux entité quand on entre en mode construction
 		if _entity_panel:
 			_entity_panel.hide()
 		if _warehouse_panel:
 			_warehouse_panel.hide()
 
-# --- CORRECTION : aiguillage correct entre les deux panneaux ---
 func open_entity_panel(entity: Entity) -> void:
 	_on_entity_selected(entity)
 
@@ -814,13 +847,10 @@ func _on_entity_selected(entity) -> void:
 		if _entity_panel: _entity_panel.hide()
 		if _warehouse_panel: _warehouse_panel.hide()
 		return
-
 	if entity is WarehouseEntity:
-		# C'est un entrepôt : on cache l'entity panel et on ouvre le warehouse panel
 		if _entity_panel: _entity_panel.hide()
 		if _warehouse_panel: _warehouse_panel.setup(entity)
 	elif entity is Entity:
-		# C'est une usine/turbine/tapis : on cache le warehouse panel et on ouvre l'entity panel
 		if _warehouse_panel: _warehouse_panel.hide()
 		if _entity_panel: _entity_panel.setup(entity)
 
@@ -841,14 +871,12 @@ func _setup_minimap() -> void:
 func _update_minimap() -> void:
 	if minimap_overlay == null:
 		return
-
 	var main_camera: Camera2D = _get_main_camera()
 	var world_rect: Rect2 = _get_minimap_world_rect()
 	if world_rect.size.x <= 0.0 or world_rect.size.y <= 0.0 or main_camera == null:
 		if minimap_overlay.has_method("clear_state"):
 			minimap_overlay.call("clear_state")
 		return
-
 	_sync_minimap_viewport_size()
 	_sync_minimap_camera(world_rect)
 	var camera_rect: Rect2 = _get_camera_visible_rect(main_camera)
@@ -866,7 +894,6 @@ func _get_minimap_world_rect() -> Rect2:
 	var current_scene: Node = get_tree().current_scene
 	if current_scene == null:
 		return _minimap_world_rect
-
 	var floor_node: Node = current_scene.find_child("Floor", true, false)
 	if floor_node and floor_node.has_method("get_loaded_chunk_world_bounds"):
 		var chunk_world_rect_variant: Variant = floor_node.call("get_loaded_chunk_world_bounds")
@@ -995,7 +1022,7 @@ func _on_time_changed(hour: int, minute: int) -> void:
 func _on_day_changed(day: int) -> void:
 	_update_day_display(day)
 	_update_session_overview()
-	_update_contracts_display() 
+	_update_contracts_display()
 
 func _update_time_display(hour: int, minute: int) -> void:
 	time_label.text = "%02d:%02d" % [hour, minute]
@@ -1027,7 +1054,7 @@ func _close_all_panels() -> void:
 		if _building_manager:
 			_building_manager.stop_building()
 		build_menu_container.hide()
-		menu_belt.hide()  
+		menu_belt.hide()
 
 func _toggle_session_overview() -> void:
 	if session_overview_panel == null:
@@ -1055,17 +1082,15 @@ func _toggle_build_menu() -> void:
 	if will_open:
 		build_menu_container.show()
 	else:
-		menu_belt.hide()  
-	
+		menu_belt.hide()
+
 func _update_session_overview() -> void:
 	if session_overview_panel == null:
 		return
-
 	overview_day_value.text = "Jour %d" % TimeManager.current_day
 	var hour: int = int(TimeManager.current_time)
 	var minute: int = int((TimeManager.current_time - hour) * 60)
 	overview_time_value.text = "%02d:%02d" % [hour, minute]
-
 	if GameManager:
 		overview_credits_value.text = _format_money_value(GameManager.credits)
 		overview_co2_value.text = _format_rate_value(GameManager.co2_emissions, "g/min")
@@ -1074,7 +1099,6 @@ func _update_session_overview() -> void:
 		overview_credits_value.text = "N/A"
 		overview_co2_value.text = "Placeholder"
 		overview_electricity_value.text = "Placeholder"
-
 	var machine_count: int = 0
 	var active_machine_count: int = 0
 	var production_rate_total: float = 0.0
@@ -1087,7 +1111,6 @@ func _update_session_overview() -> void:
 			if entity.is_active:
 				active_machine_count += 1
 			production_rate_total += entity.production_rate
-
 	overview_machines_value.text = str(machine_count)
 	overview_active_machines_value.text = "%d / %d" % [active_machine_count, machine_count]
 	if machine_count > 0:
@@ -1099,7 +1122,6 @@ func _update_session_overview() -> void:
 func _bind_runtime_managers() -> void:
 	_building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
 	_delivery_manager = get_tree().current_scene.find_child("DeliveryManager", true, false)
-
 	if _building_manager:
 		if _building_manager.has_signal("delivery_point_selected") and not _building_manager.delivery_point_selected.is_connected(_on_delivery_point_selected):
 			_building_manager.delivery_point_selected.connect(_on_delivery_point_selected)
@@ -1107,10 +1129,8 @@ func _bind_runtime_managers() -> void:
 			_building_manager.delivery_point_error.connect(_on_delivery_point_error)
 		if _building_manager.has_signal("delivery_point_selection_changed") and not _building_manager.delivery_point_selection_changed.is_connected(_on_delivery_point_selection_changed):
 			_building_manager.delivery_point_selection_changed.connect(_on_delivery_point_selection_changed)
-		# --- CORRECTION CRITIQUE : connexion du signal entity_selected ici, après que _building_manager est défini ---
 		if _building_manager.has_signal("entity_selected") and not _building_manager.entity_selected.is_connected(_on_entity_selected):
 			_building_manager.entity_selected.connect(_on_entity_selected)
-
 	if _delivery_manager:
 		if _delivery_manager.has_signal("order_submitted") and not _delivery_manager.order_submitted.is_connected(_on_order_submitted):
 			_delivery_manager.order_submitted.connect(_on_order_submitted)
@@ -1126,7 +1146,6 @@ func _bind_runtime_managers() -> void:
 func _setup_order_panel() -> void:
 	if orders_panel == null or order_resource_selector == null or order_quantity_spinbox == null:
 		return
-
 	order_resource_selector.item_selected.connect(_on_order_resource_selected)
 	order_quantity_spinbox.value_changed.connect(_on_order_quantity_changed)
 	btn_order_mode_import.pressed.connect(func(): _set_order_mode(ORDER_MODE_IMPORT))
@@ -1142,7 +1161,6 @@ func _setup_order_panel() -> void:
 func _update_order_panel() -> void:
 	if orders_panel == null:
 		return
-
 	var resource_id: String = _get_selected_resource_id()
 	var selected_quantity: int = maxi(1, int(order_quantity_spinbox.value)) if order_quantity_spinbox else 1
 	var unit_cost: float = 0.0
@@ -1223,7 +1241,7 @@ func _set_order_mode(order_mode: String) -> void:
 func _on_delivery_point_error(message: String) -> void:
 	_show_hint_toast(message)
 	orders_status_label.text = message
-	
+
 func _refresh_orderable_resources() -> void:
 	if order_resource_selector == null:
 		return
@@ -1325,7 +1343,7 @@ func _on_submit_order_pressed() -> void:
 		order_delivery_preview_changed.emit({})
 		orders_status_label.text = "Commande envoyee. Le camion arrive des que possible." if _order_mode == ORDER_MODE_IMPORT else "Contrat d'export lance. Paiement a l'arrivee du camion."
 		_update_order_panel()
-		orders_panel.hide() 
+		orders_panel.hide()
 
 func _on_delivery_point_selected(cell_pos: Vector2i, world_pos: Vector2) -> void:
 	var point_state: Dictionary = _make_delivery_point_state(cell_pos, world_pos)
@@ -1435,7 +1453,6 @@ func _format_money_value(amount: float) -> String:
 	var formatted_money: String = String.num(amount, 2)
 	if formatted_money.ends_with(".00"):
 		formatted_money = formatted_money.trim_suffix(".00")
-
 	var parts: PackedStringArray = formatted_money.split(".")
 	var int_part: String = parts[0]
 	var result: String = ""
@@ -1445,10 +1462,8 @@ func _format_money_value(amount: float) -> String:
 			result = " " + result
 		result = int_part[i] + result
 		count += 1
-
 	if parts.size() > 1:
 		result += "." + parts[1]
-
 	return result + " €"
 
 func _format_rate_value(value: float, unit: String) -> String:
@@ -1465,13 +1480,12 @@ func _ensure_input_actions() -> void:
 	_ensure_action_with_keys(ACTION_TOGGLE_ORDER_PANEL, [KEY_TAB])
 	_ensure_action_with_keys(ACTION_TOGGLE_SESSION_OVERVIEW, [KEY_I])
 	_ensure_action_with_keys(ACTION_TOGGLE_BUILD_MENU, [KEY_B])
-	_ensure_action_with_keys(&"hud_quick_save", [KEY_E])        
+	_ensure_action_with_keys(&"hud_quick_save", [KEY_E])
 	_ensure_action_with_keys(&"hud_toggle_pause", [KEY_P])
 
 func _ensure_action_with_keys(action_name: StringName, keycodes: Array[int]) -> void:
 	if not InputMap.has_action(action_name):
 		InputMap.add_action(action_name)
-
 	var existing_events: Array[InputEvent] = InputMap.action_get_events(action_name)
 	for keycode in keycodes:
 		if _has_physical_key(existing_events, keycode):
@@ -1489,7 +1503,6 @@ func _has_physical_key(events: Array[InputEvent], keycode: int) -> bool:
 	return false
 
 func _setup_belt_button_icons() -> void:
-	# Associe chaque bouton du sous-menu au sprite correspondant dans buildings_data
 	var belt_button_map: Dictionary = {
 		belt_east:     "belt_east",
 		belt_south:    "belt_south",
@@ -1518,13 +1531,19 @@ func _setup_belt_button_icons() -> void:
 		btn.icon = icon_tex
 		btn.expand_icon = true
 		btn.custom_minimum_size = Vector2(56, 56)
-		btn.text = ""  # supprime le texte pour ne garder que l'icône
-		
+		btn.text = ""
+
 func _on_menu_belt_pressed() -> void:
 	if menu_belt.visible:
 		menu_belt.hide()
 	else:
 		menu_belt.show()
+
+func _on_menu_arbre_pressed() -> void:
+	if menu_arbre.visible:
+		menu_arbre.hide()
+	else:
+		menu_arbre.show()
 
 func _on_undo_build_pressed() -> void:
 	var building_manager = get_tree().current_scene.find_child("BuildingManager", true, false)
@@ -1533,3 +1552,42 @@ func _on_undo_build_pressed() -> void:
 
 func _style_button(button: Button, base_color: Color, text_color: Color = Color.WHITE) -> void:
 	UITheme.style_button(button, base_color, text_color, false, true)
+
+func _start_building_process_with_co2(building_id: String) -> void:
+	var data: Dictionary = buildings_data.get(building_id, {})
+	var bm = get_tree().current_scene.find_child("BuildingManager", true, false)
+	if bm:
+		if bm.has_method("set_pending_co2_absorption"):
+			bm.set_pending_co2_absorption(float(data.get("co2_absorption", 2.0)))
+		if bm.has_method("set_pending_arbre_variant"):
+			bm.set_pending_arbre_variant(data.get("arbre_variant", "vert"))
+	_start_building_process(building_id)
+
+func _setup_arbre_button_icons() -> void:
+	var arbre_button_map: Dictionary = {
+		btn_arbre_vert:  "arbre_1",
+		btn_arbre_jaune: "arbre_2",
+		btn_arbre_rouge: "arbre_3",
+		btn_arbre_bleu:  "arbre_4",
+	}
+	for btn in arbre_button_map:
+		if btn == null:
+			continue
+		var key: String = arbre_button_map[btn]
+		if not buildings_data.has(key):
+			continue
+		var data = buildings_data[key]
+		btn.icon = data["texture"]
+		btn.expand_icon = false                                        # ← icône taille fixe
+		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		btn.custom_minimum_size = Vector2(80, 90)
+		btn.add_theme_font_size_override("font_size", 10)
+		btn.text = "%s | -%.0fg CO2" % [
+	_format_money_value(float(data.get("cost", 0.0))),
+	float(data.get("co2_absorption", 0.0))
+]
+		btn.add_theme_font_size_override("font_size", 12)
+		btn.add_theme_color_override("font_color", UITheme.ACCENT_GOLD) # ← texte doré
+		btn.add_theme_color_override("font_pressed_color", Color.WHITE)
+		btn.tooltip_text = "-%.0fg CO2/min" % float(data.get("co2_absorption", 0.0))
