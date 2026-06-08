@@ -24,9 +24,8 @@ const _ENTITY_SCENES: Dictionary = {
 	
 }
 
-# --- MODIFICATION ICI : Ajout du lien vers le TileMap Isométrique ---
-@onready var floor_tilemap: TileMapLayer = $"../TileMapLayer" # Si vous êtes sur Godot 4.2 ou moins, changez "TileMapLayer" en "TileMap"
-# --------------------------------------------------------------------
+# Le niveau expose actuellement le sol sous le nom "Floor".
+@onready var floor_tilemap: TileMapLayer = get_node_or_null("../Floor") as TileMapLayer
 
 @export var cell_size: int = 32 # Gardé au cas où, mais sera ignoré si floor_tilemap est assigné
 @export var buildings_node: Node2D # Nœud parent pour regrouper les usines placées

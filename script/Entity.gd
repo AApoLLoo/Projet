@@ -416,16 +416,7 @@ func _get_cycle_duration() -> float:
 	if current_recipe.is_empty():
 		return 0.0
 	var base_duration: float = maxf(0.1, float(current_recipe.get("production_time", 1.0)))
-	var settings: Dictionary = SettingsManager.get_settings()
-	# Gravité : 0.1→30.0, défaut 9.8 → factor linéaire 0.5 (rapide) à 2.0 (lent)
-	var gravity: float = SettingsManager._to_float(settings.get("physics_gravity", 9.8), 9.8)
-	var gravity_t: float = (gravity - 0.1) / (30.0 - 0.1)
-	var gravity_factor: float = lerpf(0.5, 2.0, gravity_t)
-	# Friction : 0.0→5.0, défaut 1.0 → factor linéaire 0.5 (glissant) à 2.0 (résistant)
-	var friction: float = SettingsManager._to_float(settings.get("physics_friction", 1.0), 1.0)
-	var friction_t: float = friction / 5.0
-	var friction_factor: float = lerpf(0.5, 2.0, friction_t)
-	var adjusted_duration: float = base_duration * gravity_factor * friction_factor
+	var adjusted_duration: float = base_duration * _get_gravity_production_duration_factor()
 	var actual_rate = maxf(production_rate * EntityManager.power_satisfaction, 0.01)
 	return adjusted_duration / actual_rate
 
@@ -534,7 +525,8 @@ func _refresh_runtime_state() -> void:
 func _apply_wear_after_cycle() -> void:
 	if is_broken:
 		return
-	health = clampf(health - wear_per_cycle, 0.0, max_health)
+	var wear_amount: float = wear_per_cycle * _get_temperature_wear_factor()
+	health = clampf(health - wear_amount, 0.0, max_health)
 	if health <= 0.0:
 		_set_broken(true)
 		return
@@ -570,6 +562,24 @@ func _update_production_bar() -> void:
 		_production_bar.modulate = Color(0.32, 1.0, 0.55)
 	else:
 		_production_bar.modulate = Color(0.95, 0.76, 0.22)
+
+func _get_gravity_production_duration_factor() -> float:
+	var settings: Dictionary = SettingsManager.get_settings()
+	var gravity: float = SettingsManager._to_float(settings.get("physics_gravity", 9.8), 9.8)
+	if gravity <= 9.8:
+		var low_gravity_t: float = inverse_lerp(0.1, 9.8, gravity)
+		return lerpf(0.6, 1.0, low_gravity_t)
+	var high_gravity_t: float = inverse_lerp(9.8, 30.0, gravity)
+	return lerpf(1.0, 1.9, high_gravity_t)
+
+func _get_temperature_wear_factor() -> float:
+	var settings: Dictionary = SettingsManager.get_settings()
+	var temperature: float = SettingsManager._to_float(settings.get("physics_temperature", 20.0), 20.0)
+	if temperature <= 20.0:
+		var cool_temp_t: float = inverse_lerp(-50.0, 20.0, temperature)
+		return lerpf(0.65, 1.0, cool_temp_t)
+	var hot_temp_t: float = inverse_lerp(20.0, 150.0, temperature)
+	return lerpf(1.0, 2.2, hot_temp_t)
 
 # Vérifie si l'entité peut recevoir cet objet spécifique
 
