@@ -23,7 +23,7 @@ const STEPS: Array[Dictionary] = [
 		"body":
 			"Tu hérites d'une usine à construire de zéro.\n\n" +
 			"Ton objectif est de produire, transformer et vendre des ressources afin de développer une industrie rentable.\n\n" +
-			"Tu démarres avec [b]12 500 €[/b]. Gère bien ton budget !",
+			"Tu démarres avec [b]3 000 €[/b]. Gère bien ton budget !",
 		"objective": "",
 		"check": "",
 		"skip": true,
