@@ -72,6 +72,6 @@ script = ExtResource("1_conveyorentity")
 conveyor_kind = "belt_east"
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=7002]
-scale = Vector2(1.75, 1.736)
+scale = Vector2(2, 1.984)
 sprite_frames = SubResource("SpriteFrames_belteast")
 autoplay = "default"

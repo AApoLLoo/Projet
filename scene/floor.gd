@@ -91,8 +91,8 @@ func _visible_chunks() -> Dictionary:
 func _pick_random_tile(rng: RandomNumberGenerator) -> Vector2i:
 	var weighted_tiles := [
 		{"tile": Vector2i(0, 0), "weight": 70},  # 70% du temps
-		{"tile": Vector2i(1, 0), "weight": 10},  # 20% du temps
-		{"tile": Vector2i(2, 0), "weight": 10},  # 10% du temps
+		{"tile": Vector2i(1, 0), "weight":5},  # 20% du temps
+		{"tile": Vector2i(2, 0), "weight":5},  # 10% du temps
 	]
 	
 	var total := 0

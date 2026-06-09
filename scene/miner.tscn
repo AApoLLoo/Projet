@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://miner_entity_001"]
+[gd_scene format=3 uid="uid://bbv2cq0gkrbv1"]
 
 [ext_resource type="Script" path="res://script/MinerEntity.gd" id="1_minerentity"]
-[ext_resource type="Texture2D" path="res://asset/Miner/miner-one/north-east/mining-animation.png" id="2_minereanim"]
+[ext_resource type="Texture2D" uid="uid://d3m854coiexr" path="res://asset/Miner/miner-one/north-east/mining-animation.png" id="2_minereanim"]
 [ext_resource type="PackedScene" path="res://scene/white_puff_vfx.tscn" id="3_whitepuffvfx"]
 [ext_resource type="PackedScene" path="res://scene/black_smoke_vfx.tscn" id="4_blacksmokevfx"]
 
@@ -75,7 +75,7 @@ script = ExtResource("1_minerentity")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1002]
 y_sort_enabled = true
-scale = Vector2(0.9, 0.9)
+scale = Vector2(1.5, 1.5)
 sprite_frames = SubResource("SpriteFrames_miner")
 autoplay = "default"
 

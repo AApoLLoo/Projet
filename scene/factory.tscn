@@ -10,7 +10,6 @@ z_index = 5
 script = ExtResource("1_factoryentity")
 
 [node name="Tuile" type="Sprite2D" parent="." unique_id=1945434516]
-scale = Vector2(0.55, 0.55)
 texture = ExtResource("1_52rbu")
 
 [node name="ProductionBar" type="ProgressBar" parent="."]
