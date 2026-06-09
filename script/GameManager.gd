@@ -19,7 +19,7 @@ const MAX_EXPORT_HISTORY_ENTRIES: int = 5
 @export var credits_loss_threshold: float = -1.0
 
 # Ressources globales (Maquette HUD)
-var credits: float = 12500.0
+var credits: float = 3000.0
 var energy_usage: float = 0.0  # en kW (positif = consommation nette, négatif = production nette)
 var co2_emissions: float = 0.0 # en g/min
 const CO2_LIMIT: float = 30.0

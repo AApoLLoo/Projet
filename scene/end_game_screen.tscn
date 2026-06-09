@@ -1,11 +1,11 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://cs6jq81o13ttb"]
 
-[ext_resource type="Script" path="res://script/EndGameScreen.gd" id="1_4r3m1"]
+[ext_resource type="Script" uid="uid://dsh6s7tqvkaei" path="res://script/EndGameScreen.gd" id="1_4r3m1"]
 
-[node name="EndGameScreen" type="CanvasLayer"]
+[node name="EndGameScreen" type="CanvasLayer" unique_id=545196403]
 script = ExtResource("1_4r3m1")
 
-[node name="Root" type="Control" parent="."]
+[node name="Root" type="Control" parent="." unique_id=414388178]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -14,7 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Backdrop" type="ColorRect" parent="Root"]
+[node name="Backdrop" type="ColorRect" parent="Root" unique_id=648044363]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,7 +23,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0431373, 0.0784314, 0.121569, 0.78)
 
-[node name="CenterContainer" type="CenterContainer" parent="Root"]
+[node name="CenterContainer" type="CenterContainer" parent="Root" unique_id=1429476115]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,50 +31,50 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="PanelContainer" parent="Root/CenterContainer"]
+[node name="Panel" type="PanelContainer" parent="Root/CenterContainer" unique_id=2064831681]
 custom_minimum_size = Vector2(520, 0)
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="Root/CenterContainer/Panel"]
+[node name="MarginContainer" type="MarginContainer" parent="Root/CenterContainer/Panel" unique_id=411469012]
 layout_mode = 2
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 24
 
-[node name="Content" type="VBoxContainer" parent="Root/CenterContainer/Panel/MarginContainer"]
+[node name="Content" type="VBoxContainer" parent="Root/CenterContainer/Panel/MarginContainer" unique_id=1159712970]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Eyebrow" type="Label" parent="Root/CenterContainer/Panel/MarginContainer/Content"]
+[node name="Eyebrow" type="Label" parent="Root/CenterContainer/Panel/MarginContainer/Content" unique_id=1429166442]
 layout_mode = 2
 text = "Simulation completee"
 
-[node name="Title" type="Label" parent="Root/CenterContainer/Panel/MarginContainer/Content"]
+[node name="Title" type="Label" parent="Root/CenterContainer/Panel/MarginContainer/Content" unique_id=489938252]
 layout_mode = 2
 text = "Victoire !"
 
-[node name="Message" type="Label" parent="Root/CenterContainer/Panel/MarginContainer/Content"]
+[node name="Message" type="Label" parent="Root/CenterContainer/Panel/MarginContainer/Content" unique_id=1702892358]
 layout_mode = 2
-autowrap_mode = 3
 text = "Objectif atteint."
-
-[node name="Summary" type="Label" parent="Root/CenterContainer/Panel/MarginContainer/Content"]
-layout_mode = 2
 autowrap_mode = 3
-text = "Jour 1 | Credits: 0"
 
-[node name="Actions" type="HBoxContainer" parent="Root/CenterContainer/Panel/MarginContainer/Content"]
+[node name="Summary" type="Label" parent="Root/CenterContainer/Panel/MarginContainer/Content" unique_id=1212395452]
+layout_mode = 2
+text = "Jour 1 | Credits: 0"
+autowrap_mode = 3
+
+[node name="Actions" type="HBoxContainer" parent="Root/CenterContainer/Panel/MarginContainer/Content" unique_id=2050585130]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="RestartButton" type="Button" parent="Root/CenterContainer/Panel/MarginContainer/Content/Actions"]
+[node name="RestartButton" type="Button" parent="Root/CenterContainer/Panel/MarginContainer/Content/Actions" unique_id=535531329]
 custom_minimum_size = Vector2(180, 46)
 layout_mode = 2
 text = "Recommencer"
 
-[node name="MenuButton" type="Button" parent="Root/CenterContainer/Panel/MarginContainer/Content/Actions"]
+[node name="MenuButton" type="Button" parent="Root/CenterContainer/Panel/MarginContainer/Content/Actions" unique_id=346384454]
 custom_minimum_size = Vector2(180, 46)
 layout_mode = 2
 text = "Menu principal"
