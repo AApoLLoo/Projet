@@ -1484,11 +1484,11 @@ func _on_delivery_queue_changed(queue_size: int) -> void:
 		btn_toggle_orders.text = "Commandes"
 
 func _update_build_button_prices() -> void:
-	_set_build_button_price(btn_build_belt, "Convoyeurs", "belt_east")
-	_set_build_button_price(btn_build_turbine, "Energie", "turbine")
-	_set_build_button_price(btn_build_factory, "Production", "factory")
+	_set_build_button_price(btn_build_belt, "Convoyeur", "belt_east")
+	_set_build_button_price(btn_build_turbine, "Turbine", "turbine")
+	_set_build_button_price(btn_build_factory, "Usine", "factory")
 	_set_build_button_price(btn_build_entrepot, "Entrepot", "entrepot")
-	_set_build_button_price(btn_build_miner, "Extraction", "miner")
+	_set_build_button_price(btn_build_miner, "Extracteur", "miner")
 
 func _set_build_button_price(button: Button, label: String, building_id: String) -> void:
 	if button == null:
