@@ -27,7 +27,7 @@ const STEPS: Array[Dictionary] = [
 		"objective": "",
 		"check": "",
 		"skip": true,
-		"reveals": ["day_time"],
+		"reveals": ["day_time","resources"],
 		"highlight": "",
 	},
 	{
@@ -39,7 +39,7 @@ const STEPS: Array[Dictionary] = [
 		"objective": "Ouvrir le menu Construction",
 		"check": "build_menu_opened",
 		"skip": false,
-		"reveals": ["speed_btns", "day_time", "build_btn"],
+		"reveals": ["speed_btns", "day_time","resources", "build_btn"],
 		"highlight": "build_btn",
 	},
 
@@ -53,7 +53,7 @@ const STEPS: Array[Dictionary] = [
 		"objective": "Poser au moins 1 Extracteur",
 		"check": "has_miner",
 		"skip": false,
-		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu"],
+		"reveals": ["speed_btns", "day_time", "build_btn", "resources","build_menu"],
 		"highlight": "build_btn",
 	},
 
@@ -68,7 +68,7 @@ const STEPS: Array[Dictionary] = [
 		"objective": "Poser au moins 1 Turbine",
 		"check": "has_turbine",
 		"skip": false,
-		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu"],
+		"reveals": ["speed_btns", "day_time", "build_btn", "resources","build_menu"],
 		"highlight": "build_btn",
 	},
 
@@ -82,7 +82,7 @@ const STEPS: Array[Dictionary] = [
 		"objective": "Poser au moins 1 Usine",
 		"check": "has_factory",
 		"skip": false,
-		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu"],
+		"reveals": ["speed_btns", "day_time", "build_btn", "resources","build_menu"],
 		"highlight": "build_btn",
 	},
 
@@ -96,7 +96,7 @@ const STEPS: Array[Dictionary] = [
 		"objective": "Placer au moins 3 tapis",
 		"check": "has_belts_3",
 		"skip": false,
-		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu"],
+		"reveals": ["speed_btns", "day_time", "build_btn","resources", "build_menu"],
 		"highlight": "build_btn",
 	},
 
@@ -112,7 +112,7 @@ const STEPS: Array[Dictionary] = [
 		"objective": "",
 		"check": "",
 		"skip": true,
-		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu", "resources"],
+		"reveals": ["speed_btns", "day_time", "build_btn", "resources","build_menu"],
 		"highlight": "resources",
 	},
 
@@ -128,7 +128,7 @@ const STEPS: Array[Dictionary] = [
 		"objective": "",
 		"check": "",
 		"skip": true,
-		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu", "resources", "co2"],
+		"reveals": ["speed_btns", "day_time", "build_btn", "resources","build_menu","co2"],
 		"highlight": "resources",
 	},
 
@@ -142,7 +142,7 @@ const STEPS: Array[Dictionary] = [
 		"objective": "Poser au moins 1 Entrepôt",
 		"check": "has_entrepot",
 		"skip": false,
-		"reveals": ["speed_btns", "day_time", "build_btn", "build_menu", "resources", "co2"],
+		"reveals": ["speed_btns", "day_time", "build_btn", "resources","build_menu", "co2"],
 		"highlight": "build_btn",
 	},
 
@@ -156,41 +156,28 @@ const STEPS: Array[Dictionary] = [
 		"objective": "Lancer une commande d'import",
 		"check": "has_imported",
 		"skip": false,
-		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn", "co2"],
+		"reveals": ["speed_btns", "day_time", "build_btn",  "minimap","resources", "orders_btn", "co2"],
 		"highlight": "orders_btn",
 	},
 
 	{
-		"tag": "Étape 10 — Export",
-		"title": "Exporter pour gagner de l'argent",
-		"body":
-			"Les produits fabriqués peuvent être vendus pour gagner des crédits.\n\n" +
-			"Onglet Export → choisis un produit → indique une quantité → valide.\n\n" +
-			"💡 Produire et vendre est la principale source de revenus du jeu.",
-		"objective": "Lancer un export",
-		"skip": true,
-		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn", "co2"],
-		"highlight": "orders_btn",
-	},
-
-	{
-		"tag": "Étape 11 — Contrats",
+		"tag": "Étape 10 — Contrats",
 		"title": "Remplis des contrats",
 		"body":
 			"Des contrats apparaissent régulièrement.\n\n" +
-			"Produis et livre les marchandises demandées avant la date limite.\n\n" +
+			"Produis et exporte (dans logistique) les marchandises demandées avant la date limite.\n\n" +
 			"Les contrats rapportent des bonus importants et accélèrent ta progression.\n\n"+
-			"Mais attention ! Si tu ne les remplis pas dans les temps tu auras une pénalité et tu perdras de l'argent...",
+			"Mais attention ! Si tu ne les remplis pas dans les temps, tu auras une pénalité et tu perdras de l'argent...",
 
 		"objective": "",
 		"check": "",
 		"skip": true,
-		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn", "co2"],
+		"reveals": ["speed_btns", "day_time", "build_btn", "resources", "minimap", "orders_btn", "co2", "contracts"],
 		"highlight": "",
 	},
 
 	{
-		"tag": "Étape 12 — Objectif final",
+		"tag": "Étape 11 — Objectif final",
 		"title": "Développe ton empire industriel",
 		"body":
 			"Ton objectif est de construire une usine toujours plus rentable.\n\n" +
@@ -201,29 +188,23 @@ const STEPS: Array[Dictionary] = [
 		"objective": "",
 		"check": "",
 		"skip": true,
-		"reveals": ["speed_btns", "day_time", "build_btn", "orders_btn", "overview_btn", "minimap", "resources", "co2", "build_menu"],
+		"reveals": ["speed_btns", "day_time", "build_btn", "orders_btn", "overview_btn", "minimap", "resources", "co2", "build_menu", "contracts"],
 		"highlight": "",
 	},
 
 	{
-		"tag": "Terminé !",
-		"title": "Tu es prêt à jouer 🎉",
-		"body":
-			"Tu maîtrises maintenant les bases :\n\n" +
-			"✓ Extraire\n" +
-			"✓ Produire\n" +
-			"✓ Transporter\n" +
-			"✓ Gérer l'énergie\n" +
-			"✓ Importer et exporter\n" +
-			"✓ Réduire le CO₂ grâce aux arbres\n\n" +
-			"Tout le HUD est maintenant débloqué.\n\n" +
-			"Construis la plus grande usine possible !",
-		"objective": "",
-		"check": "",
-		"skip": true,
-		"reveals": ["speed_btns", "day_time", "build_btn", "orders_btn", "overview_btn", "minimap", "resources", "co2", "build_menu"],
-		"highlight": "",
-	},
+	"tag": "Terminé !",
+	"title": "Tu es prêt à jouer 🎉",
+	"body":
+		"Tu maîtrises maintenant les bases :\n\n" +
+		"✓ Extraire\n" +
+		"✓ Produire\n" +
+		"✓ Transporter\n" +
+		"✓ Gérer l'énergie\n" +
+		"✓ Importer et exporter\n" +
+		"✓ Réduire le CO₂ grâce aux arbres\n\n" +
+		"[b]Maintenant commence une partie de zéro pour voir si tu as compris ![/b]",  # ← remplace la fin
+},
 ]
 
 # ── Nœuds UI du panneau tutoriel ─────────────────────────────────────────────
@@ -241,7 +222,6 @@ var _step_counter: Label
 var _progress_bar: ProgressBar
 
 # ── Highlight overlay sur élément HUD ────────────────────────────────────────
-var _highlight_rect: ColorRect = null
 
 # ── État ──────────────────────────────────────────────────────────────────────
 var _current_step: int = 0
@@ -251,6 +231,8 @@ var _export_submitted: bool = false
 var _build_menu_was_opened: bool = false
 var _building_manager: Node = null
 var _delivery_manager: Node = null
+var _drag_active: bool = false
+var _drag_offset: Vector2 = Vector2.ZERO
 
 # ─────────────────────────────────────────────────────────────────────────────
 func _ready() -> void:
@@ -307,6 +289,8 @@ func _find_hud() -> void:
 		"co2":          _hud.get_node_or_null("CO2Container"),
 		"build_menu":   _hud.get_node_or_null("BuildMenuContainer"),
 		"orders_panel": _hud.get_node_or_null("OrdersPanel"),
+			"contracts":       _hud.get_node_or_null("MarginContainer/MarginContainer/VBoxContainer/ContractsLabel"),
+
 	}
 
 	_extra_speed_nodes = [
@@ -347,34 +331,12 @@ func _apply_reveals(step: Dictionary) -> void:
 				if extra and extra is CanvasItem:
 					(extra as CanvasItem).show()
 
-	_clear_highlight()
-	var highlight_key: String = step.get("highlight", "")
-	if not highlight_key.is_empty():
-		var target: Node = _hud_groups.get(highlight_key)
-		if target and target is Control:
-			_show_highlight(target as Control)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
-func _show_highlight(target: Control) -> void:
-	if _highlight_rect == null:
-		_highlight_rect = ColorRect.new()
-		_highlight_rect.name = "TutorialHighlight"
-		_highlight_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_highlight_rect.z_index = 5
-		add_child(_highlight_rect)
 
-	_highlight_rect.color = Color(1.0, 0.85, 0.2, 0.18)
 
-	var rect: Rect2 = target.get_global_rect()
-	_highlight_rect.set_anchor_and_offset(SIDE_LEFT,   0, rect.position.x - 4)
-	_highlight_rect.set_anchor_and_offset(SIDE_TOP,    0, rect.position.y - 4)
-	_highlight_rect.set_anchor_and_offset(SIDE_RIGHT,  0, rect.position.x + rect.size.x + 4)
-	_highlight_rect.set_anchor_and_offset(SIDE_BOTTOM, 0, rect.position.y + rect.size.y + 4)
-	_highlight_rect.show()
 
-func _clear_highlight() -> void:
-	if _highlight_rect:
-		_highlight_rect.hide()
 
 # ─────────────────────────────────────────────────────────────────────────────
 func _bind_managers() -> void:
@@ -539,12 +501,13 @@ func _go_to(index: int) -> void:
 		_panel.anchor_right = 1.0
 		_panel.offset_left = -400.0
 		_panel.offset_right = -20.0
-	if _next_callable.is_valid() and _next_btn.pressed.is_connected(_next_callable):
-		_next_btn.pressed.disconnect(_next_callable)
+	while _next_btn.pressed.get_connections().size() > 0:
+		var c = _next_btn.pressed.get_connections()[0]
+		_next_btn.pressed.disconnect(c["callable"])
 
 	if is_last:
-		_next_btn.text = "Terminer"
-		_next_callable = Callable(self, "_close")
+		_next_btn.text = "Recommencer !"
+		_next_callable = Callable(self, "_finish")
 		UITheme.style_button(_next_btn, UITheme.ACCENT_TEAL, UITheme.TEXT_LIGHT, false, true)
 		_next_btn.disabled = false
 	else:
@@ -585,12 +548,14 @@ func _build_ui() -> void:
 	_panel.anchor_bottom = 1.0
 	_panel.offset_left = -400.0
 	_panel.offset_right = -20.0
-	_panel.offset_top = -560.0
-	_panel.offset_bottom = -80.0
+	_panel.offset_top = -480.0   # ← remonte moins haut = plus bas sur l'écran
+	_panel.offset_bottom = -38.0  # ← colle plus au bord bas
 	_panel.custom_minimum_size = Vector2(380.0, 0.0)
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_panel.mouse_default_cursor_shape = Control.CURSOR_MOVE 
 	UITheme.style_card(_panel, false, true, 0.96)
 	add_child(_panel)
+	_panel.gui_input.connect(_on_panel_gui_input) 
 
 	var outer := MarginContainer.new()
 	outer.add_theme_constant_override("margin_left", 20)
@@ -725,6 +690,29 @@ func _build_ui() -> void:
 	UITheme.style_button(_next_btn, UITheme.ACCENT_GOLD, UITheme.INK_DARK, false, true)
 	nav.add_child(_next_btn)
 
+func _on_panel_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event
+		if mb.button_index == MOUSE_BUTTON_LEFT:
+			if mb.pressed:
+				_drag_active = true
+				# offset entre le coin haut-gauche du panel et la souris
+				_drag_offset = _panel.global_position - get_viewport().get_mouse_position()
+			else:
+				_drag_active = false
+
+	elif event is InputEventMouseMotion and _drag_active:
+		var new_pos: Vector2 = get_viewport().get_mouse_position() + _drag_offset
+		# Repositionner en mode offset absolu (désactiver les anchors dynamiques)
+		_panel.set_anchors_preset(Control.PRESET_TOP_LEFT, false)
+		var vp_size: Vector2 = get_viewport().get_visible_rect().size
+		new_pos.x = clamp(new_pos.x, 0.0, vp_size.x - _panel.size.x)
+		new_pos.y = clamp(new_pos.y, 0.0, vp_size.y - _panel.size.y)
+		_panel.set_position(new_pos)
+		
+func _finish() -> void:
+	SaveSystem.tutorial_mode = false  # ← false, pas true
+	get_tree().change_scene_to_file("res://scene/level.tscn")
 # ─────────────────────────────────────────────────────────────────────────────
 func _close() -> void:
 	SaveSystem.tutorial_mode = false
@@ -737,7 +725,6 @@ func _close() -> void:
 			if node and node is CanvasItem:
 				(node as CanvasItem).show()
 
-	_clear_highlight()
 
 	if _delivery_manager:
 		if _delivery_manager.has_signal("order_submitted") and _delivery_manager.order_submitted.is_connected(_on_order_submitted):
