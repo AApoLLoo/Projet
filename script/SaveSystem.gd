@@ -256,7 +256,7 @@ func get_default_state() -> Dictionary:
 	state["save_name"] = ""
 	state["game_day"] = 1
 	state["game_time"] = 8.0
-	state["credits"] = 12500.0
+	state["credits"] = 3000.0
 	state["resource_stock"] = {}
 	state["delivery_point"] = {}
 	state["export_history"] = []

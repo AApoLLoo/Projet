@@ -5,7 +5,7 @@ signal order_delivery_preview_changed(point_state)
 const ACTION_TOGGLE_ORDER_PANEL: StringName = &"hud_toggle_order_panel"
 const ACTION_TOGGLE_SESSION_OVERVIEW: StringName = &"hud_toggle_session_overview"
 const ACTION_TOGGLE_BUILD_MENU: StringName = &"hud_toggle_build_menu"
-const ACTION_TOGGLE_MINIMAP: StringName = &"hud_toggle_minimap"
+#const ACTION_TOGGLE_MINIMAP: StringName = &"hud_toggle_minimap"
 const ORDER_MODE_IMPORT: String = "import"
 const ORDER_MODE_EXPORT: String = "export"
 
@@ -628,7 +628,7 @@ func _build_shortcut_bar() -> void:
 		["B", "Construction"],
 		["Tab", "Logistique"],
 		["I", "Vue usine"],
-		["M", "Minimap"],
+		#["M", "Minimap"],
 		["P", "Pause temps"],
 		["E", "Sauvegarde rapide"],
 	]
@@ -761,9 +761,9 @@ func _input(event: InputEvent) -> void:
 				level.quick_save()
 				_show_quick_save_toast()
 			get_viewport().set_input_as_handled()
-		elif key_event.is_action_pressed(ACTION_TOGGLE_MINIMAP):   # ← ajouter
-			_toggle_minimap()
-			get_viewport().set_input_as_handled()
+		#elif key_event.is_action_pressed(ACTION_TOGGLE_MINIMAP):   # ← ajouter
+			#_toggle_minimap()
+			#get_viewport().set_input_as_handled()
 
 func _show_quick_save_toast() -> void:
 	_show_toast("✓ Partie sauvegardée")
@@ -1535,7 +1535,7 @@ func _ensure_input_actions() -> void:
 	_ensure_action_with_keys(ACTION_TOGGLE_BUILD_MENU, [KEY_B])
 	_ensure_action_with_keys(&"hud_quick_save", [KEY_E])
 	_ensure_action_with_keys(&"hud_toggle_pause", [KEY_P])
-	_ensure_action_with_keys(ACTION_TOGGLE_MINIMAP, [KEY_M])
+	#_ensure_action_with_keys(ACTION_TOGGLE_MINIMAP, [KEY_M])
 
 func _ensure_action_with_keys(action_name: StringName, keycodes: Array[int]) -> void:
 	if not InputMap.has_action(action_name):
@@ -1617,11 +1617,11 @@ func _start_building_process_with_co2(building_id: String) -> void:
 			bm.set_pending_arbre_variant(data.get("arbre_variant", "vert"))
 	_start_building_process(building_id)
 
-func _toggle_minimap() -> void:
-	var minimap_container := get_node_or_null("MinimapContainer")
-	if minimap_container == null:
-		return
-	minimap_container.visible = not minimap_container.visible
+#func _toggle_minimap() -> void:
+	#var minimap_container := get_node_or_null("MinimapContainer")
+	#if minimap_container == null:
+		#return
+	#minimap_container.visible = not minimap_container.visible
 	
 func _setup_arbre_button_icons() -> void:
 	var arbre_button_map: Dictionary = {
