@@ -245,6 +245,13 @@ func _ready() -> void:
 	_find_hud()
 	_bind_managers()
 	_bind_build_menu_signal()
+	
+	# Réinitialiser les ressources pour le tuto
+	var gm = _get_autoload("GameManager")
+	if gm:
+		gm.credits = 3000.0
+		gm.resources_updated.emit()
+	
 	_go_to(0)
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -48,6 +48,8 @@ signal delivery_point_selection_changed(enabled)
 signal delivery_point_error(message: String)
 signal entrepot_inspected(entrepot_instance)
 signal co2_penalty_applied(penalty: float)
+signal not_enough_credits(cost: float)
+
 var is_destroying: bool = false
 var is_selecting_delivery_point: bool = false
 
@@ -247,9 +249,13 @@ func _update_preview() -> void:
 	else:
 		preview_sprite.modulate = Color(1, 0, 0, 0.6)
 
+
 func _try_place_building() -> void:
 	var mouse_pos: Vector2 = get_global_mouse_position()
 	var cell_pos: Vector2i = get_grid_pos(mouse_pos)
+	if GameManager.credits < factory_cost:
+		not_enough_credits.emit(factory_cost)
+		return
 	var snap_pos: Vector2 = get_world_pos(cell_pos)
 	if not _can_build(cell_pos):
 		var raw = null

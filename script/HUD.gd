@@ -492,6 +492,8 @@ func _ready() -> void:
 	if _building_manager != null:
 		destroy_button.set_pressed_no_signal(_building_manager.is_destroying)
 
+	if _building_manager != null and _building_manager.has_signal("not_enough_credits"):
+		_building_manager.not_enough_credits.connect(_on_not_enough_credits)
 	# --- BOUTON ZONE ÉLECTRIQUE ---
 	var elec_overlay_button: Button = Button.new()
 	elec_overlay_button.name = "BtnElectricityOverlay"
@@ -773,9 +775,9 @@ func _show_toast(message: String, border_color: Color = UITheme.BORDER_STRONG) -
 		return
 	var toast := PanelContainer.new()
 	toast.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	toast.offset_left = -220.0
+	toast.offset_left = -260.0
 	toast.offset_top = -360.0
-	toast.offset_right = -10.0
+	toast.offset_right = -200.0
 	toast.offset_bottom = -320.0
 	var style := StyleBoxFlat.new()
 	style.bg_color = UITheme.SURFACE_SOFT
@@ -852,6 +854,10 @@ func _start_building_process(building_type: String) -> void:
 		if _warehouse_panel:
 			_warehouse_panel.hide()
 
+func _on_not_enough_credits(cost: float) -> void:
+	_show_toast("Fonds insuffisants ! (coût : %.0f €)" % cost, Color.html("#C0392B"))
+	
+	
 func open_entity_panel(entity: Entity) -> void:
 	_on_entity_selected(entity)
 
