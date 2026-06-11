@@ -9,10 +9,12 @@ const EXPORT_TIME_COST_PER_SECOND: float = 1.5
 const ORDERABLE_RESOURCE_ORDER: Array[String] = [
 	"charbon",
 	"gaz",
+	"gaz_raffine",
 	"matiere_brute",
 	"metal",
 	"piece_base",
 	"piece_avancee",
+	"repair_kit",
 ]
 
 const RESOURCE_CATALOG: Dictionary = {
@@ -29,6 +31,13 @@ const RESOURCE_CATALOG: Dictionary = {
 		"export_unit_value": 0.0,
 		"can_import": true,
 		"can_export": false,
+	},
+	"gaz_raffine": {
+		"label": "Gaz raffine",
+		"import_unit_cost": 0.0,
+		"export_unit_value": 165.0,
+		"can_import": false,
+		"can_export": true,
 	},
 	"matiere_brute": {
 		"label": "Matiere brute",
@@ -57,6 +66,13 @@ const RESOURCE_CATALOG: Dictionary = {
 		"export_unit_value": 420.0,   
 		"can_import": false,
 		"can_export": true,
+	},
+	"repair_kit": {
+		"label": "Kit de reparation",
+		"import_unit_cost": 180.0,
+		"export_unit_value": 0.0,
+		"can_import": true,
+		"can_export": false,
 	},
 }
 
@@ -291,7 +307,12 @@ func _apply_delivery_payload(order: Dictionary) -> void:
 	if job_type == JOB_EXPORT:
 		# Export : ressources déjà consommées dans _prepare_job_for_dispatch
 		# On ajoute les crédits ET on valide les contrats
-		GameManager.add_credits(float(order.get("total_cost", 0.0)))
+		GameManager.complete_export(
+			resource_id,
+			String(order.get("resource_label", get_resource_label(resource_id))),
+			quantity,
+			float(order.get("total_cost", 0.0))
+		)
 		if ContractManager:
 			ContractManager.try_fulfill_contracts(resource_id, quantity)
 		return
@@ -371,7 +392,26 @@ func _is_resource_available_for_job(resource_id: String, job_type: String) -> bo
 	var resource_entry: Dictionary = RESOURCE_CATALOG.get(resource_id, {})
 	if job_type == JOB_EXPORT:
 		return bool(resource_entry.get("can_export", false))
-	return bool(resource_entry.get("can_import", false))
+	if not bool(resource_entry.get("can_import", false)):
+		return false
+	return not _is_mineable_resource(resource_id)
+
+func _is_mineable_resource(resource_id: String) -> bool:
+	return _get_mineable_resource_ids().has(resource_id)
+
+func _get_mineable_resource_ids() -> Array[String]:
+	var mineable_resources: Array[String] = []
+	for recipe_variant in RecipeDatabase.get_recipes("miner"):
+		if not (recipe_variant is Dictionary):
+			continue
+		var recipe: Dictionary = recipe_variant
+		var outputs: Dictionary = recipe.get("outputs", {})
+		for output_variant in outputs.keys():
+			var output_id: String = String(output_variant)
+			if output_id.is_empty() or mineable_resources.has(output_id):
+				continue
+			mineable_resources.append(output_id)
+	return mineable_resources
 
 func _get_job_label(job_type: String) -> String:
 	if job_type == JOB_EXPORT:
@@ -426,17 +466,13 @@ func _find_recipe_for_output(resource_id: String) -> Dictionary:
 	return {}
 
 func get_save_state() -> Dictionary:
-	return {
-		"pending_orders": _pending_orders.duplicate(true),
-		"current_order": _current_order.duplicate(true) if _delivery_in_progress else {},
-		"delivery_in_progress": _delivery_in_progress
-	}
 	var current_order_data: Variant = null
 	if _delivery_in_progress and not _current_order.is_empty():
 		current_order_data = _current_order.duplicate(true)
 	return {
 		"pending_orders": _pending_orders.duplicate(true),
 		"current_order": current_order_data,
+		"delivery_in_progress": _delivery_in_progress,
 	}
 
 func apply_save_state(data: Dictionary) -> void:
@@ -444,17 +480,12 @@ func apply_save_state(data: Dictionary) -> void:
 	_current_order.clear()
 	_delivery_in_progress = false
 
-	# Livraison qui était en cours au moment de la sauvegarde
+	# Une livraison en cours est refilee en tete de file au chargement.
+	# Les ressources/credits ont deja ete reserves avant le depart du camion,
+	# donc il ne faut ni recréditer, ni dupliquer la commande.
 	var current_order_data: Variant = data.get("current_order")
 	if current_order_data is Dictionary and not current_order_data.is_empty():
-		var job_type: String = String(current_order_data.get("job_type", JOB_IMPORT))
-		if job_type == JOB_EXPORT:
-			# Le stock était déjà consommé avant la sauvegarde → créditer directement
-			if GameManager:
-				GameManager.add_credits(float(current_order_data.get("total_cost", 0.0)))
-		else:
-			# Import : les crédits étaient déjà déduits → remettre en tête de file
-			_pending_orders.append(current_order_data.duplicate(true))
+		_pending_orders.push_front(current_order_data.duplicate(true))
 
 	# Commandes en attente (non encore démarrées)
 	var raw_pending: Variant = data.get("pending_orders", [])
@@ -463,11 +494,6 @@ func apply_save_state(data: Dictionary) -> void:
 			if order is Dictionary:
 				_pending_orders.append(order.duplicate(true))
 
-	var saved_current: Variant = data.get("current_order", {})
-	if saved_current is Dictionary and not saved_current.is_empty():
-		_pending_orders.push_front(saved_current.duplicate(true))
-
 	queue_changed.emit(_pending_orders.size())
 	delivery_state_changed.emit(false, {})
-	queue_changed.emit(_pending_orders.size())
 	_try_start_next_delivery()

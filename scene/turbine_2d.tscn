@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://script/TurbineEntity.gd" id="1_turbineentity"]
 [ext_resource type="PackedScene" path="res://scene/white_puff_vfx.tscn" id="2_whitepuffvfx"]
+[ext_resource type="PackedScene" path="res://scene/black_smoke_vfx.tscn" id="3_blacksmokevfx"]
 [ext_resource type="Texture2D" uid="uid://cl1akoi1t5mdv" path="res://asset/Turbine Animation 0006.png" id="1_0cou2"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ktmlt"]
@@ -76,3 +77,11 @@ puff_interval = 1.55
 puff_interval_jitter = 0.3
 puff_offset_jitter = Vector2(4, 1.5)
 puff_scale_jitter = 0.05
+
+[node name="BlackSmokeVfx" parent="." instance=ExtResource("3_blacksmokevfx")]
+position = Vector2(8, -18)
+scale = Vector2(0.18, 0.18)
+puff_interval = 0.9
+puff_interval_jitter = 0.2
+puff_offset_jitter = Vector2(4, 2)
+puff_scale_jitter = 0.08

@@ -15,6 +15,8 @@ const DEFAULT_CAMERA_X: float = 576.0
 const DEFAULT_CAMERA_Y: float = 324.0
 const MAX_SAVE_NAME_LENGTH: int = 32
 
+static var tutorial_mode := false
+
 var launch_mode: StringName = MODE_NEW
 var _active_slot_id: String = ""
 var _requested_load_slot_id: String = ""
@@ -111,6 +113,21 @@ func get_save_slots(include_new_slot: bool = false) -> Array[Dictionary]:
 		slots.append(new_slot_data)
 
 	return slots
+
+func get_save_directory_path() -> String:
+	_ensure_save_directory()
+	return ProjectSettings.globalize_path(SAVE_DIR_PATH)
+
+func open_save_directory() -> bool:
+	var global_path: String = get_save_directory_path()
+	if global_path.is_empty():
+		return false
+	var normalized_path: String = global_path.replace("\\", "/")
+	var directory_url: String = "file:///" + normalized_path.trim_prefix("/")
+	var open_result: Error = OS.shell_open(directory_url)
+	if open_result == OK:
+		return true
+	return OS.shell_open(global_path) == OK
 
 func save_level_state(camera_position: Vector2, floor_state: Dictionary) -> String:
 	return save_level_state_to_slot(_active_slot_id, camera_position, floor_state)
@@ -239,7 +256,7 @@ func get_default_state() -> Dictionary:
 	state["save_name"] = ""
 	state["game_day"] = 1
 	state["game_time"] = 8.0
-	state["credits"] = 12500.0
+	state["credits"] = 3000.0
 	state["resource_stock"] = {}
 	state["delivery_point"] = {}
 	state["export_history"] = []

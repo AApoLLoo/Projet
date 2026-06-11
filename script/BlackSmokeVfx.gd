@@ -1,17 +1,17 @@
 extends Node2D
-class_name WhitePuffVfx
+class_name BlackSmokeVfx
 
 const FRAME_COUNT: int = 25
-const FRAME_TEMPLATE: String = "res://asset/vfx/White puff/whitePuff%02d.png"
+const FRAME_TEMPLATE: String = "res://asset/vfx/Black smoke/blackSmoke%02d.png"
 const ANIMATION_NAME: StringName = &"default"
-const ANIMATION_SPEED: float = 18.0
+const ANIMATION_SPEED: float = 16.0
 
 static var _shared_frames: SpriteFrames = null
 
-@export_range(0.1, 10.0, 0.01) var puff_interval: float = 1.2
-@export_range(0.0, 5.0, 0.01) var puff_interval_jitter: float = 0.35
-@export var puff_offset_jitter: Vector2 = Vector2(4.0, 2.0)
-@export_range(0.0, 0.5, 0.01) var puff_scale_jitter: float = 0.08
+@export_range(0.1, 10.0, 0.01) var puff_interval: float = 0.95
+@export_range(0.0, 5.0, 0.01) var puff_interval_jitter: float = 0.2
+@export var puff_offset_jitter: Vector2 = Vector2(4.0, 2.5)
+@export_range(0.0, 0.5, 0.01) var puff_scale_jitter: float = 0.12
 @export var start_immediately: bool = true
 
 @onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -83,12 +83,12 @@ func _ensure_sprite_frames() -> void:
 			var frame_path: String = FRAME_TEMPLATE % frame_index
 			var texture: Texture2D = load(frame_path) as Texture2D
 			if texture == null:
-				push_warning("WhitePuffVfx: missing frame %s" % frame_path)
+				push_warning("BlackSmokeVfx: missing frame %s" % frame_path)
 				continue
 			frames.add_frame(ANIMATION_NAME, texture)
 			added_frame_count += 1
 		if added_frame_count == 0:
-			push_warning("WhitePuffVfx: no white puff frames loaded.")
+			push_warning("BlackSmokeVfx: no black smoke frames loaded.")
 			return
 		_shared_frames = frames
 	_sprite.sprite_frames = _shared_frames

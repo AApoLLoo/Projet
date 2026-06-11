@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://xn73iip0q4kt"]
+[gd_scene format=3 uid="uid://dh0p6poikr0vf"]
 
 [ext_resource type="Script" path="res://scene/achivements.gd" id="1_achivements"]
 
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_achivements")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=1611259776]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.08, 0.13, 0.16, 1)
 
-[node name="WarmGlow" type="ColorRect" parent="."]
+[node name="WarmGlow" type="ColorRect" parent="." unique_id=823444607]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -28,7 +28,7 @@ offset_bottom = 220.0
 grow_horizontal = 2
 color = Color(0.89, 0.7, 0.35, 0.18)
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=187376559]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -36,141 +36,139 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
-layout_mode = 2
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer" unique_id=271605203]
 custom_minimum_size = Vector2(980, 640)
+layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer" unique_id=1236096188]
 layout_mode = 2
 theme_override_constants/margin_left = 30
 theme_override_constants/margin_top = 28
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 28
 
-[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer" unique_id=795889344]
 layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="Header" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content"]
+[node name="Header" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content" unique_id=1604579647]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Eyebrow" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header"]
+[node name="Eyebrow" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header" unique_id=1167242269]
 layout_mode = 2
 text = "PROGRESSION"
 
-[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header"]
+[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header" unique_id=487969330]
 layout_mode = 2
 text = "Achievements & objectifs"
 
-[node name="Subtitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header"]
+[node name="Subtitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Header" unique_id=968581776]
 layout_mode = 2
 text = "Une vue synthese des grandes etapes du prototype, avec des objectifs plus lisibles pour guider la progression."
 autowrap_mode = 3
 
-[node name="Cards" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content"]
+[node name="Cards" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content" unique_id=641077542]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="ProductionCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards"]
+[node name="ProductionCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards" unique_id=722997673]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/ProductionCard"]
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/ProductionCard" unique_id=871119929]
 layout_mode = 2
 theme_override_constants/margin_left = 18
 theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 18
 theme_override_constants/margin_bottom = 18
 
-[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/ProductionCard/MarginContainer"]
+[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/ProductionCard/MarginContainer" unique_id=440301390]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/ProductionCard/MarginContainer/Content"]
+[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/ProductionCard/MarginContainer/Content" unique_id=578231405]
 layout_mode = 2
 text = "Production"
 
-[node name="Description" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/ProductionCard/MarginContainer/Content"]
+[node name="Description" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/ProductionCard/MarginContainer/Content" unique_id=156164015]
 layout_mode = 2
 text = "Lance une usine, choisis une recette et stabilise un flux de production continu."
 autowrap_mode = 3
 
-[node name="Status" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/ProductionCard/MarginContainer/Content"]
+[node name="Status" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/ProductionCard/MarginContainer/Content" unique_id=1937412357]
 unique_name_in_owner = true
-text = "En attente d'une premiere session"
 layout_mode = 2
+text = "En attente d'une premiere session"
 
-[node name="EnergyCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards"]
+[node name="EnergyCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards" unique_id=839572098]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/EnergyCard"]
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/EnergyCard" unique_id=596943941]
 layout_mode = 2
 theme_override_constants/margin_left = 18
 theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 18
 theme_override_constants/margin_bottom = 18
 
-[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/EnergyCard/MarginContainer"]
+[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/EnergyCard/MarginContainer" unique_id=685778699]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/EnergyCard/MarginContainer/Content"]
+[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/EnergyCard/MarginContainer/Content" unique_id=878099818]
 layout_mode = 2
 text = "Energie"
 
-[node name="Description" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/EnergyCard/MarginContainer/Content"]
+[node name="Description" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/EnergyCard/MarginContainer/Content" unique_id=1250371361]
 layout_mode = 2
 text = "Ajoute de la puissance, compare la conso et garde un reseau stable pour eviter les arrêts."
 autowrap_mode = 3
 
-[node name="Status" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/EnergyCard/MarginContainer/Content"]
-unique_name_in_owner = true
-text = "Objectif prototype: brancher une turbine"
+[node name="Status" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/EnergyCard/MarginContainer/Content" unique_id=1569338467]
 layout_mode = 2
+text = "Objectif prototype: brancher une turbine"
 
-[node name="LogisticsCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards"]
+[node name="LogisticsCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards" unique_id=1580488333]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/LogisticsCard"]
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/LogisticsCard" unique_id=419445230]
 layout_mode = 2
 theme_override_constants/margin_left = 18
 theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 18
 theme_override_constants/margin_bottom = 18
 
-[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/LogisticsCard/MarginContainer"]
+[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/LogisticsCard/MarginContainer" unique_id=754381148]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/LogisticsCard/MarginContainer/Content"]
+[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/LogisticsCard/MarginContainer/Content" unique_id=1651727206]
 layout_mode = 2
 text = "Logistique"
 
-[node name="Description" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/LogisticsCard/MarginContainer/Content"]
+[node name="Description" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/LogisticsCard/MarginContainer/Content" unique_id=59781850]
 layout_mode = 2
 text = "Optimise le transport, les points de livraison et les flux d'import/export."
 autowrap_mode = 3
 
-[node name="Status" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/LogisticsCard/MarginContainer/Content"]
-unique_name_in_owner = true
-text = "Disponible apres la premiere sauvegarde"
+[node name="Status" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Cards/LogisticsCard/MarginContainer/Content" unique_id=1596968633]
 layout_mode = 2
+text = "Disponible apres la premiere sauvegarde"
 
-[node name="Footer" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content"]
+[node name="Footer" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/Content" unique_id=1426983952]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="SummaryLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Footer"]
+[node name="SummaryLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/Content/Footer" unique_id=433648615]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Les achievements detailles arriveront avec la boucle de progression complete."
 autowrap_mode = 3
 
-[node name="BackButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/Content/Footer"]
+[node name="BackButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/Content/Footer" unique_id=578084935]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 46)
 layout_mode = 2

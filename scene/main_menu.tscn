@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://ylhh3mcm4cy3"]
 
 [ext_resource type="Texture2D" uid="uid://bbekbm0x5yqxl" path="res://asset/image_accueil.png" id="2_hxu56"]
-[ext_resource type="Script" uid="uid://bhw80blb4onvx" path="res://scene/main_menu.gd" id="2_wkc40"]
+[ext_resource type="Script" uid="uid://bhw80blb4onvx" path="res://script/main_menu.gd" id="2_wkc40"]
 
 [node name="MainMenu" type="Control" unique_id=461237088]
 layout_mode = 3
@@ -103,11 +103,6 @@ custom_minimum_size = Vector2(300, 54)
 layout_mode = 2
 text = "Reglages"
 
-[node name="AchievementsButton" type="Button" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=124663486]
-custom_minimum_size = Vector2(300, 54)
-layout_mode = 2
-text = "Achievements"
-
 [node name="QuitButton" type="Button" parent="MenuBounds/CenterContainer/ContentStack/MenuCard/MarginContainer/MenuButtons" unique_id=39767664]
 custom_minimum_size = Vector2(300, 54)
 layout_mode = 2
@@ -150,8 +145,8 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -324.0
-offset_top = -154.0
+offset_left = -351.0
+offset_top = -213.0
 offset_right = -24.0
 offset_bottom = -34.0
 grow_horizontal = 0
@@ -168,7 +163,11 @@ theme_override_constants/margin_bottom = 10
 layout_mode = 2
 theme_override_font_sizes/font_size = 17
 text = "Antoine, Antoine, Ethan, Louis, Enzo
-v0.8.1 (Prototype)"
+v1.0.1
+
+
+
+"
 horizontal_alignment = 2
 
 [node name="MessageDialog" type="AcceptDialog" parent="." unique_id=2133714974]

@@ -11,6 +11,7 @@ var _drag_origin: Vector2 = Vector2.ZERO
 const FRAMES = {
 	"charbon": 12,
 	"gaz": 61,
+	"gaz_raffine": 61,
 	"matiere_brute": 35,
 	"metal": 14,
 	"piece_base": 45,
@@ -79,6 +80,17 @@ func _input(event):
 					# Pas de cible valide : reste au sol là où on a lâché
 					_drag_origin = global_position
 					z_index = 0
+
+# Appelé par ConveyorEntity.eject_carried_item() :
+# place l'item directement en mode drag sous la souris.
+func pickup_from_belt(world_position: Vector2) -> void:
+	global_position = world_position
+	_drag_origin = world_position
+	z_index = 50
+	input_pickable = true
+	# Offset nul : le centre du sprite suit exactement la souris
+	offset = Vector2.ZERO
+	dragging = true
 
 func _try_drop_at_current_position() -> bool:
 	if destination.is_empty() or quantity <= 0:

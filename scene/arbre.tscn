@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://dtinryht3i6jm"]
+
+[ext_resource type="Texture2D" uid="uid://dlemj4n2otaal" path="res://asset/Trees+(2).png" id="1_eatbf"]
+[ext_resource type="Script" uid="uid://bx2hef7sgm5lo" path="res://script/Arbre.gd" id="1_flxmm"]
+[ext_resource type="Texture2D" uid="uid://b17n14jkapfra" path="res://asset/Trees+(5).png" id="3_225dk"]
+[ext_resource type="Texture2D" uid="uid://b6nn5go22u0p1" path="res://asset/Trees+(3).png" id="4_gori7"]
+[ext_resource type="Texture2D" uid="uid://bb0ubxebed34l" path="res://asset/Trees+(4).png" id="5_vh321"]
+
+[node name="Arbre" type="Node2D" unique_id=405092277]
+script = ExtResource("1_flxmm")
+
+[node name="ArbreSpriteVertF" type="Sprite2D" parent="." unique_id=1484472616]
+unique_name_in_owner = true
+texture = ExtResource("1_eatbf")
+
+[node name="ArbreSpriteVert" type="Sprite2D" parent="." unique_id=1123622979]
+unique_name_in_owner = true
+texture = ExtResource("3_225dk")
+
+[node name="ArbreSpriteRouge" type="Sprite2D" parent="." unique_id=72128725]
+unique_name_in_owner = true
+texture = ExtResource("4_gori7")
+
+[node name="ArbreSpriteBlanc" type="Sprite2D" parent="." unique_id=1394447210]
+unique_name_in_owner = true
+texture = ExtResource("5_vh321")

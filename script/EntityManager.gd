@@ -85,7 +85,7 @@ func recalculate_totals() -> void:
 			continue
 			
 		# Calcul Capacité vs Demande (On regarde si la machine est allumée)
-		if entity.is_active:
+		if entity.is_operational():
 			if entity.entity_type == "turbine":
 				global_power_capacity += entity.get("electricity_output") if entity.get("electricity_output") != null else 100.0
 			elif entity.get("electricity_need") != null and entity.electricity_need > 0.0:
@@ -128,7 +128,7 @@ func get_electricity_at_cell(cell_pos: Vector2i) -> float:
 	for entity in entities.values():
 		if not is_instance_valid(entity):
 			continue
-		if entity.entity_type != "turbine" or not entity.is_active:
+		if entity.entity_type != "turbine" or not entity.is_operational():
 			continue
 		var radius: int = entity.get("zone_radius") if entity.get("zone_radius") != null else 20
 		var dist: float = Vector2(cell_pos - entity.cell_position).length()
